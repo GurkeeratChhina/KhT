@@ -47,7 +47,7 @@ import numpy as np
 class CLT(object):
     """A crossingless tangle (CLT) is a matching of n+m ends (m=top,n=bot=bottom). 
     arcs is a list whose ith entry gives the value of the involution at the ith tangle end."""
-    
+    # gr is a list of [qu, hom, del] of the trigradings, where qu is the quantum grading, hom is the homological grading, and del is the delta grading
     __slots__ = 'top','bot', 'total', 'arcs', 'gr', 'pairs'
     
     def __init__(self,top,bot,arcs,gr):
@@ -55,7 +55,7 @@ class CLT(object):
         self.bot = bot
         self.total = int((top+bot)/2)# total number of arcs
         self.arcs = arcs
-        self.gr = gr #quantum grading
+        self.gr = gr 
         self.pairs = [pair for pair in [[i,arcs[i]] for i in range(top+bot)] if pair[0] < pair[1]] # testing alternative format for CLTs
     
     def check(self):
@@ -195,11 +195,17 @@ class Cobordism(object):
         self.decos = np.array(decos)
     
     def __add__(self, other):
+        if np.array_equal(self.decos, np.array([])):
+            return other
+        if np.array_equal(np.array([]), other.decos):
+            return self
         if self.front!=other.front or self.back!=other.back:# incompatible cobordisms
             raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not compatible, because they do not belong to the same morphism space.')
         return Cobordism(self.front,self.back,simplify_decos(np.concatenate((self.decos,other.decos))))
-    
+        
+
     def __mul__(self, other):
+        
         
         def partition_dC(dC,arcs):
             """find the finest partition of dC that is preserved by arcs. The output is a list of list of indices.
@@ -226,81 +232,83 @@ class Cobordism(object):
                 partition.append(nucleus)
             return partition
         
-        
-        x=self.front
-        y=self.back
-        z=other.back
-        if y!=other.front: # incomposable cobordisms
-            raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on {}'.format(y)+' are not composable; the first ends on {}'.format(other.clt1))
-        #components of the fully simplified cobordism from x to z, ordered according to their smallest TEI
-        dC=components(x,z)
-        comps1=components(x,y)
-        comps2=components(y,z)
-        
-        #finding the boundary component of each c of C 
-        C=partition_dC(dC,y.arcs)# as lists dc of indices of components
-        #print("dC=",dC)
-        #print("C=",C)
-        
-        def find_comp(comp):
-            return comp in C
-        
-        comp1_indices=[[j for j,comp in enumerate(comps1) if comp[0] in c] for i,c in enumerate(C)]
-        comp2_indices=[[j for j,comp in enumerate(comps2) if comp[0] in c] for i,c in enumerate(C)]
-        #print("comp1_indices=",comp1_indices)
-        #print("comp2_indices=",comp2_indices)
-        
-        # |C_i intersect c|
-        def c_i_cap_c(c_i,c_flat):
-            #return sum(map(lambda s: s in c_flat, c_i))
-            return sum([1 for i in c_i if i[0] in c_flat])
-        genus=[1-int(0.5*(c_i_cap_c(self.comp,flatten([dC[j] for j in c]))\
-                         +c_i_cap_c(other.comp,flatten([dC[j] for j in c]))\
-                         -0.5*len(flatten([dC[j] for j in c]))\
-                         +len(c))) for c in C]
-        
-        def decos_from_c(g,r,IdcI,coeff):
-            if r>0:# r>0 and v_c=1
-                return [[g+r-1]+[1 for j in range(IdcI)]+[coeff]]
-            else:
-                if g%2==0:# genus even
-                    return [[g+IdcI-sum(dots)-1]+list(dots)+[(-1)**(g+IdcI-sum(dots)-1)*coeff]\
-                            for dots in list(product([0,1], repeat=IdcI))[:-1]]
-                if g%2==1:# genus odd
-                    return [[g+IdcI-sum(dots)-1]+list(dots)+[((-1)**(g+IdcI-sum(dots)-1))*coeff]\
-                            for dots in list(product([0,1], repeat=IdcI))[:-1]]\
-                            +[[g-1]+[1 for i in range(IdcI)]+[coeff*2]]
-        
-        def combine_decos(l,Hpower):
-            #print(l)
-            return [sum([Hpower]+[i[0] for i in l])]+flatten([i[1:-1] for i in l])+[np.prod([i[-1] for i in l])]
-        
-        #print("dC = ",dC)
-        decos=[]
-        for e1 in self.decos:
-            for e2 in other.decos:
-                partial_decos=[]
-                for i,c in enumerate(C):
-                    r=sum(e1[1:-1][[*comp1_indices[i]]]+e2[1:-1][[*comp2_indices[i]]])# number of dots on c
-                    #print("e1=",e1,",e2=",e2,",r=",r)
-                    g=genus[i]# genus of the closure of c
-                    IdcI=len(c)# number of boundary components of c
-                    partial_decos.append(decos_from_c(g,r,IdcI,e1[-1]*e2[-1]))   
-                    #print([decos_from_c(g,r,IdcI)])
-                # decos_from_pair (e1,e2)
-                #print("partial_decos = ",partial_decos)
-                decos+=[combine_decos(l,e1[0]+e2[0]) for l in itertools.product(*partial_decos)]
-        
-        #print("decos = ",decos)
-        # reorder the dots according to the order of the components
-        def reorder_dots(order):
-            return [0]+[i[1]+1 for i in sorted(list(zip(order,range(len(order)))))]+[len(order)+1]
-        # final result
-        return Cobordism(x,z,simplify_decos(np.array(decos))[:,reorder_dots(flatten(C))])
+        if np.array_equal(self.decos, np.array([])) or np.array_equal(other.decos, np.array([])):
+            return ZeroCob
+        else :
+            x=self.front
+            y=self.back
+            z=other.back
+            if y!=other.front: # incomposable cobordisms
+                raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on {}'.format(y)+' are not composable; the first ends on {}'.format(other.clt1))
+            #components of the fully simplified cobordism from x to z, ordered according to their smallest TEI
+            dC=components(x,z)
+            comps1=components(x,y)
+            comps2=components(y,z)
+            
+            #finding the boundary component of each c of C 
+            C=partition_dC(dC,y.arcs)# as lists dc of indices of components
+            #print("dC=",dC)
+            #print("C=",C)
+            
+            def find_comp(comp):
+                return comp in C
+            
+            comp1_indices=[[j for j,comp in enumerate(comps1) if comp[0] in c] for i,c in enumerate(C)]
+            comp2_indices=[[j for j,comp in enumerate(comps2) if comp[0] in c] for i,c in enumerate(C)]
+            #print("comp1_indices=",comp1_indices)
+            #print("comp2_indices=",comp2_indices)
+            
+            # |C_i intersect c|
+            def c_i_cap_c(c_i,c_flat):
+                #return sum(map(lambda s: s in c_flat, c_i))
+                return sum([1 for i in c_i if i[0] in c_flat])
+            genus=[1-int(0.5*(c_i_cap_c(self.comp,flatten([dC[j] for j in c]))\
+                             +c_i_cap_c(other.comp,flatten([dC[j] for j in c]))\
+                             -0.5*len(flatten([dC[j] for j in c]))\
+                             +len(c))) for c in C]
+            
+            def decos_from_c(g,r,IdcI,coeff):
+                if r>0:# r>0 and v_c=1
+                    return [[g+r-1]+[1 for j in range(IdcI)]+[coeff]]
+                else:
+                    if g%2==0:# genus even
+                        return [[g+IdcI-sum(dots)-1]+list(dots)+[(-1)**(g+IdcI-sum(dots)-1)*coeff]\
+                                for dots in list(product([0,1], repeat=IdcI))[:-1]]
+                    if g%2==1:# genus odd
+                        return [[g+IdcI-sum(dots)-1]+list(dots)+[((-1)**(g+IdcI-sum(dots)-1))*coeff]\
+                                for dots in list(product([0,1], repeat=IdcI))[:-1]]\
+                                +[[g-1]+[1 for i in range(IdcI)]+[coeff*2]]
+            
+            def combine_decos(l,Hpower):
+                #print(l)
+                return [sum([Hpower]+[i[0] for i in l])]+flatten([i[1:-1] for i in l])+[np.prod([i[-1] for i in l])]
+            
+            #print("dC = ",dC)
+            decos=[]
+            for e1 in self.decos:
+                for e2 in other.decos:
+                    partial_decos=[]
+                    for i,c in enumerate(C):
+                        r=sum(e1[1:-1][[*comp1_indices[i]]]+e2[1:-1][[*comp2_indices[i]]])# number of dots on c
+                        #print("e1=",e1,",e2=",e2,",r=",r)
+                        g=genus[i]# genus of the closure of c
+                        IdcI=len(c)# number of boundary components of c
+                        partial_decos.append(decos_from_c(g,r,IdcI,e1[-1]*e2[-1]))   
+                        #print([decos_from_c(g,r,IdcI)])
+                    # decos_from_pair (e1,e2)
+                    #print("partial_decos = ",partial_decos)
+                    decos+=[combine_decos(l,e1[0]+e2[0]) for l in itertools.product(*partial_decos)]
+            
+            #print("decos = ",decos)
+            # reorder the dots according to the order of the components
+            def reorder_dots(order):
+                return [0]+[i[1]+1 for i in sorted(list(zip(order,range(len(order)))))]+[len(order)+1]
+            # final result
+            return Cobordism(x,z,simplify_decos(np.array(decos))[:,reorder_dots(flatten(C))])
     
-    def __rmul__(self, other):
-        #print('__rmul__')
-        return other
+    # def __rmul__(self, other):
+        # #print('__rmul__')
+        # return other
     
     
     def deg(self):
@@ -316,6 +324,8 @@ class Cobordism(object):
     #def deg_safe(self):
         # check all summands in this linear combination to make sure the element is homogeneous.
         # FIXME
+
+
         
 def simplify_decos(decos):
     decos=np.array(sorted(decos.tolist()))
@@ -330,8 +340,26 @@ def simplify_decos(decos):
     return decos[decos[:,-1]!=0,:]
     #return [x for x in [add_coeffs(list(g)) for k, g in groupby(sorted(decos),key = lambda s: s[0])] if x[1]!=0]
 
+CLTA = CLT(1,1, [1,0], 0)
+ZeroCob = Cobordism(CLTA,CLTA,[])
 
+class ChainComplex(object):
+	# A chain complex is a directed graph, consisting of 
+	#  - A list of CLTS as labels on the vertices
+	#  - A a matrix of cobordisms as the adjacency matrix.
+	# These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
+	# Note that the matrix's rows and columns depend on the order the CLTS are given in the list
+	
+	def __init__(self,listofclt,morphisms):
+		self.elements = listofclt
+		self.morphisms = morphisms
     
+	def ValidMorphism(self):
+		squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-1,-2)))
+		for i in squared:
+			if i != 0:
+				raise Exception('Differnetial does not square to 0')
+	
     
     
 # graphical output for a crossingless tangle
@@ -512,9 +540,6 @@ def cap(n,i):
     return parallel(i-1)+CLT(0,2,[1,0],0)+parallel(n-i)
 	
 
-    
-	
-	
 b=CLT(2,2,[1,0,3,2],0)
 drawclt(b,"b")
 
@@ -576,7 +601,15 @@ list2 = [4,5,6]
 list3 = flatten([list1, list2])
 
 print(list3)
-print("File executed successfully")
+
+A = [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]]
+complex1 = ChainComplex([b,c], A)
+# print((np.tensordot(A,A, axes=(-1,-2))))
+# complex1.ValidMorphism()
+zerosquare = ZeroCob*ZeroCob
+tempcob = ZeroCob*Sbc
+# zerosquare + tempcob
+
 
 
 # todo:
@@ -586,31 +619,25 @@ print("File executed successfully")
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
 
-# import numpy as np
-# from scipy import sparse
-
-# class testalg(object):
-	# def __init__(self,x):
-        # self.x = x,
-    # def __mul__(self, other):
-		# return testalg(2*self.x*other.x)
+class testalg(object):
+	def __init__(self,x):
+		self.x = x
+	def __mul__(self, other):
+		return testalg(2*self.x*other.x)
 	# def __rmul__(self, other):
 		# return testalg(2*self.x*other.x)
-	
-	# def __add__(self, other):
-		# return testalg(2+self.x+other.x)
-	# def __add__(self, other):
-		# return testalg(2+self.x+other.x)
-		
-# a=testalg(1)
-# b=testalg(2)
-# c=testalg(3)
-# d=testalg(4)
+	def __add__(self, other):
+		return testalg(2+self.x+other.x)
 
-# A=[[a,b],[c,d]]
-# sA = sparse.csr_matrix(A)
-# print((np.tensordot(A,A, axes=(-1,-2)))[0,0].x)
+a=testalg(1)
+b=testalg(2)
+c=testalg(3)
+d=testalg(4)
+
+A=[[a,b],[c,d]]
+print((np.tensordot(A,A, axes=(-1,-2)))[0,0].x)
 	
-# B=[[1,2],[3,4]]
-# C=[[1,1],[0,0]]
-# print(np.tensordot(C,B, axes=(-1,-2)))
+B=[[1,2],[3,4]]
+C=[[1,1],[0,0]]
+print(np.tensordot(C,B, axes=(-1,-2)))
+print("File executed successfully")
