@@ -357,7 +357,7 @@ class ChainComplex(object):
 	def ValidMorphism(self):
 		squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-1,-2)))
 		for i in squared:
-			if i != 0:
+			if not np.array_equal(i.decos, np.array([])):
 				raise Exception('Differnetial does not square to 0')
 	
     
@@ -604,11 +604,7 @@ print(list3)
 
 A = [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]]
 complex1 = ChainComplex([b,c], A)
-# print((np.tensordot(A,A, axes=(-1,-2))))
-# complex1.ValidMorphism()
-zerosquare = ZeroCob*ZeroCob
-tempcob = ZeroCob*Sbc
-# zerosquare + tempcob
+complex1.ValidMorphism()
 
 
 
@@ -619,25 +615,25 @@ tempcob = ZeroCob*Sbc
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
 
-class testalg(object):
-	def __init__(self,x):
-		self.x = x
-	def __mul__(self, other):
-		return testalg(2*self.x*other.x)
-	# def __rmul__(self, other):
+# class testalg(object):
+	# def __init__(self,x):
+		# self.x = x
+	# def __mul__(self, other):
 		# return testalg(2*self.x*other.x)
-	def __add__(self, other):
-		return testalg(2+self.x+other.x)
+	# # def __rmul__(self, other):
+		# # return testalg(2*self.x*other.x)
+	# def __add__(self, other):
+		# return testalg(2+self.x+other.x)
 
-a=testalg(1)
-b=testalg(2)
-c=testalg(3)
-d=testalg(4)
+# a=testalg(1)
+# b=testalg(2)
+# c=testalg(3)
+# d=testalg(4)
 
-A=[[a,b],[c,d]]
-print((np.tensordot(A,A, axes=(-1,-2)))[0,0].x)
+# A=[[a,b],[c,d]]
+# print((np.tensordot(A,A, axes=(-1,-2)))[0,0].x)
 	
-B=[[1,2],[3,4]]
-C=[[1,1],[0,0]]
-print(np.tensordot(C,B, axes=(-1,-2)))
+# B=[[1,2],[3,4]]
+# C=[[1,1],[0,0]]
+# print(np.tensordot(C,B, axes=(-1,-2)))
 print("File executed successfully")
