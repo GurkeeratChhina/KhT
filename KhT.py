@@ -308,8 +308,12 @@ class Cobordism(object):
         #print("flatten(C)",flatten(C))
         #print("reorder_dots(flatten(C))",reorder_dots(flatten(C)))
         # PREVIOUSLY: return Cobordism(x,z,simplify_decos(decos)[:,reorder_dots(flatten(C))])
-        return Cobordism(x,z,[[deco[index] for index in reorder_dots(flatten(C))] for deco in simplify_decos(decos)])
-    
+        #print('reorder dots')
+        #print(reorder_dots(flatten(C)))
+        #print(simplify_decos(decos))
+        Output = Cobordism(x,z,[[deco[index] for index in reorder_dots(flatten(C))] for deco in simplify_decos(decos)])
+        Output.ReduceDecorations() # This kills any cobordism in the linear combination that has a dot on the same component as the basepoint
+        return Output
     # def __rmul__(self, other):
         # #print('__rmul__')
         # return other
@@ -328,7 +332,14 @@ class Cobordism(object):
     #def deg_safe(self):
         # check all summands in this linear combination to make sure the element is homogeneous.
         # FIXME
-        
+    
+    # self is a linear combination of cobordisms, with each cobordism being a different list in decos.
+    # ReduceDecorations sets a cobordism, decoration, with a dot on the top 0-th tangle end 
+    # (which is chosen to be the basepoint of the cobordism) to be the zero cobordism, by removing decoration from decos
+    def ReduceDecorations(self):
+        ReducedDecorations = [decoration for decoration in self.decos if decoration[1] == 0]
+        self.decos = ReducedDecorations
+    
 def simplify_decos(decos):# ToDo: rewrite this without numpy
     decos=np.array(sorted(decos))
     """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
@@ -540,10 +551,19 @@ def cup(n,i):
 def cap(n,i):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cup"""
     return parallel(i-1)+CLT(0,2,[1,0],0)+parallel(n-i)
+    
+def DrawFourEndedChainComplex(complex):
+    for CLT in complex.elements:
+        if CLT.total != 2: # Note that a valid CLT is a 1-3 tangle or a 2-2 tangle
+            raise Exception("Not a four ended tangle")
+    
+    # If a CLT is a 2-2 tangle, then the horizontal tangle is [1,0,3,2] and the vertical is [2,3,0,1]
+    # If a CLT is 1-3, then the horizontal tangle is [3,2,1,0] and the vertical is [1,0,3,2]
+    
 	
 
 b=CLT(2,2,[1,0,3,2],0)
-drawclt(b,"b")
+drawclt(b,"b")      
 
 c=CLT(2,2,[2,3,0,1],0)
 drawclt(c,"c")
@@ -557,11 +577,13 @@ drawcob(Scb,"Scb")
 #composition of morphisms
 #print((Sbc*Scb).decos)
 #print((Sbc*Scb).comp)
+print('Sbc*Scb')
 drawcob((Sbc*Scb),"SSbb")
 
 #composition of morphisms
 #print((Scb*Sbc).decos)
 #print((Scb*Sbc).comp)
+print('Scb*Sbc')
 drawcob((Scb*Sbc),"SScc")
 
 # addition of cobordisms
@@ -582,7 +604,9 @@ cob1=Cobordism(T1,T2,[[4,1,0,1]])
 cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,1,1,1],[1,1,1,19]])
 cob3=Cobordism(T2,T1,[[2,0,1,-2]])
 cob4=cob1+cob2
+print('cob5')
 cob5=cob1*cob3
+print('cob6')
 cob6=cob3*cob1
 cob5.decos
 
@@ -592,30 +616,30 @@ drawclt(T3,"CLT3")
 drawclt(T4,"CLT4")
 drawclt(T5,"CLT5")
 drawcob(cob1,"cob1")
+cob1.ReduceDecorations()
+drawcob(cob1, "cob1Reduced")
 drawcob(cob2,"cob2")
 drawcob(cob3,"cob3")
 drawcob(cob4,"cob4")
 drawcob(cob5,"cob5")
 drawcob(cob6,"cob6")
 
-list1 = [1,2,3]
-list2 = [4,5,6]
-list3 = flatten([list1, list2])
-
-print(list3)
-
 A = [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]]
 complex1 = ChainComplex([b,c], A)
+print('Complex1')
 complex1.ValidMorphism()
 
 CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
 drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
 complex2 = ChainComplex([b,c,c], [[ZeroCob, Sbc, ZeroCob],[ZeroCob, ZeroCob, CobRightDotMinusLeftDotVertical],[ZeroCob, ZeroCob, ZeroCob]])
+print('Complex2')
 complex2.ValidMorphism()
+print('temporary2')
 drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
 RightDc = Cobordism(c,c,[[0,0,1,1]])
 drawcob(RightDc, "RightDc")
+print('DottedSadle')
 drawcob(Sbc*RightDc, "DottedSaddle")
 
 drawcob(ZeroCob, "ZeroCob")
