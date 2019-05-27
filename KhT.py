@@ -363,18 +363,26 @@ class ChainComplex(object):
 	# These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
 	# Note that the matrix's rows and columns depend on the order the CLTS are given in the list
 	
-	def __init__(self,listofclt,morphisms):
-		self.elements = listofclt
-		self.morphisms = morphisms
+    def __init__(self,listofclt,morphisms):
+        self.elements = listofclt
+        self.morphisms = morphisms
     
-	def ValidMorphism(self):
-		squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-1,-2)))
-		for i in squared:
-			if not np.array_equal(i.decos, np.array([])):
-				raise Exception('Differnetial does not square to 0')
-	
-    
-    
+    def ValidMorphism(self):
+        length = len(self.elements)
+        if len(self.morphisms) != length:
+            raise Exception('Differential does not have n rows (where n is the number of elements in chain complex)')
+        for i in self.morphisms:
+            if len(i) != length:
+                raise Exception('Differential does not have n columns (where n is the number of elements in chain complex)')
+        for i in range(0, length):
+            if self.morphisms[i][i].decos != []:
+                raise Exception('Differential has self loops')
+        
+        squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-1,-2)))
+        for i in squared:
+            if i.decos != []:
+                raise Exception('Differnetial does not square to 0')
+
 # graphical output for a crossingless tangle
 
 import math
@@ -554,7 +562,7 @@ def cap(n,i):
     
 def DrawFourEndedChainComplex(complex):
     for CLT in complex.elements:
-        if CLT.total != 2: # Note that a valid CLT is a 1-3 tangle or a 2-2 tangle
+        if CLT.total != 2: # Note that a valid 4 ended CLT is a 1-3 tangle or a 2-2 tangle
             raise Exception("Not a four ended tangle")
     
     # If a CLT is a 2-2 tangle, then the horizontal tangle is [1,0,3,2] and the vertical is [2,3,0,1]
