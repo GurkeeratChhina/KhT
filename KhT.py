@@ -41,6 +41,10 @@ from itertools import groupby
 from itertools import product
 import itertools as itertools
 import numpy as np
+from graph_tool.all import *
+import math
+import cairo
+from IPython.display import IFrame
 
 ###########################
 ###########################
@@ -175,7 +179,6 @@ def components(clt1,clt2):
 def arc_to_involution(pairs):
     """convert a list of pairs of TEIs into an involution."""
     return [x[1] for x in sorted(pairs+[pair[::-1] for pair in pairs])]
-
 
 class Cobordism(object):
     """A cobordism from a crossingless tangle clt1=front to another clt2=back consists of 
@@ -390,7 +393,10 @@ class ChainComplex(object):
 # the first element is D if the morphism is a power of D, and S if it is a power of S
 # the second element is the power of the corresponding morphism
 # the third element is the coefficient of the morphism
+# Requires Cob to be a cobordism between 4 ended tangles
 def CobordismToDS(Cob):
+    if Cob.front.total !=2 or Cob.back.total !=2:
+        raise Exception("Cobordism to convert to DS is not between 4-ended tangles")
     DS = [] 
     for elem in Cob.decos:
         if len(elem) == 3: # elem is H^k S
@@ -407,7 +413,7 @@ def CobordismToDS(Cob):
                     break
             else:
                 DS.append(["D", elem[0]+1, elem[3]]) #otherwise add dot
-        else: # elem is H^k times id
+        elif len(elem) == 4 and elem[0] != 0: # elem is H^k times id
             for ds in DS:
                 if ds[0] == "S" and ds[1] == 2*elem[0]: #check if saddle part is already there
                     ds[2] += elem[3]
@@ -420,14 +426,17 @@ def CobordismToDS(Cob):
                     break
             else:
                 DS.append(["D", elem[0], elem[3]]) #otherwise add dot part
+        else: #elem is id, elem should be [0, 0, 0, n]
+            for ds in DS:
+                if ds[0] == "S" and ds[1] == 0: #check if id is already there
+                    ds[2] += elem[3]
+                    break
+            else:
+                DS.append(["S", 0, elem[3]]) #otherwise add id
     return DS
+        
 
 # graphical output for a crossingless tangle
-
-import math
-import cairo
-from IPython.display import IFrame
-
 
 def draw_tangle_ends(posx,posy,clt,h,ctx):
     
@@ -598,7 +607,7 @@ def DrawFourEndedChainComplex(complex, filename):
             print(complex.elements[i].arcs[0])
             raise Exception("CLT to label vertex is not a horizontal or vertical CLT")
     
-        Position[g.vertex(i)] = [50*(2*i+1), 200]
+        #Position[g.vertex(i)] = [50*(2*i+1), 200]
     
     Edge_labeling = g.new_edge_property("string") # construct edge labels with linear combinations of powers of S and D
     for i, j in itertools.product(range(0, size), range(0,size)):
@@ -611,7 +620,7 @@ def DrawFourEndedChainComplex(complex, filename):
                 if ds[2] != 0:
                     Edge_labeling[g.edge(i,j)] += str(ds[2]) + "exp(" + ds[0] + "," + str(ds[1]) +")"
 
-    graph_draw(g, pos = Position, vertex_color = "black", vertex_fill_color = Vertex_labeling, vertex_size = 20,\
+    graph_draw(g, vertex_color = "black", vertex_fill_color = Vertex_labeling, vertex_size = 20,\
                 edge_color = "black", edge_pen_width = 4.0, edge_text = Edge_labeling, edge_text_color = "black",\
                 edge_text_distance = 10, edge_font_weight = cairo.FONT_WEIGHT_BOLD, edge_font_size = 22, \
                 output_size=(1200, 400), output=filename)
@@ -639,9 +648,6 @@ def cap(n,i):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cup"""
     return parallel(i-1)+CLT(0,2,[1,0],0)+parallel(n-i)
 
-from graph_tool.all import *
-
-
 
 b=CLT(2,2,[1,0,3,2],0)
 drawclt(b,"b")      
@@ -654,6 +660,7 @@ drawcob(Sbc,"Sbc")
 
 Scb=Cobordism(c,b,[[0,0,1]])
 drawcob(Scb,"Scb")
+MinusScb = Cobordism(c,b,[[0,0,-1]])
 
 #composition of morphisms
 #print((Sbc*Scb).decos)
@@ -703,14 +710,12 @@ drawcob(cob6,"cob6")
 
 A = [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]]
 complex1 = ChainComplex([b,c], A)
-print('Complex1')
 complex1.ValidMorphism()
 
 CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
 drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
 complex2 = ChainComplex([b,c,c], [[ZeroCob, Sbc, ZeroCob],[ZeroCob, ZeroCob, CobRightDotMinusLeftDotVertical],[ZeroCob, ZeroCob, ZeroCob]])
-print('Complex2')
 complex2.ValidMorphism()
 drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
 RightDc = Cobordism(c,c,[[0,0,1,1]])
@@ -726,6 +731,18 @@ RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
 
 complex3 = ChainComplex([b,c,c,c], [[ZeroCob, Sbc, ZeroCob, ZeroCob],[ZeroCob,ZeroCob, RightDc, ZeroCob],[ZeroCob, ZeroCob, ZeroCob, RightDcMinusH],[ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
 DrawFourEndedChainComplex(complex3, "complex3.png")
+complex3.ValidMorphism()
+
+complex4 = ChainComplex([c,b,c,c], [[ZeroCob, MinusScb, RightDc, ZeroCob], [ZeroCob, ZeroCob, ZeroCob, Sbc], [ZeroCob,ZeroCob, ZeroCob, Cobordism(c,c,[[0,0,0,1]])], [ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
+DrawFourEndedChainComplex(complex4, "complex4.png")
+
+complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, Scb, ZeroCob, Cobordism(c, c, [[1,0,0,1]]), ZeroCob, ZeroCob],\
+                                        [ZeroCob, ZeroCob, Cobordism(b,b, [[0,0,1,1]]), ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob],\
+                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]])],\
+                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, Scb, ZeroCob],\
+                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, Cobordism(b,b, [[0,0,1,1]])],\
+                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
+DrawFourEndedChainComplex(complex5, "complex5.png")
 
 # todo:
 # done) multiplication in cobordism category (medium)
