@@ -336,9 +336,11 @@ class Cobordism(object):
     # self is a linear combination of cobordisms, with each cobordism being a different list in decos.
     # ReduceDecorations sets a cobordism, decoration, with a dot on the top 0-th tangle end 
     # (which is chosen to be the basepoint of the cobordism) to be the zero cobordism, by removing decoration from decos
+    # This also returns the resulting decorations
     def ReduceDecorations(self):
         ReducedDecorations = [decoration for decoration in self.decos if decoration[1] == 0]
         self.decos = ReducedDecorations
+        return ReducedDecorations
     
 def simplify_decos(decos):# ToDo: rewrite this without numpy
     decos=np.array(sorted(decos))
@@ -381,7 +383,44 @@ class ChainComplex(object):
         squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-1,-2)))
         for i in squared:
             if i.decos != []:
-                raise Exception('Differnetial does not square to 0')
+                raise Exception('Differential does not square to 0')
+
+# DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
+# an element of DS will be refered to a ds, which is a 3 element list
+# the first element is D if the morphism is a power of D, and S if it is a power of S
+# the second element is the power of the corresponding morphism
+# the third element is the coefficient of the morphism
+def CobordismToDS(Cob):
+    DS = [] 
+    for elem in Cob.decos:
+        if len(elem) == 3: # elem is H^k S
+            for ds in DS:
+                if ds[0] == "S" and ds[1] == 2*elem[0] +1: #check if saddle is already there
+                    ds[2] += elem[2]
+                    break
+            else:
+                DS.append(["S", 2*elem[0]+1, elem[2]]) #otherwise add saddle
+        elif len(elem) == 4 and elem[2] == 1: # elem is H^k D
+            for ds in DS:
+                if ds[0] == "D" and ds[1] == elem[0] +1: #check if dot is already there
+                    ds[2] += elem[3]
+                    break
+            else:
+                DS.append(["D", elem[0]+1, elem[3]]) #otherwise add dot
+        else: # elem is H^k times id
+            for ds in DS:
+                if ds[0] == "S" and ds[1] == 2*elem[0]: #check if saddle part is already there
+                    ds[2] += elem[3]
+                    break
+            else:
+                DS.append(["S", 2*elem[0], ((-1)**elem[0])*elem[3]]) #otherwise add saddle part
+            for ds in DS:
+                if ds[0] == "D" and ds[1] == elem[0]: #check if dot part is already there
+                    ds[2] += elem[3]
+                    break
+            else:
+                DS.append(["D", elem[0], elem[3]]) #otherwise add dot part
+    return DS
 
 # graphical output for a crossingless tangle
 
@@ -536,9 +575,49 @@ def drawcob(cob,name):
     
     return IFrame(name+'.pdf', width='100%', height='300')
 
-    # End of drawing code
+def DrawFourEndedChainComplex(complex, filename):
+    # For now assume that all CLT are 2-2
+    for CLT in complex.elements:
+        if CLT.top != 2 or CLT.bot !=2:
+            raise Exception("Not a four ended tangle")
     
+    # If a CLT is a 2-2 tangle, then the horizontal tangle is [1,0,3,2] and the vertical is [2,3,0,1]
+    g = Graph()
+    size = len(complex.elements)
+    g.add_vertex(size)
+    # print("size = " + str(size))
+    Vertex_labeling = g.new_vertex_property("string") # "white" is the horizontal CLT and "black" is the vertical CLT
+    Position = g.new_vertex_property("vector<float>")
+    for i in range(0, size):
+        if complex.elements[i].arcs[0] == 1:
+            Vertex_labeling[g.vertex(i)] = "white"
+        elif complex.elements[i].arcs[0] == 2:
+            Vertex_labeling[g.vertex(i)] = "black"
+        else: 
+            print(complex.elements[i].arcs)
+            print(complex.elements[i].arcs[0])
+            raise Exception("CLT to label vertex is not a horizontal or vertical CLT")
     
+        Position[g.vertex(i)] = [50*(2*i+1), 200]
+    
+    Edge_labeling = g.new_edge_property("string") # construct edge labels with linear combinations of powers of S and D
+    for i, j in itertools.product(range(0, size), range(0,size)):
+        if complex.morphisms[i][j].ReduceDecorations() != []:
+            g.add_edge(g.vertex(i), g.vertex(j))
+            Edge_labeling[g.edge(i,j)] = ""
+            for ds in CobordismToDS(complex.morphisms[i][j]):
+                if Edge_labeling[g.edge(i,j)] != "" and ds[2] > 0:
+                    Edge_labeling[g.edge(i,j)] += "+"
+                if ds[2] != 0:
+                    Edge_labeling[g.edge(i,j)] += str(ds[2]) + "exp(" + ds[0] + "," + str(ds[1]) +")"
+
+    graph_draw(g, pos = Position, vertex_color = "black", vertex_fill_color = Vertex_labeling, vertex_size = 20,\
+                edge_color = "black", edge_pen_width = 4.0, edge_text = Edge_labeling, edge_text_color = "black",\
+                edge_text_distance = 10, edge_font_weight = cairo.FONT_WEIGHT_BOLD, edge_font_size = 22, \
+                output_size=(1200, 400), output=filename)
+
+# End of drawing code
+   
 # create basic crossingless tangles
 def cup_alt(n,i):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cup"""
@@ -559,16 +638,10 @@ def cup(n,i):
 def cap(n,i):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cup"""
     return parallel(i-1)+CLT(0,2,[1,0],0)+parallel(n-i)
-    
-def DrawFourEndedChainComplex(complex):
-    for CLT in complex.elements:
-        if CLT.total != 2: # Note that a valid 4 ended CLT is a 1-3 tangle or a 2-2 tangle
-            raise Exception("Not a four ended tangle")
-    
-    # If a CLT is a 2-2 tangle, then the horizontal tangle is [1,0,3,2] and the vertical is [2,3,0,1]
-    # If a CLT is 1-3, then the horizontal tangle is [3,2,1,0] and the vertical is [1,0,3,2]
-    
-	
+
+from graph_tool.all import *
+
+
 
 b=CLT(2,2,[1,0,3,2],0)
 drawclt(b,"b")      
@@ -585,13 +658,11 @@ drawcob(Scb,"Scb")
 #composition of morphisms
 #print((Sbc*Scb).decos)
 #print((Sbc*Scb).comp)
-print('Sbc*Scb')
 drawcob((Sbc*Scb),"SSbb")
 
 #composition of morphisms
 #print((Scb*Sbc).decos)
 #print((Scb*Sbc).comp)
-print('Scb*Sbc')
 drawcob((Scb*Sbc),"SScc")
 
 # addition of cobordisms
@@ -612,9 +683,7 @@ cob1=Cobordism(T1,T2,[[4,1,0,1]])
 cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,1,1,1],[1,1,1,19]])
 cob3=Cobordism(T2,T1,[[2,0,1,-2]])
 cob4=cob1+cob2
-print('cob5')
 cob5=cob1*cob3
-print('cob6')
 cob6=cob3*cob1
 cob5.decos
 
@@ -643,15 +712,20 @@ drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 complex2 = ChainComplex([b,c,c], [[ZeroCob, Sbc, ZeroCob],[ZeroCob, ZeroCob, CobRightDotMinusLeftDotVertical],[ZeroCob, ZeroCob, ZeroCob]])
 print('Complex2')
 complex2.ValidMorphism()
-print('temporary2')
 drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
 RightDc = Cobordism(c,c,[[0,0,1,1]])
 drawcob(RightDc, "RightDc")
-print('DottedSadle')
 drawcob(Sbc*RightDc, "DottedSaddle")
 
 drawcob(ZeroCob, "ZeroCob")
 
+DrawFourEndedChainComplex(complex2, "complex2.png")
+DrawFourEndedChainComplex(complex1, "complex1.png")
+
+RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
+
+complex3 = ChainComplex([b,c,c,c], [[ZeroCob, Sbc, ZeroCob, ZeroCob],[ZeroCob,ZeroCob, RightDc, ZeroCob],[ZeroCob, ZeroCob, ZeroCob, RightDcMinusH],[ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
+DrawFourEndedChainComplex(complex3, "complex3.png")
 
 # todo:
 # done) multiplication in cobordism category (medium)
