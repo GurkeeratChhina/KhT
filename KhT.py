@@ -53,7 +53,7 @@ from IPython.display import IFrame
 class CLT(object):
     """A crossingless tangle (CLT) is a matching of n+m ends (m=top,n=bot=bottom). 
     arcs is a list whose ith entry gives the value of the involution at the ith tangle end."""
-    # gr is a list of [qu, hom, del] of the trigradings, where qu is the quantum grading, hom is the homological grading, and del is the delta grading
+    # gr is a list of [qu, hom] of the bigradings, where qu is the quantum grading, hom is the homological grading
     __slots__ = 'top','bot', 'total', 'arcs', 'gr', 'pairs'
     
     def __init__(self,top,bot,arcs,gr):
@@ -434,12 +434,52 @@ def CobordismToDS(Cob):
             else:
                 DS.append(["S", 0, elem[3]]) #otherwise add id
     return DS
-        
+
+
+# Adds a cap to every tangle and every cobordism in Complex, at index i
+# Here 0 <= i <= tangle.bot
+def AddCap(Complex, i):
+    NewElements = []
+    for clt in Complex.elements:
+        newarcs = clt.arcs.copy()
+        for j, x in enumerate(newarcs):
+            if x >= clt.top+i:
+                newarcs[j] += 2 # shifts arc ends that appear after the cap
+        newarcs.insert(clt.top +i, clt.top+i) # inserting the cap
+        newarcs.insert(clt.top +i, clt.top+i+1)
+        NewCLT = CLT(clt.top, clt.bot+2, newarcs, clt.gr) 
+        NewElements.append(NewCLT)
+    length = len(Complex.elements)
+    NewMorphisms = []
+    for j in range(length):
+        NewRow=[]
+        for k in range(length):
+            DecosCopy = Complex.morphisms[j][k].decos.copy()
+            magic_index = components(NewElements[j], NewElements[k]).index([NewElements[j].top+i, NewElements[j].top+i+1]) #computes the index of the new component of the cobordism corresponding to the identity sheet of the cap
+            NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(magic_index,0) for NewDeco in DecosCopy])
+        NewMorphisms.append(NewRow)
+    return ChainComplex(NewElements, NewMorphisms)
+
+# Here 0 <= i <= tangle.bot
+def AddCup(Complex, i):
+    newElements = []
+    for clt in Complex.elements:
+        if clt.arcs[clt.top +i] == clt.top+i+1: # 
+            newarcs = clt.arcs.copy()
+            newarcs.remove(clt.top +i)
+            newarcs.remove(clt.top+i+1)
+            for j, x in enumerate(newarcs):
+                if x >= clt.top+i:
+                    newarcs[j] -= 2
+            newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]+1, clt.gr[1]]))
+            newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]-1, clt.gr[1]]))
+    return 0
+    
+    
 
 # graphical output for a crossingless tangle
 
 def draw_tangle_ends(posx,posy,clt,h,ctx):
-    
     ctx.set_font_size(0.40)
     ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
     
@@ -649,10 +689,10 @@ def cap(n,i):
     return parallel(i-1)+CLT(0,2,[1,0],0)+parallel(n-i)
 
 
-b=CLT(2,2,[1,0,3,2],0)
+b=CLT(2,2,[1,0,3,2],[0,0])
 drawclt(b,"b")      
 
-c=CLT(2,2,[2,3,0,1],0)
+c=CLT(2,2,[2,3,0,1],[0,0])
 drawclt(c,"c")
 
 Sbc=Cobordism(b,c,[[0,0,1]])
@@ -679,15 +719,15 @@ drawclt(cup(10,3)*cap(10,2)*cup(10,4)*cup(8,6)+cap(2,1),"test1")
 drawclt(cap(5,5),"test2")
 drawcob(testcobordism,"testcobordism")
 
-T1=CLT(2,4,[2,5,0,4,3,1],0)
-T2=CLT(2,4,[2,3,0,1,5,4],0)
-T3=CLT(4,4,[4,7,3,2,0,6,5,1],0)
-T4=CLT(4,4,[6,7,3,2,5,4,0,1],0)
-T5=CLT(4,4,[3,2,1,0,7,6,5,4],0)
+T1=CLT(2,4,[2,5,0,4,3,1],[0,0])
+T2=CLT(2,4,[2,3,0,1,5,4],[0,0])
+T3=CLT(4,4,[4,7,3,2,0,6,5,1],[0,0])
+T4=CLT(4,4,[6,7,3,2,5,4,0,1],[0,0])
+T5=CLT(4,4,[3,2,1,0,7,6,5,4],[0,0])
 
 #print(components(b,c))
 cob1=Cobordism(T1,T2,[[4,1,0,1]])
-cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,1,1,1],[1,1,1,19]])
+cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,0,1,1],[1,1,1,19]])
 cob3=Cobordism(T2,T1,[[2,0,1,-2]])
 cob4=cob1+cob2
 cob5=cob1*cob3
@@ -708,8 +748,7 @@ drawcob(cob4,"cob4")
 drawcob(cob5,"cob5")
 drawcob(cob6,"cob6")
 
-A = [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]]
-complex1 = ChainComplex([b,c], A)
+complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
 complex1.ValidMorphism()
 
 CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
@@ -743,6 +782,35 @@ complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, Scb, ZeroCob, Cobordism(c, c, 
                                         [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, Cobordism(b,b, [[0,0,1,1]])],\
                                         [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
 DrawFourEndedChainComplex(complex5, "complex5.png")
+
+#complex1cap0 = AddCap(complex1, 0)
+
+newarcs1 = T1.arcs.copy()
+for j, x in enumerate(newarcs1):
+    if x >= T1.top:
+        newarcs1[j] += 2
+newarcs1.insert(T1.top, T1.top)
+newarcs1.insert(T1.top, T1.top+1)
+NewT1 = CLT(T1.top, T1.bot+2, newarcs1, T1.gr)
+drawclt(NewT1, "NewT1")
+
+newarcs2 = T2.arcs.copy()
+for j, x in enumerate(newarcs2):
+    if x >= T2.top:
+        newarcs2[j] += 2
+newarcs2.insert(T2.top, T2.top)
+newarcs2.insert(T2.top, T2.top+1)
+NewT2 = CLT(T2.top, T2.bot+2, newarcs2, T2.gr)
+drawclt(NewT2, "NewT2")
+
+DecosCopy = cob2.decos.copy()
+magic_index = components(NewT1, NewT2).index([NewT1.top, NewT1.top+1])
+for j, NewDeco in enumerate(DecosCopy):
+    DecosCopy[j].insert(magic_index + 1, 0)
+NewCob = Cobordism(NewT1, NewT2, DecosCopy)
+drawcob(NewCob, "NewCob")
+
+#   print(components(T1, T2))
 
 # todo:
 # done) multiplication in cobordism category (medium)
