@@ -34,7 +34,7 @@ def flatten(mylist):
 #
 # CLT= crossingless tangle
 # TEI= tangle end index
-#
+# DS = alternate way of representing cobordisms of 4 ended tangles, using powers of D and powers of S
 
 # load libraries
 from itertools import groupby
@@ -388,13 +388,14 @@ class ChainComplex(object):
             if i.decos != []:
                 raise Exception('Differential does not square to 0')
 
-# DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
-# an element of DS will be refered to a ds, which is a 3 element list
-# the first element is D if the morphism is a power of D, and S if it is a power of S
-# the second element is the power of the corresponding morphism
-# the third element is the coefficient of the morphism
-# Requires Cob to be a cobordism between 4 ended tangles
+
 def CobordismToDS(Cob):
+""" DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
+    an element of DS will be refered to a ds, which is a 3 element list
+    the first element is D if the morphism is a power of D, and S if it is a power of S
+    the second element is the power of the corresponding morphism
+    the third element is the coefficient of the morphism
+    Requires Cob to be a cobordism between 4 ended tangles """
     if Cob.front.total !=2 or Cob.back.total !=2:
         raise Exception("Cobordism to convert to DS is not between 4-ended tangles")
     DS = [] 
@@ -436,9 +437,10 @@ def CobordismToDS(Cob):
     return DS
 
 
-# Adds a cap to every tangle and every cobordism in Complex, at index i
-# Here 0 <= i <= tangle.bot
+
 def AddCap(Complex, i):
+""" Adds a cap to every tangle and every cobordism in Complex, at index i
+    Here 0 <= i <= tangle.bot """
     NewElements = []
     for clt in Complex.elements:
         newarcs = clt.arcs.copy()
@@ -460,19 +462,58 @@ def AddCap(Complex, i):
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
 
-# Here 0 <= i <= tangle.bot
+
+
+def AddCupToCLT(clt, i)
+""" Here 0 <= i <= clt.bot
+    Returns a list of 2 clt if there is a closed component
+    otherwise returns a list of 1 clt """
+    newElements = []
+    if clt.arcs[clt.top +i] == clt.top+i+1: # adding the cup makes a closed component
+        newarcs = clt.arcs.copy()
+        newarcs.remove(clt.top +i) #removing the closed component
+        newarcs.remove(clt.top+i+1)
+        for j, x in enumerate(newarcs):
+            if x >= clt.top+i:
+                newarcs[j] -= 2 #shifting arc ends that appear after cup
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]+1, clt.gr[1]]))
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]-1, clt.gr[1]]))
+    else: # adding the cup doesnt make closed components
+        newarcs = clt.arcs.copy()
+        leftend = newarcs[top + i]
+        rightend = newarcs[top+i+1]
+        newarcs[leftend] = rightend # connecting the two arcs via the cup
+        newarcs[rightend] = leftend
+        del newarcs[top +i] #deleting the unneeded tangles
+        del newarcs[top +i]
+        for j, x in enumerate(newarcs):
+            if x >= clt.top+i:
+                newarcs[j] -= 2 #shifting arc ends that appear after cup
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.gr))
+    return newElements
+
 def AddCup(Complex, i):
+""" Here 0 <= i <= tangle.bot """
     newElements = []
     for clt in Complex.elements:
-        if clt.arcs[clt.top +i] == clt.top+i+1: # 
-            newarcs = clt.arcs.copy()
-            newarcs.remove(clt.top +i)
-            newarcs.remove(clt.top+i+1)
-            for j, x in enumerate(newarcs):
-                if x >= clt.top+i:
-                    newarcs[j] -= 2
-            newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]+1, clt.gr[1]]))
-            newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]-1, clt.gr[1]]))
+        newElements.extend(AddCupToCLT(clt, i))
+    length = len(Complex.elements)
+    NewMorphisms = []
+    for j in range(length): # j is the target clt
+        newRow = []
+        nextRow = []
+        for k in range(length): # k is the source clt
+            if : # source and target are both closed
+                # add 2 cobordisms to newRow and nextRow
+            elif : # source is open but target is closed 
+                # add 1 cobordism to each
+            elif : # source is closed but target is open
+                # add 2 cobordisms to newRow only
+            else: # source and target are both open
+                # add 1 cobordism to newRow only
+        NewMorphisms.append(newRow)
+        if : # target is closed
+            NewMorphisms.append(nextRow)
     return 0
     
     
