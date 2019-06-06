@@ -437,7 +437,6 @@ def CobordismToDS(Cob):
     return DS
 
 
-
 def AddCap(Complex, i):
 """ Adds a cap to every tangle and every cobordism in Complex, at index i
     Here 0 <= i <= tangle.bot """
@@ -456,12 +455,15 @@ def AddCap(Complex, i):
     for j in range(length):
         NewRow=[]
         for k in range(length):
-            DecosCopy = Complex.morphisms[j][k].decos.copy()
-            magic_index = components(NewElements[j], NewElements[k]).index([NewElements[j].top+i, NewElements[j].top+i+1]) #computes the index of the new component of the cobordism corresponding to the identity sheet of the cap
-            NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(magic_index,0) for NewDeco in DecosCopy])
+            if Complex.morphisms[j][k].decos == []: # is the 0 cob
+               NewRow.append(ZeroCob) 
+            else: # is not the 0 cob
+                DecosCopy = Complex.morphisms[j][k].decos.copy()
+                magic_index = components(NewElements[j], NewElements[k]).index([NewElements[j].top+i, NewElements[j].top+i+1]) #computes the index of the new component of the cobordism corresponding to the identity sheet of the cap
+                NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(magic_index,0) for NewDeco in DecosCopy])
+                NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
-
 
 
 def AddCupToCLT(clt, i)
@@ -503,14 +505,54 @@ def AddCup(Complex, i):
         newRow = []
         nextRow = []
         for k in range(length): # k is the source clt
-            if : # source and target are both closed
-                # add 2 cobordisms to newRow and nextRow
-            elif : # source is open but target is closed 
-                # add 1 cobordism to each
-            elif : # source is closed but target is open
-                # add 2 cobordisms to newRow only
-            else: # source and target are both open
-                # add 1 cobordism to newRow only
+            if Complex.elements[k].arcs[clt.top +i] == clt.top+i+1 and Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # source and target are both closed, add 2 cobordisms to newRow and nextRow
+                if Complex.morphisms[j][k].decos == []: # is the 0 cob
+                    newRow.append(ZeroCob)
+                    newRow.append(ZeroCob)
+                    nextRow.append(ZeroCob)
+                    nextRow.append(ZeroCob)
+                else: # is not the 0 cob
+                    newDecos1 = [] #TODO: Fill out decos
+                    newDecos2 = [] #TODO: Fill out decos
+                    newDecos3 = [] #TODO: Fill out decos
+                    newDecos4 = [] #TODO: Fill out decos
+                    Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[0], newDecos1)
+                    Cobordism2 = Cobordism(AddCupToCLT(Complex.elements[k], i)[1], AddCupToCLT(Complex.elements[j], i)[0], newDecos2)
+                    Cobordism3 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[1], newDecos3)
+                    Cobordism4 = Cobordism(AddCupToCLT(Complex.elements[k], i)[1], AddCupToCLT(Complex.elements[j], i)[1], newDecos4)
+                    newRow.append(Cobordism1)
+                    newRow.append(Cobordism2)
+                    nextRow.append(Cobordism3)
+                    nextRow.append(Cobordism4)
+            elif Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # source is open but target is closed, add 1 cobordism to each
+                if Complex.morphisms[j][k].decos == []: # is the 0 cob
+                    newRow.append(ZeroCob)
+                    nextRow.append(ZeroCob)
+                else: # is not the 0 cob
+                    newDecos1 = [] #TODO: Fill out decos
+                    newDecos2 = [] #TODO: Fill out decos
+                    Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[0], newDecos1)
+                    Cobordism2 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[1], newDecos2)
+                    newRow.append(Cobordism1)
+                    nextRow.append(Cobordism2)
+            elif Complex.elements[k].arcs[clt.top +i] == clt.top+i+1: # source is closed but target is open, add 2 cobordisms to newRow only
+                if Complex.morphisms[j][k].decos == []: # is the 0 cob
+                    newRow.append(ZeroCob)
+                    newRow.append(ZeroCob)
+                else: # is not the 0 cob
+                    newDecos1 = [] #TODO: Fill out decos
+                    newDecos2 = [] #TODO: Fill out decos
+                    Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[0], newDecos1)
+                    Cobordism2 = Cobordism(AddCupToCLT(Complex.elements[k], i)[1], AddCupToCLT(Complex.elements[j], i)[0], newDecos2)
+                    newRow.append(Cobordism1)
+                    newRow.append(Cobordism2)
+            else: # source and target are both open, add 1 cobordism to newRow only
+                if Complex.morphisms[j][k].decos == []: # is the 0 cob
+                    newRow.append(ZeroCob)
+                else: # is not the 0 cob
+                    newDecos1 = [] #TODO: Fill out decos
+                    Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[k], i)[1], newDecos1)
+                    newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
         if : # target is closed
             NewMorphisms.append(nextRow)
