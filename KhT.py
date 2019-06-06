@@ -387,7 +387,6 @@ class ChainComplex(object):
             if i.decos != []:
                 raise Exception('Differential does not square to 0')
 
-
 def CobordismToDS(Cob):
     """ DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
         an element of DS will be refered to a ds, which is a 3 element list
@@ -454,13 +453,10 @@ def AddCap(Complex, i):
     for j in range(length):
         NewRow=[]
         for k in range(length):
-            if Complex.morphisms[j][k].decos == []: # is the 0 cob
-               NewRow.append(ZeroCob) 
-            else: # is not the 0 cob
-                DecosCopy = Complex.morphisms[j][k].decos.copy()
-                magic_index = components(NewElements[j], NewElements[k]).index([NewElements[j].top+i, NewElements[j].top+i+1]) #computes the index of the new component of the cobordism corresponding to the identity sheet of the cap
-                NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(magic_index,0) for NewDeco in DecosCopy])
-                NewRow.append(NewCob)
+            DecosCopy = Complex.morphisms[j][k].decos.copy()
+            magic_index = components(NewElements[j], NewElements[k]).index([NewElements[j].top+i, NewElements[j].top+i+1]) #computes the index of the new component of the cobordism corresponding to the identity sheet of the cap
+            NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(magic_index,0) for NewDeco in DecosCopy])
+            NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
 
@@ -510,10 +506,26 @@ def AddCup(Complex, i):
                     nextRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                 else: # is not the 0 cob
-                    newDecos1 = [] #TODO: Fill out decos
-                    newDecos2 = [] #TODO: Fill out decos
-                    newDecos3 = [] #TODO: Fill out decos
-                    newDecos4 = [] #TODO: Fill out decos
+                    newDecos1 = []
+                    newDecos2 = []
+                    newDecos3 = []
+                    newDecos4 = []
+                    magic_index = components(Complex.elements[k], Complex.elements[j]).index([Complex.elements[k].top+i, Complex.elements[k].top+i+1]) #computes index of closed component
+                    for deco in Complex.morphisms[j][k].decos:
+                        decocopy = deco.copy()
+                        del decocopy[magic_index + 1] # removing closed component
+                        if deco[magic_index + 1] == 0: # no dot on component already prior
+                            newDecos1.append(decocopy)
+                            newDecos4.append(decocopy)
+                        else: # is dot on component already
+                            newDecos3.append(decocopy)
+                            Hdecocopy = decocopy.copy
+                            Hdecocopy[0] += 1
+                            newDecos4.append(Hdecocopy)
+                    simplify_decos(newDecos1)
+                    simplify_decos(newDecos2)
+                    simplify_decos(newDecos3)
+                    simplify_decos(newDecos4)
                     Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[0], newDecos1)
                     Cobordism2 = Cobordism(AddCupToCLT(Complex.elements[k], i)[1], AddCupToCLT(Complex.elements[j], i)[0], newDecos2)
                     Cobordism3 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[1], newDecos3)
@@ -529,6 +541,8 @@ def AddCup(Complex, i):
                 else: # is not the 0 cob
                     newDecos1 = [] #TODO: Fill out decos
                     newDecos2 = [] #TODO: Fill out decos
+                    simplify_decos(newDecos1)
+                    simplify_decos(newDecos2)
                     Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[0], newDecos1)
                     Cobordism2 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[1], newDecos2)
                     newRow.append(Cobordism1)
@@ -540,6 +554,8 @@ def AddCup(Complex, i):
                 else: # is not the 0 cob
                     newDecos1 = [] #TODO: Fill out decos
                     newDecos2 = [] #TODO: Fill out decos
+                    simplify_decos(newDecos1)
+                    simplify_decos(newDecos2)
                     Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[j], i)[0], newDecos1)
                     Cobordism2 = Cobordism(AddCupToCLT(Complex.elements[k], i)[1], AddCupToCLT(Complex.elements[j], i)[0], newDecos2)
                     newRow.append(Cobordism1)
@@ -549,6 +565,7 @@ def AddCup(Complex, i):
                     newRow.append(ZeroCob)
                 else: # is not the 0 cob
                     newDecos1 = [] #TODO: Fill out decos
+                    simplify_decos(newDecos1)
                     Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[k], i)[1], newDecos1)
                     newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
