@@ -358,16 +358,15 @@ def simplify_decos(decos):# ToDo: rewrite this without numpy
     return (decos[decos[:,-1]!=0,:]).tolist()
     #return [x for x in [add_coeffs(list(g)) for k, g in groupby(sorted(decos),key = lambda s: s[0])] if x[1]!=0]
 
-CLTA = CLT(1,1, [1,0], 0)
+CLTA = CLT(1,1, [1,0], [0,0])
 ZeroCob = Cobordism(CLTA,CLTA,[])
 
 class ChainComplex(object):
-	# A chain complex is a directed graph, consisting of 
-	#  - A list of CLTS as labels on the vertices
-	#  - A a matrix of cobordisms as the adjacency matrix.
-	# These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
-	# Note that the matrix's rows and columns depend on the order the CLTS are given in the list
-	
+    """ A chain complex is a directed graph, consisting of 
+        - A list of CLTS as labels on the vertices
+        - A a matrix of cobordisms as the adjacency matrix.
+        These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
+        Note that the matrix's rows and columns depend on the order the CLTS are given in the list """
     def __init__(self,listofclt,morphisms):
         self.elements = listofclt
         self.morphisms = morphisms
@@ -388,24 +387,15 @@ class ChainComplex(object):
             if i.decos != []:
                 raise Exception('Differential does not square to 0')
 
-<<<<<<< HEAD
 
 def CobordismToDS(Cob):
-""" DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
-    an element of DS will be refered to a ds, which is a 3 element list
-    the first element is D if the morphism is a power of D, and S if it is a power of S
-    the second element is the power of the corresponding morphism
-    the third element is the coefficient of the morphism
-    Requires Cob to be a cobordism between 4 ended tangles """
-=======
-# DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
-# an element of DS will be refered to a ds, which is a 3 element list
-# the first element is D if the morphism is a power of D, and S if it is a power of S
-# the second element is the power of the corresponding morphism
-# the third element is the coefficient of the morphism
-# Requires Cob to be a cobordism between 4 ended tangles
-def CobordismToDS(Cob):
->>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
+    """ DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
+        an element of DS will be refered to a ds, which is a 3 element list
+        the first element is D if the morphism is a power of D, and S if it is a power of S
+        the second element is the power of the corresponding morphism
+        the third element is the coefficient of the morphism
+        Requires Cob to be a cobordism between 4 ended tangles """
+    
     if Cob.front.total !=2 or Cob.back.total !=2:
         raise Exception("Cobordism to convert to DS is not between 4-ended tangles")
     DS = [] 
@@ -445,13 +435,10 @@ def CobordismToDS(Cob):
             else:
                 DS.append(["S", 0, elem[3]]) #otherwise add id
     return DS
-        
 
-
-<<<<<<< HEAD
 def AddCap(Complex, i):
-""" Adds a cap to every tangle and every cobordism in Complex, at index i
-    Here 0 <= i <= tangle.bot """
+    """ Adds a cap to every tangle and every cobordism in Complex, at index i
+        Here 0 <= i <= tangle.bot """
     NewElements = []
     for clt in Complex.elements:
         newarcs = clt.arcs.copy()
@@ -477,11 +464,10 @@ def AddCap(Complex, i):
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
 
-
-def AddCupToCLT(clt, i)
-""" Here 0 <= i <= clt.bot
-    Returns a list of 2 clt if there is a closed component
-    otherwise returns a list of 1 clt """
+def AddCupToCLT(clt, i):
+    """ Here 0 <= i <= clt.bot
+        Returns a list of 2 clt if there is a closed component
+        otherwise returns a list of 1 clt """
     newElements = []
     if clt.arcs[clt.top +i] == clt.top+i+1: # adding the cup makes a closed component
         newarcs = clt.arcs.copy()
@@ -507,7 +493,7 @@ def AddCupToCLT(clt, i)
     return newElements
 
 def AddCup(Complex, i):
-""" Here 0 <= i <= tangle.bot """
+    """ Here 0 <= i <= tangle.bot """
     newElements = []
     for clt in Complex.elements:
         newElements.extend(AddCupToCLT(clt, i))
@@ -566,16 +552,12 @@ def AddCup(Complex, i):
                     Cobordism1 = Cobordism(AddCupToCLT(Complex.elements[k], i)[0], AddCupToCLT(Complex.elements[k], i)[1], newDecos1)
                     newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
-        if : # target is closed
+        if Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # target is closed
             NewMorphisms.append(nextRow)
     return 0
-    
-    
-
+       
 # graphical output for a crossingless tangle
 
-=======
->>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
 def draw_tangle_ends(posx,posy,clt,h,ctx):
     ctx.set_font_size(0.40)
     ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
@@ -845,12 +827,7 @@ drawcob(cob4,"cob4")
 drawcob(cob5,"cob5")
 drawcob(cob6,"cob6")
 
-<<<<<<< HEAD
 complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
-=======
-A = [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]]
-complex1 = ChainComplex([b,c], A)
->>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
 complex1.ValidMorphism()
 
 CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
@@ -884,7 +861,6 @@ complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, Scb, ZeroCob, Cobordism(c, c, 
                                         [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, Cobordism(b,b, [[0,0,1,1]])],\
                                         [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
 DrawFourEndedChainComplex(complex5, "complex5.png")
-<<<<<<< HEAD
 
 #complex1cap0 = AddCap(complex1, 0)
 
@@ -913,9 +889,7 @@ for j, NewDeco in enumerate(DecosCopy):
 NewCob = Cobordism(NewT1, NewT2, DecosCopy)
 drawcob(NewCob, "NewCob")
 
-#   print(components(T1, T2))
-=======
->>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
+# print(components(T1, T2))
 
 # todo:
 # done) multiplication in cobordism category (medium)
