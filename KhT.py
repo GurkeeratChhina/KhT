@@ -380,7 +380,7 @@ class ChainComplex(object):
         for i in self.morphisms:
             if len(i) != length:
                 raise Exception('Differential does not have n columns (where n is the number of elements in chain complex)')
-        for i in range(0, length):
+        for i in range(length):
             if self.morphisms[i][i].decos != []:
                 raise Exception('Differential has self loops')
         
@@ -452,10 +452,10 @@ def AddCap(Complex, i):
         NewElements.append(NewCLT)
     length = len(Complex.elements)
     NewMorphisms = []
-    for j in range(length):
+    for j ,row in enumerate(Complex.morphisms):
         NewRow=[]
-        for k in range(length):
-            DecosCopy = Complex.morphisms[j][k].decos.copy()
+        for k, cob in enumerate(row):
+            DecosCopy = cob.decos.copy()
             magic_index = components(NewElements[j], NewElements[k]).index([NewElements[j].top+i, NewElements[j].top+i+1]) #computes the index of the new component of the cobordism corresponding to the identity sheet of the cap
             NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(magic_index,0) for NewDeco in DecosCopy])
             NewRow.append(NewCob)
@@ -497,7 +497,7 @@ def AddCup(Complex, i):
         newElements.extend(AddCupToCLT(clt, i))
     length = len(Complex.elements)
     NewMorphisms = []
-    for j in range(length): # j is the target clt
+    for j in range(length): # j is the target clt, TODO rewrite without range, use enumerate instead
         newRow = []
         nextRow = []
         for k in range(length): # k is the source clt
@@ -735,10 +735,10 @@ def DrawFourEndedChainComplex(complex, filename):
     # print("size = " + str(size))
     Vertex_labeling = g.new_vertex_property("string") # "white" is the horizontal CLT and "black" is the vertical CLT
     Position = g.new_vertex_property("vector<float>")
-    for i in range(0, size):
-        if complex.elements[i].arcs[0] == 1:
+    for i, clt in enumerate(complex.elements):
+        if clt.arcs[0] == 1:
             Vertex_labeling[g.vertex(i)] = "white"
-        elif complex.elements[i].arcs[0] == 2:
+        elif clt.arcs[0] == 2:
             Vertex_labeling[g.vertex(i)] = "black"
         else: 
             print(complex.elements[i].arcs)
@@ -750,7 +750,7 @@ def DrawFourEndedChainComplex(complex, filename):
     # TODO: omit coefficients of +- 1, leaving only the sign
     SUP = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
     Edge_labeling = g.new_edge_property("string") # construct edge labels with linear combinations of powers of S and D
-    for i, j in itertools.product(range(0, size), range(0,size)):
+    for i, j in itertools.product(range(0, size), range(0,size)): #rewrite with enumerate
         if complex.morphisms[i][j].ReduceDecorations() != []:
             g.add_edge(g.vertex(i), g.vertex(j))
             Edge_labeling[g.edge(i,j)] = ""
