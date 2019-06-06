@@ -388,6 +388,7 @@ class ChainComplex(object):
             if i.decos != []:
                 raise Exception('Differential does not square to 0')
 
+<<<<<<< HEAD
 
 def CobordismToDS(Cob):
 """ DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
@@ -396,6 +397,15 @@ def CobordismToDS(Cob):
     the second element is the power of the corresponding morphism
     the third element is the coefficient of the morphism
     Requires Cob to be a cobordism between 4 ended tangles """
+=======
+# DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
+# an element of DS will be refered to a ds, which is a 3 element list
+# the first element is D if the morphism is a power of D, and S if it is a power of S
+# the second element is the power of the corresponding morphism
+# the third element is the coefficient of the morphism
+# Requires Cob to be a cobordism between 4 ended tangles
+def CobordismToDS(Cob):
+>>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
     if Cob.front.total !=2 or Cob.back.total !=2:
         raise Exception("Cobordism to convert to DS is not between 4-ended tangles")
     DS = [] 
@@ -435,8 +445,10 @@ def CobordismToDS(Cob):
             else:
                 DS.append(["S", 0, elem[3]]) #otherwise add id
     return DS
+        
 
 
+<<<<<<< HEAD
 def AddCap(Complex, i):
 """ Adds a cap to every tangle and every cobordism in Complex, at index i
     Here 0 <= i <= tangle.bot """
@@ -562,6 +574,8 @@ def AddCup(Complex, i):
 
 # graphical output for a crossingless tangle
 
+=======
+>>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
 def draw_tangle_ends(posx,posy,clt,h,ctx):
     ctx.set_font_size(0.40)
     ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
@@ -831,7 +845,12 @@ drawcob(cob4,"cob4")
 drawcob(cob5,"cob5")
 drawcob(cob6,"cob6")
 
+<<<<<<< HEAD
 complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
+=======
+A = [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]]
+complex1 = ChainComplex([b,c], A)
+>>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
 complex1.ValidMorphism()
 
 CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
@@ -865,6 +884,7 @@ complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, Scb, ZeroCob, Cobordism(c, c, 
                                         [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, Cobordism(b,b, [[0,0,1,1]])],\
                                         [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
 DrawFourEndedChainComplex(complex5, "complex5.png")
+<<<<<<< HEAD
 
 #complex1cap0 = AddCap(complex1, 0)
 
@@ -894,6 +914,8 @@ NewCob = Cobordism(NewT1, NewT2, DecosCopy)
 drawcob(NewCob, "NewCob")
 
 #   print(components(T1, T2))
+=======
+>>>>>>> 7e7569a06206ccecb60dba54ef834dfdd058bc9e
 
 # todo:
 # done) multiplication in cobordism category (medium)
