@@ -346,6 +346,8 @@ class Cobordism(object):
         return ReducedDecorations
     
 def simplify_decos(decos):# ToDo: rewrite this without numpy
+    if decos == []:
+        return []
     decos=np.array(sorted(decos))
     """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
     # compute unique Hdots (unique_Hdot[0]) and how often each appears (unique_Hdot[1])
@@ -476,12 +478,12 @@ def AddCupToCLT(clt, i):
         newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]-1, clt.gr[1]]))
     else: # adding the cup doesnt make closed components
         newarcs = clt.arcs.copy()
-        leftend = newarcs[top + i]
-        rightend = newarcs[top+i+1]
+        leftend = newarcs[clt.top + i]
+        rightend = newarcs[clt.top+i+1]
         newarcs[leftend] = rightend # connecting the two arcs via the cup
         newarcs[rightend] = leftend
-        del newarcs[top +i] #deleting the unneeded tangles
-        del newarcs[top +i]
+        del newarcs[clt.top +i] #deleting the unneeded tangles
+        del newarcs[clt.top +i]
         for j, x in enumerate(newarcs):
             if x >= clt.top+i:
                 newarcs[j] -= 2 #shifting arc ends that appear after cup
@@ -519,7 +521,7 @@ def AddCup(Complex, i):
                             newDecos4.append(decocopy)
                         else: # is dot on component already
                             newDecos3.append(decocopy)
-                            Hdecocopy = decocopy.copy
+                            Hdecocopy = decocopy.copy()
                             Hdecocopy[0] += 1
                             newDecos4.append(Hdecocopy)
                     simplify_decos(newDecos1)
@@ -571,7 +573,7 @@ def AddCup(Complex, i):
         NewMorphisms.append(newRow)
         if Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # target is closed
             NewMorphisms.append(nextRow)
-    return 0
+    return ChainComplex(newElements, NewMorphisms)
        
 # graphical output for a crossingless tangle
 
@@ -907,6 +909,35 @@ for j, NewDeco in enumerate(DecosCopy):
     DecosCopy[j].insert(magic_index + 1, 0)
 NewCob = Cobordism(NewT1, NewT2, DecosCopy)
 drawcob(NewCob, "NewCob")
+
+
+
+BasicComplex = ChainComplex([CLT(1,1, [1,0], [0,0])], [[ZeroCob]])
+BasicCap = AddCap(BasicComplex, 1)
+
+drawclt(BasicCap.elements[0], "basiccap")
+Double = AddCup(BasicCap, 0)
+drawclt(Double.elements[0], "double")
+
+def PrintComplexMorphismMatrix(Complex):
+    for i in Complex.morphisms:
+        Row = []
+        for j in i:
+            Row.append(len(j.decos))
+        print(Row)
+
+PrintComplexMorphismMatrix(Double)
+
+tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1]), [[0, 0, 1, 1]])
+tempcomplex = ChainComplex([CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1])], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
+tempcomplexwithcup = AddCup(tempcomplex, 1)
+PrintComplexMorphismMatrix(tempcomplexwithcup)
+print("Decorations at 3, 0", tempcomplexwithcup.morphisms[3][0].decos)
+print("Decorations at 3, 1", tempcomplexwithcup.morphisms[3][1].decos)
+print("Grading of element at 0", tempcomplexwithcup.elements[0].gr)
+print("Grading of element at 1", tempcomplexwithcup.elements[1].gr)
+print("Grading of element at 2", tempcomplexwithcup.elements[2].gr)
+print("Grading of element at 3", tempcomplexwithcup.elements[3].gr)
 
 # print(components(T1, T2))
 
