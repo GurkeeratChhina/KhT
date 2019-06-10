@@ -180,6 +180,22 @@ def arc_to_involution(pairs):
     """convert a list of pairs of TEIs into an involution."""
     return [x[1] for x in sorted(pairs+[pair[::-1] for pair in pairs])]
 
+def clt_front_pairs(components):
+    """the tangle at the front, in TEI pair notation, of a cobordism with components 'components'."""
+    return [component[i:i+2] for component in components for i in range(0,len(component),2)]
+
+def clt_back_pairs(components):
+    """the tangle at the back, in TEI pair notation, of a cobordism with components 'components'."""
+    return [(component+component[0:1])[i+1:i+3] for component in components for i in range(0,len(component),2)]
+
+def clt_front_arcs(components):
+    """the tangle at the front, in TEI arc notation, of a cobordism with components 'components'."""
+    return arc_to_involution(clt_front_pairs(components))
+
+def clt_back_arcs(components):
+    """the tangle at the back, in TEI arc notation, of a cobordism with components 'components'."""
+    return arc_to_involution(clt_back_pairs(components))
+
 class Cobordism(object):
     """A cobordism from a crossingless tangle clt1=front to another clt2=back consists of 
     - clt1=front, (these may just be pointers?)
@@ -192,10 +208,13 @@ class Cobordism(object):
             and all components are ordered by that first entry. 
         - the last entry coeff is some non-zero integer (= coefficient in the base ring/field)
     """
-    def __init__(self,clt1,clt2,decos):
+    def __init__(self,clt1,clt2,decos,comps="default"):
         self.front = clt1
         self.back = clt2
-        self.comp = components(clt1,clt2)
+        if comps=="default":
+            self.comps = components(clt1,clt2)
+        else:
+            self.comps = comps
         self.decos = decos
     
     def __add__(self, other):
@@ -205,14 +224,13 @@ class Cobordism(object):
             return self
         if self.front!=other.front or self.back!=other.back:# incompatible cobordisms
             raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not compatible, because they do not belong to the same morphism space.')
-        return Cobordism(self.front,self.back,simplify_decos(self.decos+other.decos))
-        
+        return Cobordism(self.front,self.back,simplify_decos(self.decos+other.decos),self.comps)
+
 
     def __mul__(self, other):
         
         def partition_dC(dC,arcs):
-            """find the finest partition of dC that is preserved by arcs. The output is a list of list of indices.
-            Note: If dC is ordered wrt the lowest TEI, then so will be the output."""
+            """find the finest partition of dC that is preserved by arcs. The output is a list of list of indices."""
             partition=[]
             # remaining components in our iteration
             remaining=list(range(len(dC)))
@@ -244,10 +262,10 @@ class Cobordism(object):
             raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on {}'.format(y)+' are not composable; the first ends on {}'.format(other.clt1))
         #components of the fully simplified cobordism from x to z, ordered according to their smallest TEI
         dC=components(x,z)
-        comps1=components(x,y)
-        comps2=components(y,z)
-        
-        #finding the boundary component of each c of C 
+        comps1=self.comps
+        comps2=other.comps
+
+        #finding the boundary component of each c of C
         C=partition_dC(dC,y.arcs)# as lists dc of indices of components
         #print("dC=",dC)
         #print("C=",C)
@@ -264,8 +282,8 @@ class Cobordism(object):
         def c_i_cap_c(c_i,c_flat):
             #return sum(map(lambda s: s in c_flat, c_i))
             return sum([1 for i in c_i if i[0] in c_flat])
-        genus=[1-int(0.5*(c_i_cap_c(self.comp,flatten([dC[j] for j in c]))\
-                         +c_i_cap_c(other.comp,flatten([dC[j] for j in c]))\
+        genus=[1-int(0.5*(c_i_cap_c(self.comps,flatten([dC[j] for j in c]))\
+                         +c_i_cap_c(other.comps,flatten([dC[j] for j in c]))\
                          -0.5*len(flatten([dC[j] for j in c]))\
                          +len(c))) for c in C]
         
@@ -303,8 +321,8 @@ class Cobordism(object):
         
         #print("decos = ",decos)
         # reorder the dots according to the order of the components
-        def reorder_dots(order):
-            return [0]+[i[1]+1 for i in sorted(list(zip(order,range(len(order)))))]+[len(order)+1]
+        #def reorder_dots(order):
+        #    return [0]+[i[1]+1 for i in sorted(list(zip(order,range(len(order)))))]+[len(order)+1]
         # final result
         #print("simplify_decos(decos)",simplify_decos(decos))
         #print("C",C)
@@ -314,7 +332,8 @@ class Cobordism(object):
         #print('reorder dots')
         #print(reorder_dots(flatten(C)))
         #print(simplify_decos(decos))
-        Output = Cobordism(x,z,[[deco[index] for index in reorder_dots(flatten(C))] for deco in simplify_decos(decos)])
+        #Output = Cobordism(x,z,[[deco[index] for index in reorder_dots(flatten(C))] for deco in simplify_decos(decos)])
+        Output = Cobordism(x,z,simplify_decos(decos),[dC[index] for index in flatten(C)])
         Output.ReduceDecorations() # This kills any cobordism in the linear combination that has a dot on the same component as the basepoint
         return Output
     # def __rmul__(self, other):
@@ -328,7 +347,7 @@ class Cobordism(object):
     def check(self):
         if self.front.top==self.back.top and self.front.bot==self.back.bot:
             x=components(self.front,self.back)
-            return len(x)==len(self.dots) and x==self.comp
+            return len(x)==len(self.dots) and x==self.comps
         else:
             return False
         
@@ -701,7 +720,7 @@ def drawcob(cob,name):
         for dot_index,dot in enumerate(deco[1:-1]):
             if dot in [0,1]:
                 if dot==1:
-                    draw_dot_on_arc(cob.comp[dot_index][0:2],clt1,h,ctx,deco_index)
+                    draw_dot_on_arc(cob.comps[dot_index][0:2],clt1,h,ctx,deco_index)
             else:
                 raise Exception('Some components are decorated by more than one dot.')
         
@@ -763,7 +782,7 @@ def DrawFourEndedChainComplex(complex, filename):
     graph_draw(g, vertex_color = "black", vertex_fill_color = Vertex_labeling, vertex_size = 20,\
                 edge_color = "black", edge_pen_width = 4.0, edge_text = Edge_labeling, edge_text_color = "black",\
                 edge_text_distance = 10, edge_font_weight = cairo.FONT_WEIGHT_BOLD, edge_font_size = 22, \
-                output_size=(1200, 400), output=filename)
+                output_size=(1200, 400), edge_marker_size = 20, output=filename)
 
 # End of drawing code
    
@@ -804,12 +823,12 @@ MinusScb = Cobordism(c,b,[[0,0,-1]])
 
 #composition of morphisms
 #print((Sbc*Scb).decos)
-#print((Sbc*Scb).comp)
+#print((Sbc*Scb).comps)
 drawcob((Sbc*Scb),"SSbb")
 
 #composition of morphisms
 #print((Scb*Sbc).decos)
-#print((Scb*Sbc).comp)
+#print((Scb*Sbc).comps)
 drawcob((Scb*Sbc),"SScc")
 
 # addition of cobordisms
