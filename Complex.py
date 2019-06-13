@@ -50,10 +50,14 @@ def AddCap(Complex, i):
     for j ,row in enumerate(Complex.morphisms):
         NewRow=[]
         for k, cob in enumerate(row):
-            DecosCopy = cob.decos.copy()
-            magic_index = components(NewElements[j], NewElements[k]).index([NewElements[j].top+i, NewElements[j].top+i+1]) #computes the index of the new component of the cobordism corresponding to the identity sheet of the cap
-            NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(magic_index,0) for NewDeco in DecosCopy])
-            NewRow.append(NewCob)
+            if cob.decos == []:
+                NewRow.append(ZeroCob)
+            else:
+                DecosCopy = cob.decos.copy()
+                newcomps = cob.comps.copy()
+                newcomps.append([cob.front.top +i, cob.front.top+i+1])
+                NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(-2,0) for NewDeco in DecosCopy], newcomps)
+                NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
 
@@ -212,13 +216,40 @@ def AddCup(Complex, i): # WIP
                     magic_index_1 = 0 # index of component containing i
                     magic_index_2 = 0 # index of component containing i+1
                     compscopy = cob.comps.copy()
-                    for x,comp in enumerate(compscopy):# TODO: shift tangle ends in compscopy
+                    for x,comp in enumerate(compscopy):
                         if cob.front.top +i in comp:
                             magic_index_1 = x
                         if cob.front.top+i+1 in comp:
                             magic_index_2 = x
                     if magic_index_1 == magic_index_2: # only one component being connected via cup
-                        return
+                        comp = compscopy[magic_index_1].copy()
+                        x1 = comp.index(cob.front.top +i)
+                        x2 = comp.index(cob.front.top +i + 1)
+                        comp1 = comp[:min(x1, x2)] + comp[max(x1, x_2)+1:]
+                        comp2 = comp[min(x1, x_2) +1:max(x1, x_2)]
+                        compscopy = compscopy[:magic_index_1] +[comp1, comp2] + compscopy[magic_index_1+1:]
+                        for x, comp in enumerate(compscopy):
+                            for y, end in encode(comp):
+                                if end > cob.front.top+i+1:
+                                    comp[y] -= 2
+                        for deco in cob.decos:
+                            decocopy = deco.copy()
+                            if decocopy[magic_index_1+1] == 1: # dot on the component we want to cut the neck of
+                                decocopy.insert(magic_index_1 +1, 1)
+                                newDecos1.append(decocopy)
+                            else: # no dot on component we want to cut the neck of
+                                decodotleft = decocopy.copy()
+                                decodotright = decocopy.copy()
+                                decominusH = decocopy.copy()
+                                decodotleft.insert(magic_index_1 +1, 1)
+                                decodotleft.insert(magic_index_1 +2, 1)
+                                decominusH.insert(magic_index_1 +1, 0)
+                                decominusH[0] += 1
+                                decominusH[-1] *= -1
+                                newDecos1.append(decodotleft)
+                                newDecos1.append(decodotright)
+                                newDecos1.append(decominusH)
+                            
                     else: # two seperate components being connected via cup
                         comp1 = compscopy[magic_index_1]
                         comp2 = compscopy[magic_index_2]
@@ -232,6 +263,10 @@ def AddCup(Complex, i): # WIP
                             comp2.reverse()
                         comp1 = comp1[:location1] + comp2 + comp1[location1+1:] # insert comp2 into comp1, and dont include element i
                         del compscopy[magic_index_2]
+                        for x, comp in enumerate(compscopy):
+                            for y, end in encode(comp):
+                                if end > cob.front.top+i+1:
+                                    comp[y] -= 2
                         for deco in cob.decos:
                             decocopy = deco.copy()
                             if decocopy[magic_index_1 + 1] == 1 and decocopy[magic_index_2 + 1] == 1: # dot on both components
