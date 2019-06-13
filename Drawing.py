@@ -211,13 +211,13 @@ def DrawFourEndedChainComplex(complex, filename):
     size = len(complex.elements)
     g.add_vertex(size)
     # print("size = " + str(size))
-    Vertex_labeling = g.new_vertex_property("string") # "white" is the horizontal CLT and "black" is the vertical CLT
+    Vertex_labeling = g.new_vertex_property("string") # "black" is the horizontal CLT and "white" is the vertical CLT
     Position = g.new_vertex_property("vector<float>")
     for i, clt in enumerate(complex.elements):
         if clt.arcs[0] == 1:
-            Vertex_labeling[g.vertex(i)] = "white"
-        elif clt.arcs[0] == 2:
             Vertex_labeling[g.vertex(i)] = "black"
+        elif clt.arcs[0] == 2:
+            Vertex_labeling[g.vertex(i)] = "white"
         else: 
             print(complex.elements[i].arcs)
             print(complex.elements[i].arcs[0])

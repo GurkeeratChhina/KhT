@@ -85,13 +85,13 @@ drawcob(cob5,"cob5")
 drawcob(cob6,"cob6")
 
 complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
-complex1.ValidMorphism()
+# complex1.ValidMorphism()
 
 CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
 drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
 complex2 = ChainComplex([b,c,c], [[ZeroCob, Sbc, ZeroCob],[ZeroCob, ZeroCob, CobRightDotMinusLeftDotVertical],[ZeroCob, ZeroCob, ZeroCob]])
-complex2.ValidMorphism()
+# complex2.ValidMorphism()
 drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
 RightDc = Cobordism(c,c,[[0,0,1,1]])
 drawcob(RightDc, "RightDc")
@@ -106,18 +106,19 @@ RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
 
 complex3 = ChainComplex([b,c,c,c], [[ZeroCob, Sbc, ZeroCob, ZeroCob],[ZeroCob,ZeroCob, RightDc, ZeroCob],[ZeroCob, ZeroCob, ZeroCob, RightDcMinusH],[ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
 DrawFourEndedChainComplex(complex3, "complex3.png")
-complex3.ValidMorphism()
+# complex3.ValidMorphism()
 
 complex4 = ChainComplex([c,b,c,c], [[ZeroCob, MinusScb, RightDc, ZeroCob], [ZeroCob, ZeroCob, ZeroCob, Sbc], [ZeroCob,ZeroCob, ZeroCob, Cobordism(c,c,[[0,0,0,1]])], [ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
 DrawFourEndedChainComplex(complex4, "complex4.png")
 
-complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, Scb, ZeroCob, Cobordism(c, c, [[1,0,0,1]]), ZeroCob, ZeroCob],\
-                                        [ZeroCob, ZeroCob, Cobordism(b,b, [[0,0,1,1]]), ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob],\
-                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]])],\
-                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, Scb, ZeroCob],\
-                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, Cobordism(b,b, [[0,0,1,1]])],\
-                                        [ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
+complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [ZeroCob, Cobordism(b,b, [[0,0,1,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [Cobordism(c, c, [[1,0,0,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob, Scb, ZeroCob, ZeroCob],\
+                                        [ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]]), ZeroCob, Cobordism(b,b,[[0,0,1,1]]), ZeroCob]])
 DrawFourEndedChainComplex(complex5, "complex5.png")
+complex5.ValidMorphism()
 
 #complex1cap0 = AddCap(complex1, 0)
 
@@ -155,25 +156,50 @@ drawclt(BasicCap.elements[0], "basiccap")
 Double = AddCup(BasicCap, 0)
 drawclt(Double.elements[0], "double")
 
-def PrintComplexMorphismMatrix(Complex):
+def PrintComplexMorphismIntMatrix(Complex):
     for i in Complex.morphisms:
         Row = []
         for j in i:
             Row.append(len(j.decos))
         print(Row)
 
-PrintComplexMorphismMatrix(Double)
+def PrintComplexMorphismDecoCompMatrix(Complex):
+    for i in Complex.morphisms:
+        Row = []
+        for j in i:
+            if j.decos == []:
+                Row.append(0)
+            else:
+                Row.append([j.comps, j.decos])
+        print(Row)
+        
+PrintComplexMorphismIntMatrix(Double)
 
 tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1]), [[0, 0, 1, 1]])
 tempcomplex = ChainComplex([CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1])], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
 tempcomplexwithcup = AddCup(tempcomplex, 1)
-PrintComplexMorphismMatrix(tempcomplexwithcup)
+PrintComplexMorphismIntMatrix(tempcomplexwithcup)
 print("Decorations at 3, 0", tempcomplexwithcup.morphisms[3][0].decos)
 print("Decorations at 3, 1", tempcomplexwithcup.morphisms[3][1].decos)
 print("Grading of element at 0", tempcomplexwithcup.elements[0].gr)
 print("Grading of element at 1", tempcomplexwithcup.elements[1].gr)
 print("Grading of element at 2", tempcomplexwithcup.elements[2].gr)
 print("Grading of element at 3", tempcomplexwithcup.elements[3].gr)
+
+complex5cap = AddCap(complex5, 1)
+PrintComplexMorphismIntMatrix(complex5cap)
+PrintComplexMorphismDecoCompMatrix(complex5cap)
+complex5again = AddCup(complex5cap, 0)
+DrawFourEndedChainComplex(complex5again, "complex5again.png")
+
+CLT01 = CLT(1,3,[1,0,3,2],[0,0])
+CLT03 = CLT(1,3,[3,2,1,0],[0,1])
+BasicSaddle = Cobordism(CLT01, CLT03, [[0,0,1]])
+BasicSaddleComplex = ChainComplex([CLT01, CLT03], [[ZeroCob, ZeroCob], [BasicSaddle, ZeroCob]])
+BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
+
+PrintComplexMorphismIntMatrix(BasicSaddleCup)
+PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
 
 # print(components(T1, T2))
 

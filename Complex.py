@@ -27,7 +27,7 @@ class ChainComplex(object):
             if self.morphisms[i][i].decos != []:
                 raise Exception('Differential has self loops')
         
-        squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-1,-2)))
+        squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1)))
         for i in squared:
             if i.decos != []:
                 raise Exception('Differential does not square to 0')
@@ -53,10 +53,14 @@ def AddCap(Complex, i):
             if cob.decos == []:
                 NewRow.append(ZeroCob)
             else:
-                DecosCopy = cob.decos.copy()
-                newcomps = cob.comps.copy()
-                newcomps.append([cob.front.top +i, cob.front.top+i+1])
-                NewCob = Cobordism(NewElements[j], NewElements[k], [NewDeco.insert(-2,0) for NewDeco in DecosCopy], newcomps)
+                def incrementindex(entry):
+                    if  entry >= cob.front.top+i:
+                        return entry+2
+                    else:
+                        return entry
+                newcomps=[[incrementindex(entry) for entry in comp] for comp in cob.comps]
+                newcomps.append([cob.front.top +i, cob.front.top+i+1])          
+                NewCob = Cobordism(NewElements[j], NewElements[k], [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos], newcomps)
                 NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
@@ -229,8 +233,8 @@ def AddCup(Complex, i): # WIP
                         comp2 = comp[min(x1, x_2) +1:max(x1, x_2)]
                         compscopy = compscopy[:magic_index_1] +[comp1, comp2] + compscopy[magic_index_1+1:]
                         for x, comp in enumerate(compscopy):
-                            for y, end in encode(comp):
-                                if end > cob.front.top+i+1:
+                            for y, end in enumerate(comp):
+                                if  end > cob.front.top+i+1:
                                     comp[y] -= 2
                         for deco in cob.decos:
                             decocopy = deco.copy()
@@ -264,7 +268,7 @@ def AddCup(Complex, i): # WIP
                         comp1 = comp1[:location1] + comp2 + comp1[location1+1:] # insert comp2 into comp1, and dont include element i
                         del compscopy[magic_index_2]
                         for x, comp in enumerate(compscopy):
-                            for y, end in encode(comp):
+                            for y, end in enumerate(comp):
                                 if end > cob.front.top+i+1:
                                     comp[y] -= 2
                         for deco in cob.decos:
