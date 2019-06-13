@@ -119,9 +119,6 @@ def AddCup(Complex, i): # WIP
                             Hcopy = decocopy.copy()
                             Hcopy[0] += 1
                             newDecos4.append(Hcopy)
-                    simplify_decos(newDecos1)
-                    simplify_decos(newDecos2)
-                    simplify_decos(newDecos3)
                     simplify_decos(newDecos4)
                     tops = AddCupToCLT(cob.front, i)
                     bots = AddCupToCLT(cob.back, i)
@@ -138,8 +135,8 @@ def AddCup(Complex, i): # WIP
                     newRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                 else: # is not the 0 cob
-                    newDecos1 = [] #TODO: Fill out decos
-                    newDecos2 = [] #TODO: Fill out decos
+                    newDecos1 = []
+                    newDecos2 = []
                     magic_index = 0
                     compscopy = cob.comps.copy()
                     for x,comp in enumerate(compscopy):
@@ -147,7 +144,9 @@ def AddCup(Complex, i): # WIP
                             magic_index = x
                             compscopy[x].remove(cob.front.top+i)
                             compscopy[x].remove(cob.front.top+i+1)
-                            break
+                        for y, end in enumerate(comp):
+                            if end > cob.front.top+i+1:
+                                comp[y] -= 2
                     for deco in cob.decos:
                         decocopy = deco.copy()
                         if deco[magic_index+1] == 1: # dot on component already
@@ -162,7 +161,6 @@ def AddCup(Complex, i): # WIP
                             Hcopy[-1] *= -1
                             newDecos1.append(Hcopy)
                     simplify_decos(newDecos1)
-                    simplify_decos(newDecos2)
                     tops = AddCupToCLT(cob.front, i)
                     bots = AddCupToCLT(cob.back, i)
                     Cobordism1 = Cobordism(tops[0], bots[0], newDecos1, compscopy)
@@ -174,14 +172,36 @@ def AddCup(Complex, i): # WIP
                     newRow.append(ZeroCob)
                     newRow.append(ZeroCob)
                 else: # is not the 0 cob
-                    newDecos1 = [] #TODO: Fill out decos
-                    newDecos2 = [] #TODO: Fill out decos
-                    simplify_decos(newDecos1)
+                    newDecos1 = []
+                    newDecos2 = []
+                    compscopy = cob.comps.copy()
+                    magic_index = 0
+                    for x,comp in enumerate(compscopy):
+                        if cob.front.top +i in comp:
+                            magic_index = x
+                            compscopy[x].remove(cob.front.top+i)
+                            compscopy[x].remove(cob.front.top+i+1)
+                        for y, end in enumerate(comp):
+                            if end > cob.front.top+i+1:
+                                comp[y] -= 2
+                    for deco in cob.decos:
+                        decocopy = deco.copy()
+                        if deco[magic_index+1] == 1: # dot on component already
+                            newDecos1.append(decocopy)
+                            dotcopy = decocopy.copy()
+                            Hcopy = decocopy.copy()
+                            Hcopy[0] += 1
+                            newDecos2.append(Hcopy)
+                        else: # dot not on component already
+                            newDecos1.append(decocopy)
+                            dotcopy = decocopy.copy()
+                            dotcopy[magic_index+1] = 1
+                            newDecos2.append(dotcopy)
                     simplify_decos(newDecos2)
                     tops = AddCupToCLT(cob.front, i)
                     bots = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cobordism(tops[0], bots[0], newDecos1)
-                    Cobordism2 = Cobordism(tops[1], bots[0], newDecos2)
+                    Cobordism1 = Cobordism(tops[0], bots[0], newDecos1, compscopy)
+                    Cobordism2 = Cobordism(tops[1], bots[0], newDecos2, compscopy)
                     newRow.append(Cobordism1)
                     newRow.append(Cobordism2)
             else: # source and target are both open, add 1 cobordism to newRow only
@@ -189,13 +209,49 @@ def AddCup(Complex, i): # WIP
                     newRow.append(ZeroCob)
                 else: # is not the 0 cob
                     newDecos1 = [] #TODO: Fill out decos
+                    magic_index_1 = 0 # index of component containing i
+                    magic_index_2 = 0 # index of component containing i+1
+                    compscopy = cob.comps.copy()
+                    for x,comp in enumerate(compscopy):# TODO: shift tangle ends in compscopy
+                        if cob.front.top +i in comp:
+                            magic_index_1 = x
+                        if cob.front.top+i+1 in comp:
+                            magic_index_2 = x
+                    if magic_index_1 == magic_index_2: # only one component being connected via cup
+                        return
+                    else: # two seperate components being connected via cup
+                        comp1 = compscopy[magic_index_1]
+                        comp2 = compscopy[magic_index_2]
+                        location1 = comp1.index(cob.front.top+i)
+                        location2 = comp2.index(cob.front.top+i+1)
+                        Alongtop1 = location1%2 #0 if the arc immediately after i+1 is along top, 1 otherwise
+                        Alongtop2 = location2%2 #0 if the arc immediately after i+1 is along top, 1 otherwise
+                        comp2 = (comp2[-1*location2:] + comp2[:-1*location2]) #rotates list until i+1 is at front
+                        del comp2[0] #remove i+1
+                        if location1 != location2: # if top/bot dont line up, flip comp2
+                            comp2.reverse()
+                        comp1 = comp1[:location1] + comp2 + comp1[location1+1:] # insert comp2 into comp1, and dont include element i
+                        del compscopy[magic_index_2]
+                        for deco in cob.decos:
+                            decocopy = deco.copy()
+                            if decocopy[magic_index_1 + 1] == 1 and decocopy[magic_index_2 + 1] == 1: # dot on both components
+                                decocopy[0] += 1
+                            elif decocopy[magic_index_1 + 1] == 1 or decocopy[magic_index_2 + 1] == 1: # dot on exactly one of the two components
+                                decocopy[magic_index_1 +1] = 1
+                            del decocopy[magic_index_2 +1]
+                            newDecos1.append(decocopy)
                     simplify_decos(newDecos1)
                     tops = AddCupToCLT(cob.front, i)
                     bots = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cobordism(tops[0], bots[0], newDecos1)
+                    Cobordism1 = Cobordism(tops[0], bots[0], newDecos1, compscopy)
                     newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
         if Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # target is closed
             NewMorphisms.append(nextRow)
     return ChainComplex(newElements, NewMorphisms)
- 
+    
+def AddPosCrossing(Complex, i):
+    return 0
+
+def AddNegCrossing(Complex, i):
+    return 0
