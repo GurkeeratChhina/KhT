@@ -32,19 +32,21 @@ class ChainComplex(object):
             if i.decos != []:
                 raise Exception('Differential does not square to 0')
 
+def AddCapToCLT(clt, i):
+    newarcs = clt.arcs.copy()
+    for j, x in enumerate(newarcs):
+        if x >= clt.top + i:
+            newarcs[j] += 2
+    newarcs.insert(clt.top+i, clt.top+i)
+    newarcs.insert(clt.top+i, clt.top+i+1)
+    return CLT(clt.top, clt.bot+2, newarcs, clt.gr)
+
 def AddCap(Complex, i):
     """ Adds a cap to every tangle and every cobordism in Complex, at index i
         Here 0 <= i <= tangle.bot """
     NewElements = []
     for clt in Complex.elements:
-        newarcs = clt.arcs.copy()
-        for j, x in enumerate(newarcs):
-            if x >= clt.top+i:
-                newarcs[j] += 2 # shifts arc ends that appear after the cap
-        newarcs.insert(clt.top +i, clt.top+i) # inserting the cap
-        newarcs.insert(clt.top +i, clt.top+i+1)
-        NewCLT = CLT(clt.top, clt.bot+2, newarcs, clt.gr) 
-        NewElements.append(NewCLT)
+        NewElements.append(AddCapToCLT(clt, i))
     length = len(Complex.elements)
     NewMorphisms = []
     for j ,row in enumerate(Complex.morphisms):
