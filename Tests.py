@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import math
 from KhT import *
 from Tangles import *
@@ -200,6 +202,11 @@ BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
 
 PrintComplexMorphismIntMatrix(BasicSaddleCup)
 PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
+
+
+
+PrettyPrintComplex(BasicSaddleCup)
+PrettyPrintComplex(BasicSaddleCup,"long")
 
 # print(components(T1, T2))
 
