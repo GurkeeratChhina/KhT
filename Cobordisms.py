@@ -189,7 +189,21 @@ class Cobordism(object):
         self.decos = ReducedDecorations
         return ReducedDecorations
     
-def simplify_decos(decos):# ToDo: rewrite this without numpy
+   
+def simplify_decos(decos):
+    """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
+    if decos == []:
+        return []    
+    def droplast(l):
+        return l[:-1]
+    def add_coeffs(l):
+        return sum([element[-1] for element in l])
+    return [x for x in \
+        [decos_without_coeff+[add_coeffs(list(grouped))] \
+        for decos_without_coeff,grouped in groupby(sorted(decos),droplast)] \
+        if x[-1]!=0]
+        
+def simplify_decos_old(decos):# old function
     if decos == []:
         return []
     decos=np.array(sorted(decos))

@@ -208,6 +208,13 @@ PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
 PrettyPrintComplex(BasicSaddleCup)
 PrettyPrintComplex(BasicSaddleCup,"long")
 
+## comparing efficiency of two functions
+#import timeit
+#print(timeit.timeit('simplify_decos_old([[1,0,1,1],[0,0,1,2],[0,0,1,3],[0,1,1,5],[1,0,1,12]])',setup="from __main__ import simplify_decos_old", number=1000)) 
+#print(timeit.timeit('simplify_decos([[1,0,1,1],[0,0,1,2],[0,0,1,3],[0,1,1,5],[1,0,1,12]])',setup="from __main__ import simplify_decos", number=1000))
+## old vs new: 0.14744883000093978 vs 0.009813104006752837
+
+
 # print(components(T1, T2))
 
 # todo:
