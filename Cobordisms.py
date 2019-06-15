@@ -1,6 +1,5 @@
 from itertools import product
 import itertools as itertools
-import numpy as np
 import math
 from KhT import *
 from Tangles import *
@@ -92,16 +91,9 @@ class Cobordism(object):
 
         #finding the boundary component of each c of C
         C=partition_dC(dC,y.arcs)# as lists dc of indices of components
-        #print("dC=",dC)
-        #print("C=",C)
-        
-        def find_comp(comp):
-            return comp in C
         
         comp1_indices=[[j for j,comp in enumerate(comps1) if comp[0] in dc] for dc in dC]
         comp2_indices=[[j for j,comp in enumerate(comps2) if comp[0] in dc] for dc in dC]
-        #print("comp1_indices=",comp1_indices)
-        #print("comp2_indices=",comp2_indices)
         
         # |C_i intersect c|
         def c_i_cap_c(c_i,c_flat):
@@ -125,10 +117,8 @@ class Cobordism(object):
                             +[[g-1]+[1 for i in range(IdcI)]+[2]]
         
         def combine_decos(l,Hpower,coeff):
-            #print(l)
-            return [sum([Hpower]+[i[0] for i in l])]+flatten([i[1:-1] for i in l])+[coeff*np.prod([i[-1] for i in l])]
+            return [sum([Hpower]+[i[0] for i in l])]+flatten([i[1:-1] for i in l])+[coeff*prod([i[-1] for i in l])]
         
-        #print("dC = ",dC)
         decos=[]
         for e1 in self.decos:
             for e2 in other.decos:
@@ -137,34 +127,16 @@ class Cobordism(object):
                     r=sum([e1[index+1] for index in comp1_indices[i]]+[e2[index+1] for index in comp2_indices[i]])# number of dots on c
                     g=genus[i]# genus of the closure of c
                     IdcI=len(c)# number of boundary components of c
-                    #print(",g=",g,",IdcI=",IdcI,",e1=",e1,",e2=",e2,",r=",r,",comp1_indices[i]=",comp1_indices[i],",comp2_indices[i]=",comp2_indices[i])
-                    partial_decos.append(decos_from_c(g,r,IdcI))   
-                    #print([decos_from_c(g,r,IdcI)])
-                # decos_from_pair (e1,e2)
-                #print("partial_decos = ",partial_decos)
+                    partial_decos.append(decos_from_c(g,r,IdcI))
+                    
                 decos+=[combine_decos(l,e1[0]+e2[0],e1[-1]*e2[-1]) for l in itertools.product(*partial_decos)]
         
-        #print("decos = ",decos)
-        # reorder the dots according to the order of the components
-        #def reorder_dots(order):
-        #    return [0]+[i[1]+1 for i in sorted(list(zip(order,range(len(order)))))]+[len(order)+1]
-        # final result
-        #print("simplify_decos(decos)",simplify_decos(decos))
-        #print("C",C)
-        #print("flatten(C)",flatten(C))
-        #print("reorder_dots(flatten(C))",reorder_dots(flatten(C)))
-        # PREVIOUSLY: return Cobordism(x,z,simplify_decos(decos)[:,reorder_dots(flatten(C))])
-        #print('reorder dots')
-        #print(reorder_dots(flatten(C)))
-        #print(simplify_decos(decos))
-        #Output = Cobordism(x,z,[[deco[index] for index in reorder_dots(flatten(C))] for deco in simplify_decos(decos)])
         Output = Cobordism(x,z,simplify_decos(decos),[dC[index] for index in flatten(C)])
         Output.ReduceDecorations() # This kills any cobordism in the linear combination that has a dot on the same component as the basepoint
         return Output
     # def __rmul__(self, other):
         # #print('__rmul__')
         # return other
-    
     
     def deg(self):
         return len(self.dots)-self.front.total-2*self.Hpower-2*sum(self.dots)
@@ -180,12 +152,12 @@ class Cobordism(object):
         # check all summands in this linear combination to make sure the element is homogeneous.
         # FIXME
     
-    # self is a linear combination of cobordisms, with each cobordism being a different list in decos.
-    # ReduceDecorations sets a cobordism, decoration, with a dot on the top 0-th tangle end 
-    # (which is chosen to be the basepoint of the cobordism) to be the zero cobordism, by removing decoration from decos
-    # This also returns the resulting decorations
     def ReduceDecorations(self):
-        ReducedDecorations = [decoration for decoration in self.decos if decoration[1] == 0]
+        """delete all decorations in a cobordism ('self') that have a dot in the component containing the basepoint (the TEI 0)."""
+        def contains_basepoint(list):
+            return 0 in list
+        
+        ReducedDecorations = [deco for deco in self.decos if deco[find_first_index(self.comps,contains_basepoint)+1] == 0]
         self.decos = ReducedDecorations
         return ReducedDecorations
     
@@ -203,20 +175,5 @@ def simplify_decos(decos):
         for decos_without_coeff,grouped in groupby(sorted(decos),droplast)] \
         if x[-1]!=0]
         
-def simplify_decos_old(decos):# old function
-    if decos == []:
-        return []
-    decos=np.array(sorted(decos))
-    """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
-    # compute unique Hdots (unique_Hdot[0]) and how often each appears (unique_Hdot[1])
-    unique_Hdot=np.unique(decos[:,:-1],return_counts=True,axis=0)
-    # add all coefficients; we are assuming here that decos is ordered, otherwise it will not work!
-    new_coeffs=[[sum(i)] for i in np.split(decos[:,-1],np.cumsum(unique_Hdot[1])[:-1])]
-    # compute new decos
-    decos=np.append(unique_Hdot[0],new_coeffs,axis=1)
-    # return only those decorations whose coefficient is non-zero
-    return (decos[decos[:,-1]!=0,:]).tolist()
-    #return [x for x in [add_coeffs(list(g)) for k, g in groupby(sorted(decos),key = lambda s: s[0])] if x[1]!=0]
-
 CLTA = CLT(1,1, [1,0], [0,0])
 ZeroCob = Cobordism(CLTA,CLTA,[])
