@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import pandas as pd
 from graph_tool.all import *
 import math
 import cairo
@@ -8,7 +9,7 @@ from KhT import *
 from Tangles import *
 from Cobordisms import *
 from Complex import *
-import pandas as pd
+
 
 def printdecos(cob,switch="short"):
     if cob.decos==[]:

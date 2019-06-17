@@ -29,25 +29,43 @@ def cap(n,i):
 
 # Elementary tangles and cobordisms
 b=CLT(2,2,[1,0,3,2],[0,0])
-drawclt(b,"b")      
-
 c=CLT(2,2,[2,3,0,1],[0,0])
-drawclt(c,"c")
-
 Sbc=Cobordism(b,c,[[0,0,1]])
-drawcob(Sbc,"Sbc")
-
 Scb=Cobordism(c,b,[[0,0,1]])
-drawcob(Scb,"Scb")
 MinusScb = Cobordism(c,b,[[0,0,-1]])
-
-drawcob((Sbc*Scb),"SSbb")
-
-drawcob((Scb*Sbc),"SScc")
-
 RightDc = Cobordism(c,c,[[0,0,1,1]])
-drawcob(RightDc, "RightDc")
 
+
+def TestSet4():
+    drawclt(b,"b") 
+    drawclt(c,"c")
+    drawcob(Sbc,"Sbc")
+    drawcob(Scb,"Scb")
+    drawcob((Sbc*Scb),"SSbb")
+    drawcob((Scb*Sbc),"SScc")
+    drawcob(RightDc, "RightDc")
+    T3=CLT(4,4,[4,7,3,2,0,6,5,1],[0,0])
+    T4=CLT(4,4,[6,7,3,2,5,4,0,1],[0,0])
+    T5=CLT(4,4,[3,2,1,0,7,6,5,4],[0,0])
+    cob3=Cobordism(T2,T1,[[2,0,1,-2]])
+    cob4=cob1+cob2
+    cob5=cob1*cob3
+    cob6=cob3*cob1
+    cob5.decos
+    drawclt(T1,"CLT1")
+    drawclt(T2,"CLT2")
+    drawclt(T3,"CLT3")
+    drawclt(T4,"CLT4")
+    drawclt(T5,"CLT5")
+    drawcob(cob1,"cob1")
+    cob1.ReduceDecorations()
+    drawcob(cob1, "cob1Reduced")
+    drawcob(cob2,"cob2")
+    drawcob(cob3,"cob3")
+    drawcob(cob4,"cob4")
+    drawcob(cob5,"cob5")
+    drawcob(cob6,"cob6")
+    
 # testcobordism=Cobordism(b,c,[[2,1,2],[0,0,4]])
 # drawclt(cup(10,3)*cap(10,2)*cup(10,4)*cup(8,6)+cap(2,1),"test1")
 # drawclt(cap(5,5),"test2")
@@ -55,55 +73,34 @@ drawcob(RightDc, "RightDc")
 
 T1=CLT(2,4,[2,5,0,4,3,1],[0,0])
 T2=CLT(2,4,[2,3,0,1,5,4],[0,0])
-T3=CLT(4,4,[4,7,3,2,0,6,5,1],[0,0])
-T4=CLT(4,4,[6,7,3,2,5,4,0,1],[0,0])
-T5=CLT(4,4,[3,2,1,0,7,6,5,4],[0,0])
-
-
 cob1=Cobordism(T1,T2,[[4,1,0,1]])
 cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,0,1,1],[1,1,1,19]])
-cob3=Cobordism(T2,T1,[[2,0,1,-2]])
-cob4=cob1+cob2
-cob5=cob1*cob3
-cob6=cob3*cob1
-cob5.decos
 
-drawclt(T1,"CLT1")
-drawclt(T2,"CLT2")
-drawclt(T3,"CLT3")
-drawclt(T4,"CLT4")
-drawclt(T5,"CLT5")
-drawcob(cob1,"cob1")
-cob1.ReduceDecorations()
-drawcob(cob1, "cob1Reduced")
-drawcob(cob2,"cob2")
-drawcob(cob3,"cob3")
-drawcob(cob4,"cob4")
-drawcob(cob5,"cob5")
-drawcob(cob6,"cob6")
+def TestSet5():
+    complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
+    complex1.ValidMorphism()
 
-complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
-complex1.ValidMorphism()
+    CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
+    drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
-CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
-drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
+    complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
+    complex2.ValidMorphism()
+    drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
+    drawcob(Sbc*RightDc, "DottedSaddle")
 
-complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
-complex2.ValidMorphism()
-drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
-drawcob(Sbc*RightDc, "DottedSaddle")
+    DrawFourEndedChainComplex(complex2, "complex2.png")
+    DrawFourEndedChainComplex(complex1, "complex1.png")
 
-DrawFourEndedChainComplex(complex2, "complex2.png")
-DrawFourEndedChainComplex(complex1, "complex1.png")
+    RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
 
-RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
+    complex3 = ChainComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
+    DrawFourEndedChainComplex(complex3, "complex3.png")
+    complex3.ValidMorphism()
 
-complex3 = ChainComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
-DrawFourEndedChainComplex(complex3, "complex3.png")
-complex3.ValidMorphism()
-
-complex4 = ChainComplex([c,b,c,c], [[ZeroCob, MinusScb, RightDc, ZeroCob], [ZeroCob, ZeroCob, ZeroCob, Sbc], [ZeroCob,ZeroCob, ZeroCob, Cobordism(c,c,[[0,0,0,1]])], [ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
-DrawFourEndedChainComplex(complex4, "complex4.png")
+    complex4 = ChainComplex([c,b,c,c], [[ZeroCob, MinusScb, RightDc, ZeroCob], [ZeroCob, ZeroCob, ZeroCob, Sbc], [ZeroCob,ZeroCob, ZeroCob, Cobordism(c,c,[[0,0,0,1]])], [ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
+    DrawFourEndedChainComplex(complex4, "complex4.png")
+    
+    complex1cap0 = AddCap(complex1, 0)
 
 complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
                                         [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
@@ -113,8 +110,6 @@ complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, Zer
                                         [ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]]), ZeroCob, Cobordism(b,b,[[0,0,1,1]]), ZeroCob]])
 DrawFourEndedChainComplex(complex5, "complex5.png")
 complex5.ValidMorphism()
-
-complex1cap0 = AddCap(complex1, 0)
 
 NewT1 = AddCapToCLT(T1, 1)
 drawclt(NewT1, "NewT1")
@@ -171,11 +166,15 @@ def TestSet3():
     BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
     PrintComplexMorphismIntMatrix(BasicSaddleCup)
     PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
+    PrettyPrintComplex(BasicSaddleCup)
+    PrettyPrintComplex(BasicSaddleCup,"long")
 
-# TestSet0()
-# TestSet1()
-# TestSet2()
-# TestSet3()
+TestSet0()
+TestSet1()
+TestSet2()
+TestSet3()
+TestSet4()
+TestSet5()
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
 
@@ -200,10 +199,6 @@ def TestAlgTest():
     print(np.tensordot(C,B, axes=(-1,-2)))
 
 # TestAlgTest()
-
-
-PrettyPrintComplex(BasicSaddleCup)
-PrettyPrintComplex(BasicSaddleCup,"long")
 
 ## comparing efficiency of two functions
 #import timeit
