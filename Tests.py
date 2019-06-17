@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import math
 from KhT import *
 from Tangles import *
@@ -24,23 +26,6 @@ def cup(n,i):
 def cap(n,i):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cup"""
     return parallel(i-1)+CLT(0,2,[1,0],0)+parallel(n-i)
-
-def PrintComplexMorphismIntMatrix(Complex):
-    for i in Complex.morphisms:
-        Row = []
-        for j in i:
-            Row.append(len(j.decos))
-        print(Row)
-
-def PrintComplexMorphismDecoCompMatrix(Complex):
-    for i in Complex.morphisms:
-        Row = []
-        for j in i:
-            if j.decos == []:
-                Row.append(0)
-            else:
-                Row.append([j.comps, j.decos])
-        print(Row)
 
 # Elementary tangles and cobordisms
 b=CLT(2,2,[1,0,3,2],[0,0])
@@ -202,6 +187,7 @@ class testalg(object):
 	def __add__(self, other):
 		return testalg(2+self.x+other.x)
         
+
 def TestAlgTest():
     a=testalg(1)
     b=testalg(2)
@@ -215,4 +201,14 @@ def TestAlgTest():
 
 # TestAlgTest()
 
+
+PrettyPrintComplex(BasicSaddleCup)
+PrettyPrintComplex(BasicSaddleCup,"long")
+
+## comparing efficiency of two functions
+#import timeit
+#print(timeit.timeit('simplify_decos_old([[1,0,1,1],[0,0,1,2],[0,0,1,3],[0,1,1,5],[1,0,1,12]])',setup="from __main__ import simplify_decos_old", number=1000)) 
+#print(timeit.timeit('simplify_decos([[1,0,1,1],[0,0,1,2],[0,0,1,3],[0,1,1,5],[1,0,1,12]])',setup="from __main__ import simplify_decos", number=1000))
+## old vs new: 0.14744883000093978 vs 0.009813104006752837
 print("File executed successfully")
+

@@ -1,6 +1,5 @@
 from itertools import product
 import itertools as itertools
-import numpy as np
 import math
 from KhT import *
 

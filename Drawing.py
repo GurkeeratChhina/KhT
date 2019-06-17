@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from graph_tool.all import *
 import math
 import cairo
@@ -6,6 +8,43 @@ from KhT import *
 from Tangles import *
 from Cobordisms import *
 from Complex import *
+import pandas as pd
+
+def printdecos(cob,switch="short"):
+    if cob.decos==[]:
+        return 0
+    else:
+        if switch == "long":
+            return [cob.comps,cob.decos]
+        else:
+            return len(cob.decos)
+    
+def PrettyPrintComplex(Complex,switch="short"):
+    print("The generators:")
+    print(pd.DataFrame({\
+        "clt.pairs": [clt.pairs for clt in Complex.elements],\
+        "q": [clt.gr[0] for clt in Complex.elements],\
+        "h": [clt.gr[1] for clt in Complex.elements]
+        },columns=["clt.pairs","q","h"]))
+    print("The differential:")
+    print(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]))
+    
+def PrintComplexMorphismIntMatrix(Complex):
+    for i in Complex.morphisms:
+        Row = []
+        for j in i:
+            Row.append(len(j.decos))
+        print(Row)
+
+def PrintComplexMorphismDecoCompMatrix(Complex):
+    for i in Complex.morphisms:
+        Row = []
+        for j in i:
+            if j.decos == []:
+                Row.append(0)
+            else:
+                Row.append([j.comps, j.decos])
+        print(Row)
 
 def CobordismToDS(Cob):
     """ DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists

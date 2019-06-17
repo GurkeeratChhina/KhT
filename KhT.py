@@ -4,7 +4,6 @@
 from itertools import groupby
 from itertools import product
 import itertools as itertools
-import numpy as np
 import math
 
 #TO DO: 
@@ -31,6 +30,13 @@ def indexQ(mylist,val):
 def flatten(mylist):
     """analogue to Mathematica Flatten"""
     return [j for i in mylist for j in i]
+
+#product, without using numpy
+def prod(iterable):
+    prod = 1
+    for x in iterable:
+        prod *= x
+    return prod
 
 #
 # dictionary
