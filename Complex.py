@@ -95,7 +95,7 @@ def AddCupToCLT(clt, i):
         newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.gr))
     return newElements
 
-def AddCup(Complex, i): # WIP
+def AddCup(Complex, i): # TODO: Reduce/eliminate usages of .copy()
     """ Here 0 <= i <= tangle.bot -2"""
     newElements = []
     for clt in Complex.elements:
@@ -228,6 +228,7 @@ def AddCup(Complex, i): # WIP
                         if cob.front.top+i+1 in comp:
                             magic_index_2 = x
                     if magic_index_1 == magic_index_2: # only one component being connected via cup
+                        print("1 component")
                         comp = compscopy[magic_index_1].copy()
                         x1 = comp.index(cob.front.top +i)
                         x2 = comp.index(cob.front.top +i + 1)
@@ -263,13 +264,13 @@ def AddCup(Complex, i): # WIP
                         location2 = comp2.index(cob.front.top+i+1)
                         Alongtop1 = location1%2 #0 if the arc immediately after i+1 is along top, 1 otherwise
                         Alongtop2 = location2%2 #0 if the arc immediately after i+1 is along top, 1 otherwise
-                        comp2 = (comp2[-1*location2:] + comp2[:-1*location2]) #rotates list until i+1 is at front
-                        del comp2[0] #remove i+1
+                        comp2 = (comp2[location2+1:] + comp2[:location2]) #rotates list until i+1 is at front, and removes it
                         if location1 != location2: # if top/bot dont line up, flip comp2
                             comp2.reverse()
                         comp1 = comp1[:location1] + comp2 + comp1[location1+1:] # insert comp2 into comp1, and dont include element i
-                        del compscopy[magic_index_2]
-                        for x, comp in enumerate(compscopy):
+                        compscopy2 = compscopy[:magic_index_1] + [comp1] + compscopy[magic_index_1+1:]
+                        del compscopy2[magic_index_2]
+                        for x, comp in enumerate(compscopy2):
                             for y, end in enumerate(comp):
                                 if end > cob.front.top+i+1:
                                     comp[y] -= 2
@@ -284,7 +285,7 @@ def AddCup(Complex, i): # WIP
                     simplify_decos(newDecos1)
                     tops = AddCupToCLT(cob.front, i)
                     bots = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cobordism(tops[0], bots[0], newDecos1, compscopy)
+                    Cobordism1 = Cobordism(tops[0], bots[0], newDecos1, compscopy2)
                     newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
         if Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # target is closed

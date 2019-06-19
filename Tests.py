@@ -89,8 +89,8 @@ def TestSet5():
     drawcob(Sbc*RightDc, "DottedSaddle")
    
     complex1cap0 = AddCap(complex1, 0)
-    #PrettyPrintComplex(complex1cap0)
-    #PrettyPrintComplex(complex1cap0,"long")
+    PrettyPrintComplex(complex1cap0)
+    PrettyPrintComplex(complex1cap0,"long")
     
     DrawFourEndedChainComplex(complex2, "complex2.png")
     DrawFourEndedChainComplex(complex1, "complex1.png")
