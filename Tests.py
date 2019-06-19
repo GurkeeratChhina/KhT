@@ -87,9 +87,20 @@ def TestSet5():
     complex2.ValidMorphism()
     drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
     drawcob(Sbc*RightDc, "DottedSaddle")
-
+   
+    complex1cap0 = AddCap(complex1, 0)
+    #PrettyPrintComplex(complex1cap0)
+    #PrettyPrintComplex(complex1cap0,"long")
+    
     DrawFourEndedChainComplex(complex2, "complex2.png")
     DrawFourEndedChainComplex(complex1, "complex1.png")
+    
+    complex1again = AddCup(complex1cap0, 1)
+    print("printing components")
+    for row in complex1again.morphisms:
+        for cob in row:
+            print(cob.comps)
+    DrawFourEndedChainComplex(complex1again, "complex1again.png")
 
     RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
 
@@ -100,7 +111,7 @@ def TestSet5():
     complex4 = ChainComplex([c,b,c,c], [[ZeroCob, MinusScb, RightDc, ZeroCob], [ZeroCob, ZeroCob, ZeroCob, Sbc], [ZeroCob,ZeroCob, ZeroCob, Cobordism(c,c,[[0,0,0,1]])], [ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
     DrawFourEndedChainComplex(complex4, "complex4.png")
     
-    complex1cap0 = AddCap(complex1, 0)
+    
 
 complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
                                         [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
@@ -169,12 +180,13 @@ def TestSet3():
     PrettyPrintComplex(BasicSaddleCup)
     PrettyPrintComplex(BasicSaddleCup,"long")
 
-TestSet0()
-TestSet1()
-TestSet2()
-TestSet3()
-TestSet4()
+# TestSet0()
+# TestSet1()
+# TestSet2()
+# TestSet3()
+# TestSet4()
 TestSet5()
+
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
 
