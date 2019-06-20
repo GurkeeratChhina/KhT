@@ -66,7 +66,7 @@ def CobordismToDS(Cob):
                     break
             else:
                 DS.append(["S", 2*elem[0]+1, elem[2]]) #otherwise add saddle
-        elif len(elem) == 4 and elem[2] == 1: # elem is H^k D
+        elif len(elem) == 4 and elem[find_first_index(Cob.comps,notcontains_0)+1] == 1: # elem is H^k D
             for ds in DS:
                 if ds[0] == "D" and ds[1] == elem[0] +1: #check if dot is already there
                     ds[2] += elem[3]

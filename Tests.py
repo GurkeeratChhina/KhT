@@ -89,17 +89,13 @@ def TestSet5():
     drawcob(Sbc*RightDc, "DottedSaddle")
    
     complex1cap0 = AddCap(complex1, 0)
-    PrettyPrintComplex(complex1cap0)
+    print("complex1cap0")
     PrettyPrintComplex(complex1cap0,"long")
     
     DrawFourEndedChainComplex(complex2, "complex2.png")
     DrawFourEndedChainComplex(complex1, "complex1.png")
     
     complex1again = AddCup(complex1cap0, 1)
-    print("printing components")
-    for row in complex1again.morphisms:
-        for cob in row:
-            print(cob.comps)
     DrawFourEndedChainComplex(complex1again, "complex1again.png")
 
     RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
@@ -108,9 +104,28 @@ def TestSet5():
     DrawFourEndedChainComplex(complex3, "complex3.png")
     complex3.ValidMorphism()
 
-    complex4 = ChainComplex([c,b,c,c], [[ZeroCob, MinusScb, RightDc, ZeroCob], [ZeroCob, ZeroCob, ZeroCob, Sbc], [ZeroCob,ZeroCob, ZeroCob, Cobordism(c,c,[[0,0,0,1]])], [ZeroCob, ZeroCob, ZeroCob, ZeroCob]])
+    complex4 = ChainComplex([c,b,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob], [MinusScb, ZeroCob, ZeroCob, ZeroCob], [RightDc,ZeroCob, ZeroCob, ZeroCob], [ZeroCob, Sbc, Cobordism(c,c,[[0,0,0,1]]), ZeroCob]])
     DrawFourEndedChainComplex(complex4, "complex4.png")
+    # This should fail:
+    # complex4.ValidMorphism()
     
+    complex2cap1 = AddCap(complex2, 1)
+    print("complex2cap1")
+    PrettyPrintComplex(complex2cap1,"long")
+    complex2again = AddCup(complex2cap1, 0)
+    DrawFourEndedChainComplex(complex2again, "complex2again.png")
+    complex2cap0 = AddCap(complex2, 0)
+    print("complex2cap0")
+    PrettyPrintComplex(complex2cap0)
+    print("\n")
+    complex2again2 = AddCup(complex2cap0, 1)
+    PrettyPrintComplex(complex2again2, "long")
+    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
+    
+    complex3again1 = AddCup(AddCap(complex3, 0), 1)
+    complex3again2 = AddCup(AddCap(complex3, 1), 0)
+    DrawFourEndedChainComplex(complex3again1, "complex3again1.png")
+    DrawFourEndedChainComplex(complex3again2, "complex3again2.png")
     
 
 complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\

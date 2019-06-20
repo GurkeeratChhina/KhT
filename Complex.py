@@ -1,3 +1,4 @@
+import pandas as pd
 from itertools import product
 import itertools as itertools
 import numpy as np
@@ -27,9 +28,9 @@ class ChainComplex(object):
             if self.morphisms[i][i].decos != []:
                 raise Exception('Differential has self loops')
         
-        squared = flatten(np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1)))
-        for i in squared:
-            if i.decos != []:
+        squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
+        for i in flatten(squared):
+            if i.ReduceDecorations() != []:
                 raise Exception('Differential does not square to 0')
 
 def AddCapToCLT(clt, i):
@@ -228,7 +229,6 @@ def AddCup(Complex, i): # TODO: Reduce/eliminate usages of .copy()
                         if cob.front.top+i+1 in comp:
                             magic_index_2 = x
                     if magic_index_1 == magic_index_2: # only one component being connected via cup
-                        print("1 component")
                         comp = compscopy[magic_index_1].copy()
                         x1 = comp.index(cob.front.top +i)
                         x2 = comp.index(cob.front.top +i + 1)
@@ -262,10 +262,8 @@ def AddCup(Complex, i): # TODO: Reduce/eliminate usages of .copy()
                         comp2 = compscopy[magic_index_2]
                         location1 = comp1.index(cob.front.top+i)
                         location2 = comp2.index(cob.front.top+i+1)
-                        Alongtop1 = location1%2 #0 if the arc immediately after i+1 is along top, 1 otherwise
-                        Alongtop2 = location2%2 #0 if the arc immediately after i+1 is along top, 1 otherwise
                         comp2 = (comp2[location2+1:] + comp2[:location2]) #rotates list until i+1 is at front, and removes it
-                        if location1 != location2: # if top/bot dont line up, flip comp2
+                        if location1 %2 == location2%2: # if top/bot dont line up, flip comp2
                             comp2.reverse()
                         comp1 = comp1[:location1] + comp2 + comp1[location1+1:] # insert comp2 into comp1, and dont include element i
                         compscopy2 = compscopy[:magic_index_1] + [comp1] + compscopy[magic_index_1+1:]

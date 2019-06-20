@@ -30,6 +30,14 @@ def indexQ(mylist,val):
 def flatten(mylist):
     """analogue to Mathematica Flatten"""
     return [j for i in mylist for j in i]
+    
+def contains_0(list):
+    """used to find basepoint containing component"""
+    return 0 in list
+
+def notcontains_0(list):
+    """used to find the first component that doesn't contain the basepoint, usually for cobordisms with only 2 components"""
+    return not(0 in list)
 
 #product, without using numpy
 def prod(iterable):

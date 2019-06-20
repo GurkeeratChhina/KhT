@@ -154,9 +154,7 @@ class Cobordism(object):
     
     def ReduceDecorations(self):
         """delete all decorations in a cobordism ('self') that have a dot in the component containing the basepoint (the TEI 0)."""
-        def contains_basepoint(list):
-            return 0 in list
-        ReducedDecorations = [deco for deco in self.decos if deco[find_first_index(self.comps,contains_basepoint)+1] == 0]
+        ReducedDecorations = [deco for deco in self.decos if deco[find_first_index(self.comps,contains_0)+1] == 0]
         self.decos = ReducedDecorations
         return ReducedDecorations
     
