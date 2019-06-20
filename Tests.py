@@ -35,37 +35,7 @@ Scb=Cobordism(c,b,[[0,0,1]])
 MinusScb = Cobordism(c,b,[[0,0,-1]])
 RightDc = Cobordism(c,c,[[0,0,1,1]])
 
-
-def TestSet4():
-    drawclt(b,"b") 
-    drawclt(c,"c")
-    drawcob(Sbc,"Sbc")
-    drawcob(Scb,"Scb")
-    drawcob((Sbc*Scb),"SSbb")
-    drawcob((Scb*Sbc),"SScc")
-    drawcob(RightDc, "RightDc")
-    T3=CLT(4,4,[4,7,3,2,0,6,5,1],[0,0])
-    T4=CLT(4,4,[6,7,3,2,5,4,0,1],[0,0])
-    T5=CLT(4,4,[3,2,1,0,7,6,5,4],[0,0])
-    cob3=Cobordism(T2,T1,[[2,0,1,-2]])
-    cob4=cob1+cob2
-    cob5=cob1*cob3
-    cob6=cob3*cob1
-    cob5.decos
-    drawclt(T1,"CLT1")
-    drawclt(T2,"CLT2")
-    drawclt(T3,"CLT3")
-    drawclt(T4,"CLT4")
-    drawclt(T5,"CLT5")
-    drawcob(cob1,"cob1")
-    cob1.ReduceDecorations()
-    drawcob(cob1, "cob1Reduced")
-    drawcob(cob2,"cob2")
-    drawcob(cob3,"cob3")
-    drawcob(cob4,"cob4")
-    drawcob(cob5,"cob5")
-    drawcob(cob6,"cob6")
-    
+   
 # testcobordism=Cobordism(b,c,[[2,1,2],[0,0,4]])
 # drawclt(cup(10,3)*cap(10,2)*cup(10,4)*cup(8,6)+cap(2,1),"test1")
 # drawclt(cap(5,5),"test2")
@@ -76,80 +46,6 @@ T2=CLT(2,4,[2,3,0,1,5,4],[0,0])
 cob1=Cobordism(T1,T2,[[4,1,0,1]])
 cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,0,1,1],[1,1,1,19]])
 
-def TestSet5():
-    complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
-    complex1.ValidMorphism()
-
-    CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
-    drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
-
-    complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
-    complex2.ValidMorphism()
-    drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
-    drawcob(Sbc*RightDc, "DottedSaddle")
-   
-    complex1cap0 = AddCap(complex1, 0)
-    # print("complex1cap0")
-    # PrettyPrintComplex(complex1cap0,"long")
-    
-    DrawFourEndedChainComplex(complex2, "complex2.png")
-    DrawFourEndedChainComplex(complex1, "complex1.png")
-    
-    complex1again = AddCup(complex1cap0, 1)
-    DrawFourEndedChainComplex(complex1again, "complex1again.png")
-
-    complex2cap1 = AddCap(complex2, 1)
-    # print("complex2cap1")
-    # PrettyPrintComplex(complex2cap1,"long")
-    complex2again = AddCup(complex2cap1, 0)
-    DrawFourEndedChainComplex(complex2again, "complex2again.png")
-    complex2cap0 = AddCap(complex2, 0)
-    # print("complex2cap0")
-    # PrettyPrintComplex(complex2cap0)
-    # print("\n")
-    complex2again2 = AddCup(complex2cap0, 1)
-    # PrettyPrintComplex(complex2again2, "long")
-    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
-    
-    complex1double = AddCup(complex1cap0, 0)
-    DrawFourEndedChainComplex(complex1double, "complex1double.png")
-    
-    complex2double = AddCup(AddCap(complex2, 0), 0)
-    DrawFourEndedChainComplex(complex2double, "complex2double.png")
-    
-    complex2double2 = AddCup(AddCap(complex2, 1), 1)
-    DrawFourEndedChainComplex(complex2double2, "complex2double2.png")
-    
-    
-
-def TestSet6():
-    RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
-    complex3 = ChainComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
-    DrawFourEndedChainComplex(complex3, "complex3.png")
-    complex3.ValidMorphism()
-
-    complex4 = ChainComplex([c,b,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob], [MinusScb, ZeroCob, ZeroCob, ZeroCob], [RightDc,ZeroCob, ZeroCob, ZeroCob], [ZeroCob, Sbc, Cobordism(c,c,[[0,0,0,1]]), ZeroCob]])
-    DrawFourEndedChainComplex(complex4, "complex4.png")
-    # This should fail:
-    # complex4.ValidMorphism()
-    
-    complex3again1 = AddCup(AddCap(complex3, 0), 1)
-    complex3again2 = AddCup(AddCap(complex3, 1), 0)
-    complex3again3 = AddCup(AddCap(complex3, 1), 2)
-    DrawFourEndedChainComplex(complex3again1, "complex3again1.png")
-    DrawFourEndedChainComplex(complex3again2, "complex3again2.png")
-    DrawFourEndedChainComplex(complex3again3, "complex3again3.png")
-    
-    complex3double1 = AddCup(AddCap(complex3, 0), 0)
-    complex3double2 = AddCup(AddCap(complex3, 1), 1)
-    DrawFourEndedChainComplex(complex3double1, "complex3double1.png")
-    DrawFourEndedChainComplex(complex3double2, "complex3double2.png")
-    
-    complex4again1 = AddCup(AddCap(complex4, 0), 1)
-    complex4again2 = AddCup(AddCap(complex4, 1), 0)
-    DrawFourEndedChainComplex(complex4again1, "complex4again1.png")
-    DrawFourEndedChainComplex(complex4again2, "complex4again2.png")
-    
 
 complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
                                         [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
@@ -185,8 +81,8 @@ def TestSet0():
     drawclt(BasicCap.elements[0], "basiccap")
     Double = AddCup(BasicCap, 0)
     drawclt(Double.elements[0], "double")
-
     # PrintComplexMorphismIntMatrix(Double)
+    return 0
 
 def TestSet1():
     tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1]), [[0, 0, 1, 1]])
@@ -199,6 +95,7 @@ def TestSet1():
     # print("Grading of element at 1", tempcomplexwithcup.elements[1].gr)
     # print("Grading of element at 2", tempcomplexwithcup.elements[2].gr)
     # print("Grading of element at 3", tempcomplexwithcup.elements[3].gr)
+    return 0
 
 def TestSet2():
     complex5cap = AddCap(complex5, 1)
@@ -219,6 +116,123 @@ def TestSet3():
     # PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
     # PrettyPrintComplex(BasicSaddleCup)
     # PrettyPrintComplex(BasicSaddleCup,"long")
+    return 0
+
+def TestSet4():
+    drawclt(b,"b") 
+    drawclt(c,"c")
+    drawcob(Sbc,"Sbc")
+    drawcob(Scb,"Scb")
+    drawcob((Sbc*Scb),"SSbb")
+    drawcob((Scb*Sbc),"SScc")
+    drawcob(RightDc, "RightDc")
+    T3=CLT(4,4,[4,7,3,2,0,6,5,1],[0,0])
+    T4=CLT(4,4,[6,7,3,2,5,4,0,1],[0,0])
+    T5=CLT(4,4,[3,2,1,0,7,6,5,4],[0,0])
+    cob3=Cobordism(T2,T1,[[2,0,1,-2]])
+    cob4=cob1+cob2
+    cob5=cob1*cob3
+    cob6=cob3*cob1
+    cob5.decos
+    drawclt(T1,"CLT1")
+    drawclt(T2,"CLT2")
+    drawclt(T3,"CLT3")
+    drawclt(T4,"CLT4")
+    drawclt(T5,"CLT5")
+    drawcob(cob1,"cob1")
+    cob1.ReduceDecorations()
+    drawcob(cob1, "cob1Reduced")
+    drawcob(cob2,"cob2")
+    drawcob(cob3,"cob3")
+    drawcob(cob4,"cob4")
+    drawcob(cob5,"cob5")
+    drawcob(cob6,"cob6")
+ 
+def TestSet5():
+    complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
+    complex1.ValidMorphism()
+
+    CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
+    # drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
+
+    complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
+    complex2.ValidMorphism()
+    # drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
+    # drawcob(Sbc*RightDc, "DottedSaddle")
+   
+    complex1cap0 = AddCap(complex1, 0)
+    # print("complex1cap0")
+    # PrettyPrintComplex(complex1cap0,"long")
+    
+    DrawFourEndedChainComplex(complex2, "complex2.png")
+    DrawFourEndedChainComplex(complex1, "complex1.png")
+    
+    complex1again = AddCup(complex1cap0, 1)
+    DrawFourEndedChainComplex(complex1again, "complex1again.png")
+
+    complex2cap1 = AddCap(complex2, 1)
+    # print("complex2cap1")
+    # PrettyPrintComplex(complex2cap1,"long")
+    complex2again = AddCup(complex2cap1, 0)
+    DrawFourEndedChainComplex(complex2again, "complex2again.png")
+    complex2cap0 = AddCap(complex2, 0)
+    # print("complex2cap0")
+    # PrettyPrintComplex(complex2cap0)
+    # print("\n")
+    complex2again2 = AddCup(complex2cap0, 1)
+    # PrettyPrintComplex(complex2again2, "long")
+    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
+    
+    complex1double = AddCup(complex1cap0, 0)
+    DrawFourEndedChainComplex(complex1double, "complex1double.png")
+    
+    complex2double = AddCup(AddCap(complex2, 0), 0)
+    DrawFourEndedChainComplex(complex2double, "complex2double.png")
+    
+    complex2double2 = AddCup(AddCap(complex2, 1), 1)
+    DrawFourEndedChainComplex(complex2double2, "complex2double2.png")
+    
+    print("complex2")
+    PrettyPrintComplex(complex2, "old long")
+    complex2cup = AddCup(complex2, 0)
+    print("complex2cup")
+    PrettyPrintComplex(complex2cup, "old long")
+    print("complex2again")
+    PrettyPrintComplex(complex2, "old long")
+    
+def TestSet6():
+    RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
+    complex3 = ChainComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
+    DrawFourEndedChainComplex(complex3, "complex3.png")
+    complex3.ValidMorphism()
+
+    complex4 = ChainComplex([c,b,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob], [MinusScb, ZeroCob, ZeroCob, ZeroCob], [RightDc,ZeroCob, ZeroCob, ZeroCob], [ZeroCob, Sbc, Cobordism(c,c,[[0,0,0,1]]), ZeroCob]])
+    DrawFourEndedChainComplex(complex4, "complex4.png")
+    # This should fail:
+    # complex4.ValidMorphism()
+    
+    # print("complex3")
+    # PrettyPrintComplex(complex3, "old long")
+    complex3cap0 = AddCap(complex3, 0)
+    # print("complex3cap")
+    # PrettyPrintComplex(complex3cap0, "old long")
+    complex3again1 = AddCup(complex3cap0, 1)
+    complex3again2 = AddCup(AddCap(complex3, 1), 0)
+    complex3again3 = AddCup(AddCap(complex3, 1), 2)
+    DrawFourEndedChainComplex(complex3again1, "complex3again1.png")
+    DrawFourEndedChainComplex(complex3again2, "complex3again2.png")
+    DrawFourEndedChainComplex(complex3again3, "complex3again3.png")
+    
+    complex3double1 = AddCup(AddCap(complex3, 0), 0)
+    complex3double2 = AddCup(AddCap(complex3, 1), 1)
+    DrawFourEndedChainComplex(complex3double1, "complex3double1.png")
+    DrawFourEndedChainComplex(complex3double2, "complex3double2.png")
+    
+    complex4again1 = AddCup(AddCap(complex4, 0), 1)
+    complex4again2 = AddCup(AddCap(complex4, 1), 0)
+    DrawFourEndedChainComplex(complex4again1, "complex4again1.png")
+    DrawFourEndedChainComplex(complex4again2, "complex4again2.png")
+    
 
 TestSet0()
 TestSet1()

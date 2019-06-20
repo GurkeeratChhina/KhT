@@ -37,7 +37,7 @@ def contains_0(list):
 
 def notcontains_0(list):
     """used to find the first component that doesn't contain the basepoint, usually for cobordisms with only 2 components"""
-    return not(0 in list)
+    return 0 not in list
 
 #product, without using numpy
 def prod(iterable):
