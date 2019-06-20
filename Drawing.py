@@ -9,26 +9,40 @@ from KhT import *
 from Tangles import *
 from Cobordisms import *
 from Complex import *
-
+from tabulate import tabulate
 
 def printdecos(cob,switch="short"):
     if cob.decos==[]:
-        return 0
+        return ""
     else:
-        if switch == "long":
+        if switch == "old long":
             return [cob.comps,cob.decos]
+        if switch == "long":
+            table=[["H:"]+[deco[0] for deco in cob.decos]]+\
+                [[comp]+[deco[i+1] for deco in cob.decos] \
+                    for i,comp in enumerate(cob.comps)]+\
+                [["coeff:"]+[deco[-1] for deco in cob.decos]]
+            tablealt=[["H:",0,1],[[1,2],0,1],["coeff:",3,4]]
+            return tabulate(table,tablefmt="plain")
         else:
             return len(cob.decos)
     
 def PrettyPrintComplex(Complex,switch="short"):
+    """Print a complex in human readable form. 
+    The second argument is an optional parameter which should be one of the following strings: 
+    - 'simple' (default) prints only the length of cobordisms.
+    - 'long' prints all cobordism data in a nice table.
+    - 'old long' prints all cobordism data, but as a list of lists.
+    """
     print("The generators:")
     print(pd.DataFrame({\
         "clt.pairs": [clt.pairs for clt in Complex.elements],\
         "q": [clt.gr[0] for clt in Complex.elements],\
         "h": [clt.gr[1] for clt in Complex.elements]
         },columns=["clt.pairs","q","h"]))
-    print("The differential:")
-    print(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]))
+    print("The differential: ("+switch+" form)")
+    #print(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]))
+    print(tabulate(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]),range(len(Complex.morphisms)),tablefmt="fancy_grid"))
     
 def PrintComplexMorphismIntMatrix(Complex):
     for i in Complex.morphisms:
