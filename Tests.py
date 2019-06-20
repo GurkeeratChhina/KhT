@@ -89,8 +89,8 @@ def TestSet5():
     drawcob(Sbc*RightDc, "DottedSaddle")
    
     complex1cap0 = AddCap(complex1, 0)
-    print("complex1cap0")
-    PrettyPrintComplex(complex1cap0,"long")
+    # print("complex1cap0")
+    # PrettyPrintComplex(complex1cap0,"long")
     
     DrawFourEndedChainComplex(complex2, "complex2.png")
     DrawFourEndedChainComplex(complex1, "complex1.png")
@@ -98,8 +98,32 @@ def TestSet5():
     complex1again = AddCup(complex1cap0, 1)
     DrawFourEndedChainComplex(complex1again, "complex1again.png")
 
-    RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
+    complex2cap1 = AddCap(complex2, 1)
+    # print("complex2cap1")
+    # PrettyPrintComplex(complex2cap1,"long")
+    complex2again = AddCup(complex2cap1, 0)
+    DrawFourEndedChainComplex(complex2again, "complex2again.png")
+    complex2cap0 = AddCap(complex2, 0)
+    # print("complex2cap0")
+    # PrettyPrintComplex(complex2cap0)
+    # print("\n")
+    complex2again2 = AddCup(complex2cap0, 1)
+    # PrettyPrintComplex(complex2again2, "long")
+    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
+    
+    complex1double = AddCup(complex1cap0, 0)
+    DrawFourEndedChainComplex(complex1double, "complex1double.png")
+    
+    complex2double = AddCup(AddCap(complex2, 0), 0)
+    DrawFourEndedChainComplex(complex2double, "complex2double.png")
+    
+    complex2double2 = AddCup(AddCap(complex2, 1), 1)
+    DrawFourEndedChainComplex(complex2double2, "complex2double2.png")
+    
+    
 
+def TestSet6():
+    RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
     complex3 = ChainComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
     DrawFourEndedChainComplex(complex3, "complex3.png")
     complex3.ValidMorphism()
@@ -109,23 +133,22 @@ def TestSet5():
     # This should fail:
     # complex4.ValidMorphism()
     
-    complex2cap1 = AddCap(complex2, 1)
-    print("complex2cap1")
-    PrettyPrintComplex(complex2cap1,"long")
-    complex2again = AddCup(complex2cap1, 0)
-    DrawFourEndedChainComplex(complex2again, "complex2again.png")
-    complex2cap0 = AddCap(complex2, 0)
-    print("complex2cap0")
-    PrettyPrintComplex(complex2cap0)
-    print("\n")
-    complex2again2 = AddCup(complex2cap0, 1)
-    PrettyPrintComplex(complex2again2, "long")
-    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
-    
     complex3again1 = AddCup(AddCap(complex3, 0), 1)
     complex3again2 = AddCup(AddCap(complex3, 1), 0)
+    complex3again3 = AddCup(AddCap(complex3, 1), 2)
     DrawFourEndedChainComplex(complex3again1, "complex3again1.png")
     DrawFourEndedChainComplex(complex3again2, "complex3again2.png")
+    DrawFourEndedChainComplex(complex3again3, "complex3again3.png")
+    
+    complex3double1 = AddCup(AddCap(complex3, 0), 0)
+    complex3double2 = AddCup(AddCap(complex3, 1), 1)
+    DrawFourEndedChainComplex(complex3double1, "complex3double1.png")
+    DrawFourEndedChainComplex(complex3double2, "complex3double2.png")
+    
+    complex4again1 = AddCup(AddCap(complex4, 0), 1)
+    complex4again2 = AddCup(AddCap(complex4, 1), 0)
+    DrawFourEndedChainComplex(complex4again1, "complex4again1.png")
+    DrawFourEndedChainComplex(complex4again2, "complex4again2.png")
     
 
 complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
@@ -163,26 +186,28 @@ def TestSet0():
     Double = AddCup(BasicCap, 0)
     drawclt(Double.elements[0], "double")
 
-    PrintComplexMorphismIntMatrix(Double)
+    # PrintComplexMorphismIntMatrix(Double)
 
 def TestSet1():
     tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1]), [[0, 0, 1, 1]])
     tempcomplex = ChainComplex([CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1])], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
     tempcomplexwithcup = AddCup(tempcomplex, 1)
-    PrintComplexMorphismIntMatrix(tempcomplexwithcup)
-    print("Decorations at 3, 0", tempcomplexwithcup.morphisms[3][0].decos)
-    print("Decorations at 3, 1", tempcomplexwithcup.morphisms[3][1].decos)
-    print("Grading of element at 0", tempcomplexwithcup.elements[0].gr)
-    print("Grading of element at 1", tempcomplexwithcup.elements[1].gr)
-    print("Grading of element at 2", tempcomplexwithcup.elements[2].gr)
-    print("Grading of element at 3", tempcomplexwithcup.elements[3].gr)
+    # PrintComplexMorphismIntMatrix(tempcomplexwithcup)
+    # print("Decorations at 3, 0", tempcomplexwithcup.morphisms[3][0].decos)
+    # print("Decorations at 3, 1", tempcomplexwithcup.morphisms[3][1].decos)
+    # print("Grading of element at 0", tempcomplexwithcup.elements[0].gr)
+    # print("Grading of element at 1", tempcomplexwithcup.elements[1].gr)
+    # print("Grading of element at 2", tempcomplexwithcup.elements[2].gr)
+    # print("Grading of element at 3", tempcomplexwithcup.elements[3].gr)
 
 def TestSet2():
     complex5cap = AddCap(complex5, 1)
-    PrintComplexMorphismIntMatrix(complex5cap)
-    PrintComplexMorphismDecoCompMatrix(complex5cap)
-    complex5again = AddCup(complex5cap, 0)
-    DrawFourEndedChainComplex(complex5again, "complex5again.png")
+    # PrintComplexMorphismIntMatrix(complex5cap)
+    # PrintComplexMorphismDecoCompMatrix(complex5cap)
+    complex5again1 = AddCup(complex5cap, 0)
+    DrawFourEndedChainComplex(complex5again1, "complex5again1.png")
+    complex5again2 = AddCup(AddCap(complex5, 0), 1)
+    DrawFourEndedChainComplex(complex5again2, "complex5again2.png")
 
 def TestSet3():
     CLT01 = CLT(1,3,[1,0,3,2],[0,0])
@@ -190,17 +215,18 @@ def TestSet3():
     BasicSaddle = Cobordism(CLT01, CLT03, [[0,0,1]])
     BasicSaddleComplex = ChainComplex([CLT01, CLT03], [[ZeroCob, ZeroCob], [BasicSaddle, ZeroCob]])
     BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
-    PrintComplexMorphismIntMatrix(BasicSaddleCup)
-    PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
-    PrettyPrintComplex(BasicSaddleCup)
-    PrettyPrintComplex(BasicSaddleCup,"long")
+    # PrintComplexMorphismIntMatrix(BasicSaddleCup)
+    # PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
+    # PrettyPrintComplex(BasicSaddleCup)
+    # PrettyPrintComplex(BasicSaddleCup,"long")
 
-# TestSet0()
-# TestSet1()
-# TestSet2()
-# TestSet3()
-# TestSet4()
+TestSet0()
+TestSet1()
+TestSet2()
+TestSet3()
+TestSet4()
 TestSet5()
+TestSet6()
 
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
