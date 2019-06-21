@@ -1,5 +1,5 @@
 from itertools import product
-import itertools as itertools
+from itertools import groupby
 import math
 from KhT import *
 from Tangles import *
@@ -129,7 +129,7 @@ class Cobordism(object):
                     IdcI=len(c)# number of boundary components of c
                     partial_decos.append(decos_from_c(g,r,IdcI))
                     
-                decos+=[combine_decos(l,e1[0]+e2[0],e1[-1]*e2[-1]) for l in itertools.product(*partial_decos)]
+                decos+=[combine_decos(l,e1[0]+e2[0],e1[-1]*e2[-1]) for l in product(*partial_decos)]
         
         Output = Cobordism(x,z,simplify_decos(decos),[dC[index] for index in flatten(C)])
         Output.ReduceDecorations() # This kills any cobordism in the linear combination that has a dot on the same component as the basepoint

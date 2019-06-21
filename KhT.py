@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 
 # load libraries
-from itertools import groupby
-from itertools import product
-import itertools as itertools
 import math
 
 #TO DO: 

@@ -282,7 +282,7 @@ def DrawFourEndedChainComplex(complex, filename):
     # TODO: omit coefficients of +- 1, leaving only the sign
     SUP = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
     Edge_labeling = g.new_edge_property("string") # construct edge labels with linear combinations of powers of S and D
-    for i, j in itertools.product(range(size), range(size)): #rewrite with enumerate
+    for i, j in product(range(size), range(size)): #rewrite with enumerate
         if complex.morphisms[j][i].ReduceDecorations() != []:
             g.add_edge(g.vertex(i), g.vertex(j))
             Edge_labeling[g.edge(i,j)] = ""

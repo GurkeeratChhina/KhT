@@ -38,6 +38,14 @@ def AddCapToCLT(clt, i):
             newarcs[j] += 2
     newarcs.insert(clt.top+i, clt.top+i)
     newarcs.insert(clt.top+i, clt.top+i+1)
+    print("oldnewarcs", newarcs)
+    def incrementby2(tanglend):
+        if tanglend >= clt.top+i:
+            return tanglend+2
+        else:
+            return tanglend
+    newarcs = [incrementby2(x) for x in clt.arcs[:clt.top+i]] + [clt.top+i +1, clt.top+i] + [incrementby2(x) for x in clt.arcs[clt.top+i:]]
+    print("newarcs", newarcs)
     return CLT(clt.top, clt.bot+2, newarcs, clt.gr)
 
 def AddCap(Complex, i):
@@ -72,6 +80,7 @@ def AddCupToCLT(clt, i): #check usages of .copy()
         otherwise returns a list of 1 clt """
     newElements = []
     if clt.arcs[clt.top +i] == clt.top+i+1: # adding the cup makes a closed component
+        print("closed component in generators")
         newarcs = clt.arcs.copy()
         newarcs.remove(clt.top +i) #removing the closed component
         newarcs.remove(clt.top+i+1)
@@ -81,6 +90,7 @@ def AddCupToCLT(clt, i): #check usages of .copy()
         newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]+1, clt.gr[1]]))
         newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]-1, clt.gr[1]]))
     else: # adding the cup doesnt make closed components
+        print("not closed component in generators")
         newarcs = clt.arcs.copy()
         leftend = newarcs[clt.top + i]
         rightend = newarcs[clt.top+i+1]
@@ -204,8 +214,8 @@ def AddCup(Complex, i): # TODO: Reduce/eliminate usages of .copy(), reduce decor
                         comp = cob.comps[magic_index]
                         x1 = comp.index(cob.front.top +i)
                         x2 = comp.index(cob.front.top +i + 1)
-                        comp1 = comp[:min(x1, x2)] + comp[max(x1, x_2)+1:]
-                        comp2 = comp[min(x1, x_2) +1:max(x1, x_2)]
+                        comp1 = comp[:min(x1, x2)] + comp[max(x1, x2)+1:]
+                        comp2 = comp[min(x1, x2) +1:max(x1, x2)]
                         newcomps = [[shift(j) for j in comp] for comp in cob.comps[:magic_index] +[comp1, comp2] + cob.comps[magic_index+1:]]
                         def computedeco1comps(decoration):
                             if decoration[magic_index+1] == 1:
@@ -213,9 +223,9 @@ def AddCup(Complex, i): # TODO: Reduce/eliminate usages of .copy(), reduce decor
                             else:
                                 return [decoration[:magic_index+1] +[1] + decoration[magic_index+1:] , \
                                         decoration[:magic_index+2] +[1] + decoration[magic_index+2:], \
-                                        decoration[0]+1 + decoration[1:magic_index+1] +[0] + decoration[magic_index+1:-1] + decoration[-1]*-1]
+                                        [decoration[0]+1] + decoration[1:magic_index+1] +[0] + decoration[magic_index+1:-1] + [decoration[-1]*-1]]
                         for deco in cob.decos:
-                            newdecos1.extend(computedeco1comps(deco))
+                            newDecos1.extend(computedeco1comps(deco))
                     else: # two seperate components being connected via cup
                         comp1 = cob.comps[magic_index]
                         comp2 = cob.comps[magic_index_2]
