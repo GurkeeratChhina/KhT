@@ -61,7 +61,7 @@ def PrintComplexMorphismDecoCompMatrix(Complex):
                 Row.append([j.comps, j.decos])
         print(Row)
 
-def CobordismToDS(Cob):
+def CobordismToDS(Cob): #more pythonic implementation
     """ DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
         an element of DS will be refered to a ds, which is a 3 element list
         the first element is D if the morphism is a power of D, and S if it is a power of S
@@ -254,7 +254,7 @@ def drawcob(cob,name):
     
     return IFrame('Output/' + name+'.pdf', width='100%', height='300')
 
-def DrawFourEndedChainComplex(complex, filename):
+def DrawFourEndedChainComplex(complex, filename): #TODO: dont call reduce decorations when labeling edges
     # For now assume that all CLT are 2-2
     for CLT in complex.elements:
         if CLT.top != 2 or CLT.bot !=2:
@@ -282,8 +282,8 @@ def DrawFourEndedChainComplex(complex, filename):
     # TODO: omit coefficients of +- 1, leaving only the sign
     SUP = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
     Edge_labeling = g.new_edge_property("string") # construct edge labels with linear combinations of powers of S and D
-    for i, j in product(range(size), range(size)): #rewrite with enumerate
-        if complex.morphisms[j][i].ReduceDecorations() != []:
+    for i, j in product(range(size), range(size)): #TODO: rewrite with enumerate
+        if complex.morphisms[j][i].ReduceDecorations() != []: #TODO: reduce decorations earlier, not here
             g.add_edge(g.vertex(i), g.vertex(j))
             Edge_labeling[g.edge(i,j)] = ""
             for ds in CobordismToDS(complex.morphisms[j][i]):
