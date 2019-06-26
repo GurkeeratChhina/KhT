@@ -151,54 +151,18 @@ def TestSet4():
 def TestSet5():
     complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
     complex1.ValidMorphism()
-
-    CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
-    # drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
-
-    complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
-    complex2.ValidMorphism()
-    # drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
-    # drawcob(Sbc*RightDc, "DottedSaddle")
    
     complex1cap0 = AddCap(complex1, 0)
     # print("complex1cap0")
     # PrettyPrintComplex(complex1cap0,"long")
     
-    DrawFourEndedChainComplex(complex2, "complex2.png")
     DrawFourEndedChainComplex(complex1, "complex1.png")
     
     complex1again = AddCup(complex1cap0, 1)
     DrawFourEndedChainComplex(complex1again, "complex1again.png")
-
-    complex2cap1 = AddCap(complex2, 1)
-    # print("complex2cap1")
-    # PrettyPrintComplex(complex2cap1,"long")
-    complex2again = AddCup(complex2cap1, 0)
-    DrawFourEndedChainComplex(complex2again, "complex2again.png")
-    complex2cap0 = AddCap(complex2, 0)
-    # print("complex2cap0")
-    # PrettyPrintComplex(complex2cap0)
-    # print("\n")
-    complex2again2 = AddCup(complex2cap0, 1)
-    # PrettyPrintComplex(complex2again2, "long")
-    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
     
     complex1double = AddCup(complex1cap0, 0)
     DrawFourEndedChainComplex(complex1double, "complex1double.png")
-    
-    complex2double = AddCup(AddCap(complex2, 0), 0)
-    DrawFourEndedChainComplex(complex2double, "complex2double.png")
-    
-    complex2double2 = AddCup(AddCap(complex2, 1), 1)
-    DrawFourEndedChainComplex(complex2double2, "complex2double2.png")
-    
-    print("complex2")
-    PrettyPrintComplex(complex2, "old long")
-    complex2cup = AddCup(complex2, 0)
-    print("complex2cup")
-    PrettyPrintComplex(complex2cup, "old long")
-    print("complex2again")
-    PrettyPrintComplex(complex2, "old long")
     
 def TestSet6():
     RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
@@ -233,7 +197,55 @@ def TestSet6():
     DrawFourEndedChainComplex(complex4again1, "complex4again1.png")
     DrawFourEndedChainComplex(complex4again2, "complex4again2.png")
     
+    complex6 = ChainComplex([c,b], [[ZeroCob, ZeroCob],[Scb, ZeroCob]])
+    complex6cup = AddCup(complex6, 0)
+    print("complex6cup")
+    PrettyPrintComplex(complex6cup, "old long")
+    
+def TestSet7():
+    CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
+    # drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
+    complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
+    complex2.ValidMorphism()
+    # drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
+    # drawcob(Sbc*RightDc, "DottedSaddle")
+    
+    DrawFourEndedChainComplex(complex2, "complex2.png")
+    
+    complex2cap1 = AddCap(complex2, 1)
+    # print("complex2cap1")
+    # PrettyPrintComplex(complex2cap1,"long")
+    complex2again = AddCup(complex2cap1, 0)
+    DrawFourEndedChainComplex(complex2again, "complex2again.png")
+    complex2cap0 = AddCap(complex2, 0)
+    # print("complex2cap0")
+    # PrettyPrintComplex(complex2cap0)
+    # print("\n")
+    complex2again2 = AddCup(complex2cap0, 1)
+    # PrettyPrintComplex(complex2again2, "long")
+    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
+    
+    PrettyPrintComplex(complex2cap0, "old long")
+    complex2double = AddCup(complex2cap0, 0)
+    PrettyPrintComplex(complex2double, "old long")
+    DrawFourEndedChainComplex(complex2double, "complex2double.png")
+    
+    complex2double2 = AddCup(AddCap(complex2, 1), 1)
+    DrawFourEndedChainComplex(complex2double2, "complex2double2.png")
+    print("complex2cap")
+    PrettyPrintComplex(AddCap(complex2, 1), "old long")
+    print("complex2double")
+    PrettyPrintComplex(complex2double2, "old long")
+    
+    print("complex2")
+    PrettyPrintComplex(complex2, "old long")
+    complex2cup = AddCup(complex2, 0)
+    print("complex2cup")
+    PrettyPrintComplex(complex2cup, "old long")
+    print("complex2again")
+    PrettyPrintComplex(complex2, "old long")
+    
 TestSet0()
 TestSet1()
 TestSet2()
@@ -241,6 +253,7 @@ TestSet3()
 TestSet4()
 TestSet5()
 TestSet6()
+TestSet7()
 
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",

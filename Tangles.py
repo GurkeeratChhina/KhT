@@ -1,5 +1,3 @@
-from itertools import product
-import itertools as itertools
 import math
 from KhT import *
 
