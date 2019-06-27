@@ -156,14 +156,37 @@ class BNComplex(object):
             if i.ReduceDecorations() != []:
                 raise Exception('Differential does not square to 0')
         
-    def isotopy(self,start,end,alg):
-        " apply an isotopy along an arrow (start--->end) labelled by 'alg'."
-        if (self.diff)[end, start].pairs != []:
+    def isotopy(self,start,end,alg,switch="safe"):
+        """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
+        """
+        if (switch=="safe") & ((self.diff)[start,end].pairs != []):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
         self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
     
-    
+    def isolate_arrow(self,gen, start, end, alg):
+        """ Try to isotope away all arrows with the same start or the same end as 'arrow'. 
+        'arrow' is a list [start, end, alg], where 'alg' is a BNmor with a single entry.
+        """
+        def inverse(num): #this only works over a field;could replace this by a suitable function for positive characteristic
+            return 1/num
+        
+        face=alg.pairs[0][0]
+        inverse_coeff=inverse(alg.pairs[0][1])
+        # first remove all other arrows with the same start
+        for index in range(len(self.gens)):
+            for pair in self.diff[index,start].pairs:
+                if pair[0]*face>0:# same face
+                    if ((self.diff)[index,end].pairs == []) & (index != end): # check that isotopy is valid.
+                        self.isotopy(end,index,BNmor([[pair[0]-face,pair[1]*inverse_coeff]]),"unsafe")
+        
+        # secondly, remove all remaining arrows with the same end
+        for index in range(len(self.gens)):
+            for pair in self.diff[end,index].pairs:
+                if pair[0]*face>0:# same face
+                    if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
+                        self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]]),"unsafe")
+        
 
 ZeroMor=BNmor([])
 
@@ -259,11 +282,7 @@ def PrettyPrintBNComplex(complex):
     print("The differential:")
     print(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in complex.diff]),range(len(complex.diff)),tablefmt="fancy_grid"))
 
-
-
-
 # Claudius: I'll keep working on this list... 
-#todo: implement Clean-Up Lemma to simplify at a given generator
 #todo: implement randomized Clean-Upping (alternatingly D and S)
 #todo: implement recognition of being loop-type 
 #todo: implement recognition of local systems (optional)
@@ -280,14 +299,22 @@ alg=[[1,2],[-1,34],[0,9],[3,0],[-342,999],[0,-1],[1,-1],[-1,-1]]
 print(alg)
 print(BNmor(alg).BNAlg2String())
 
-complex1 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob], [Cobordism(b, c, [[3,0,-1]]) ,ZeroCob ,ZeroCob], [Cobordism(b, c, [[3,0,-1]]) ,ZeroCob ,ZeroCob]])
+complex1 = ChainComplex([b,b,c,c], \
+                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob ,ZeroCob ,ZeroCob ,ZeroCob],\
+                 [Cobordism(b, c, [[3,0,-1]]) ,Cobordism(b, c, [[2,0,-1]]) ,ZeroCob ,ZeroCob],\
+                 [Cobordism(b, c, [[3,0,-1]]) ,ZeroCob ,ZeroCob ,ZeroCob]])
 BNcomplex1 = CobComplex2BNComplex(complex1)
 
 PrettyPrintBNComplex(BNcomplex1)
-BNcomplex1.isotopy(1,2,BNmor([[0,1]]))
+
+#BNcomplex1.isolate_arrow(1,0,1,BNmor([[-5,-1]]))
+BNcomplex1.isolate_arrow(1,1,2,BNmor([[-5,-1]]))
+
+#BNcomplex1.isotopy(1,2,BNmor([[0,1]]))
 PrettyPrintBNComplex(BNcomplex1)
 
-#DrawBNComplex(BNcomplex1, "BNcomplex1.svg")
+DrawBNComplex(BNcomplex1, "BNcomplex1.svg")
 
 print(CobordismToBNAlg(Cobordism(b,c,[[1,0,24]])).pairs)
 print(CobordismToBNAlg(Cobordism(b,b,[[1,0,1,24]])).pairs)
