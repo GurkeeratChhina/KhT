@@ -3,6 +3,7 @@ import math
 from KhT import *
 from Tangles import *
 from Cobordisms import *
+from Drawing import *
 
 class ChainComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -31,19 +32,23 @@ class ChainComplex(object):
             if i.ReduceDecorations() != []:
                 raise Exception('Differential does not square to 0')
 
-def AddCapToCLT(clt, i):
+def AddCapToCLT(clt, i, grshift = "false"):
     def incrementby2(j): #increment TEI by 2 if greater than where cap is to be inserted
         if j >= clt.top+i:
             return j+2
         else:
             return j
     newarcs = [incrementby2(x) for x in clt.arcs[:clt.top+i]] + [clt.top+i +1, clt.top+i] + [incrementby2(x) for x in clt.arcs[clt.top+i:]]
-    return CLT(clt.top, clt.bot+2, newarcs, clt.gr)
+    if grshift == "true":
+        newgr = [j+1 for j in clt.gr]
+    else:
+        newgr = clt.gr
+    return CLT(clt.top, clt.bot+2, newarcs, newgr)
 
-def AddCap(Complex, i):
+def AddCap(Complex, i, grshift = "false"):
     """ Adds a cap to every tangle and every cobordism in Complex, at index i
         Here 0 <= i <= tangle.bot """
-    NewElements = [AddCapToCLT(clt, i) for clt in Complex.elements]
+    NewElements = [AddCapToCLT(clt, i, grshift) for clt in Complex.elements]
     length = len(Complex.elements)
     NewMorphisms = []
     for j ,row in enumerate(Complex.morphisms):
@@ -83,7 +88,7 @@ def AddCupToCLT(clt, i): #TODO: check usages of .copy()
         newarcs = clt.arcs.copy()
         newarcs[leftend] = rightend # connecting the two arcs via the cup
         newarcs[rightend] = leftend
-        newarcs1 = [decrementby2(entry) for x, entry in enumerate(newarcs) if x != clt.top+1 and x != clt.top+i+1]
+        newarcs1 = [decrementby2(entry) for x, entry in enumerate(newarcs) if x != clt.top+i and x != clt.top+i+1]
         newElements.append(CLT(clt.top, clt.bot -2, newarcs1, clt.gr))
     return newElements
 
@@ -245,9 +250,60 @@ def AddCup(Complex, i): # TODO: reduce decorations
         if Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # target is closed
             NewMorphisms.append(nextRow)
     return ChainComplex(newElements, NewMorphisms)
-    
+  
 def AddPosCrossing(Complex, i):
-    return 0
+    CapCup = AddCap(AddCup(Complex, i), i, "true")
+    TopLeft = Complex.morphisms
+    BottomRight = CapCup.morphisms
+    length1 = len(Complex.elements)
+    length2 = len(CapCup.elements)
+    TopRight = np.full((length1, length2), ZeroCob, Cobordism)
+    BottomLeft = np. full((length2, length1), ZeroCob, Cobordism) #compute this manually
+    NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
+                                   np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
+    NewElements = Complex.elements + CapCup.elements
+    NewComplex = ChainComplex(NewElements, NewMorphisms)
+    return NewComplex
 
+def grshiftclt(clt):
+    return CLT(clt.top, clt.bot, clt.arcs, [j+1 for j in clt.gr])
+
+def grshiftcob(cob):
+    return Cobordism(grshiftclt(cob.front), grshiftclt(cob.back), cob.decos, cob.comps)
+    
 def AddNegCrossing(Complex, i):
-    return 0
+    CapCup = AddCap(AddCup(Complex, i), i)
+    targetelements = [grshiftclt(clt) for clt in Complex.elements]
+    sourceelements = CapCup.elements
+    print("sourceelements", sourceelements)
+    print("targetelements", targetelements)
+    NewElements = sourceelements + targetelements
+    TopLeft = CapCup.morphisms
+    BottomRight = [[grshiftcob(cob) for cob in row] for row in Complex.morphisms]
+    length1 = len(sourceelements)
+    length2 = len(targetelements)
+    TopRight = np.full((length1, length2), ZeroCob, Cobordism)
+    BottomLeft = [] #np. full((length2, length1), ZeroCob, Cobordism) #compute this manually
+    for x, targetclt in enumerate(Complex.elements): #maybe dont need enumerate here
+        newRow = []
+        for sourceclt in Complex.elements:
+            fronts = iter(sourceelements)
+            if sourceclt.arcs[sourceclt.top +i] == sourceclt.top+i+1: #sourceclt is closed
+                print("closed")
+                decos1 = []
+                decos2 = []
+                newCobordism1 = Cobordism(next(fronts), targetelements[x], decos1) #fill out decos and comps
+                newCobordism2 = Cobordism(next(fronts), targetelements[x], decos2)
+                newRow.append(newCobordism1)
+                newRow.append(newCobordism2)
+            else: #sourceclt is open
+                print("open")
+                decos = []
+                newCobordism = Cobordism(next(fronts), targetelements[x], decos)
+                newRow.append(newCobordism)
+        BottomLeft.append(newRow)
+    print(length1, length2, BottomLeft)
+    NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
+                                   np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
+    NewComplex = ChainComplex(NewElements, NewMorphisms)
+    return NewComplex

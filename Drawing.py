@@ -292,7 +292,7 @@ def DrawFourEndedChainComplex(complex, filename): #TODO: dont call reduce decora
                 if ds[2] != 0:
                     Edge_labeling[g.edge(i,j)] += str(ds[2]) + "·" + ds[0] + str(ds[1]).translate(SUP)
 
-    graph_draw(g, vertex_color = "black", vertex_fill_color = Vertex_labeling, vertex_size = 20,\
-                edge_color = "black", edge_pen_width = 4.0, edge_text = Edge_labeling, edge_text_color = "black",\
-                edge_text_distance = 10, edge_font_weight = cairo.FONT_WEIGHT_BOLD, edge_font_size = 22, \
-                output_size=(1200, 400), edge_marker_size = 20, output="Output/" + filename)
+    graph_draw(g, vertex_color = "black", vertex_fill_color = Vertex_labeling, vertex_size = 30,\
+                edge_color = "black", edge_pen_width = 6.0, edge_text = Edge_labeling, edge_text_color = "black",\
+                edge_text_distance = 10, edge_font_weight = cairo.FONT_WEIGHT_BOLD, edge_font_size = 30, \
+                output_size=(1600, 1000), edge_marker_size = 20, output="Output/" + filename)
