@@ -83,6 +83,10 @@ class BNmor(object):
     def __mul__(self, other):
         return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0]).simplify_BNmor()
     
+    def negative(self):
+        self.pairs=[[pair[0],(-1)*pair[1]] for pair in self.pairs]
+        return self
+    
     def is_identity(self):
         if len(self.pairs)!=1:
             return False
@@ -133,7 +137,7 @@ class BNComplex(object):
         Note that the matrix's rows and columns depend on the order the CLTS are given in the list """
     def __init__(self,gens,diff):
         self.gens = gens
-        self.diff = diff
+        self.diff = np.array(diff)
     
     def ValidMorphism(self):
         # return True
@@ -151,7 +155,15 @@ class BNComplex(object):
         for i in flatten(squared):
             if i.ReduceDecorations() != []:
                 raise Exception('Differential does not square to 0')
-
+        
+    def isotopy(self,start,end,alg):
+        " apply an isotopy along an arrow (start--->end) labelled by 'alg'."
+        if (self.diff)[end, start].pairs != []:
+            raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
+        self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
+        self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
+    
+    
 
 ZeroMor=BNmor([])
 
@@ -247,14 +259,16 @@ def PrettyPrintBNComplex(complex):
     print("The differential:")
     print(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in complex.diff]),range(len(complex.diff)),tablefmt="fancy_grid"))
 
+
+
+
 # Claudius: I'll keep working on this list... 
-#todo: add a way to convert BNComplexes into Complexes (optional; could be useful for twisting)
-#todo: implement Clean-Up Lemma
 #todo: implement Clean-Up Lemma to simplify at a given generator
 #todo: implement randomized Clean-Upping (alternatingly D and S)
 #todo: implement recognition of being loop-type 
 #todo: implement recognition of local systems (optional)
 #todo: implement Cancellation (optional)
+#todo: add a way to convert BNComplexes into Complexes (optional; could be useful for twisting)
 #todo: implement pairing theorem (just for fun!)
 
 BNmor0 = BNmor([])
@@ -266,12 +280,14 @@ alg=[[1,2],[-1,34],[0,9],[3,0],[-342,999],[0,-1],[1,-1],[-1,-1]]
 print(alg)
 print(BNmor(alg).BNAlg2String())
 
-complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Cobordism(b, c, [[3,0,-1]]) ,ZeroCob]])
+complex1 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob], [Cobordism(b, c, [[3,0,-1]]) ,ZeroCob ,ZeroCob], [Cobordism(b, c, [[3,0,-1]]) ,ZeroCob ,ZeroCob]])
 BNcomplex1 = CobComplex2BNComplex(complex1)
 
 PrettyPrintBNComplex(BNcomplex1)
+BNcomplex1.isotopy(1,2,BNmor([[0,1]]))
+PrettyPrintBNComplex(BNcomplex1)
 
-DrawBNComplex(BNcomplex1, "BNcomplex1.svg")
+#DrawBNComplex(BNcomplex1, "BNcomplex1.svg")
 
 print(CobordismToBNAlg(Cobordism(b,c,[[1,0,24]])).pairs)
 print(CobordismToBNAlg(Cobordism(b,b,[[1,0,1,24]])).pairs)
