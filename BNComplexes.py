@@ -1,11 +1,13 @@
 import itertools as itertools
 import numpy as np
 import math
+from random import choice
 from KhT import *
 from Tangles import *
 from Complex import *
 from Drawing import *
 from Cobordisms import *
+import time
 
 def ToExponent(exponent):
     return str(exponent).translate(str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹"))
@@ -31,13 +33,17 @@ class BNobj(object):
         else: 
             return "○"#c (hollow dot)
     
-    def BNobj2String(self,switch="idem"):        
+    def BNobj2String(self,switch="idem",index=-1):        
         
         if "idem" in switch:
             idem=self.idem2dot()
         else:
-            idem=""
+            idem = ""
         
+        if (index == -1) or ("index" not in switch):
+            index = ""
+        else:
+            index = str(index)+":"
         if "q" in switch:
             q="q"+ToExponent(self.q)
         else:
@@ -51,7 +57,7 @@ class BNobj(object):
         else:
             delta=""
         
-        return q+h+delta+idem
+        return index+q+h+delta+idem
 
 class BNmor(object):
     """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
@@ -83,10 +89,6 @@ class BNmor(object):
     def __mul__(self, other):
         return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0]).simplify_BNmor()
     
-    def negative(self):
-        self.pairs=[[pair[0],(-1)*pair[1]] for pair in self.pairs]
-        return self
-    
     def is_identity(self):
         if len(self.pairs)!=1:
             return False
@@ -96,6 +98,12 @@ class BNmor(object):
             return True
         else:
             return False
+    
+    def contains_D(self):
+        return all([pair[0]<=0 for pair in self.pairs])==False
+    
+    def contains_S(self):
+        return all([pair[0]>=0 for pair in self.pairs])==False
     
     def BNAlg2String(self):
         string=""
@@ -161,10 +169,13 @@ class BNComplex(object):
         """
         if (switch=="safe") & ((self.diff)[start,end].pairs != []):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
-        self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
+        alg_neg=BNmor([[pair[0],(-1)*pair[1]] for pair in alg.pairs])
+        #print("precomp: ",[(alg_neg*element).pairs for element in self.diff[start,:]])
+        self.diff[end,:]+=[alg_neg*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
+        #print("postcomp: ",[(element*alg).pairs for element in self.diff[:,end]])
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
     
-    def isolate_arrow(self,gen, start, end, alg):
+    def isolate_arrow(self,start, end, alg):
         """ Try to isotope away all arrows with the same start or the same end as 'arrow'. 
         'arrow' is a list [start, end, alg], where 'alg' is a BNmor with a single entry.
         """
@@ -186,7 +197,87 @@ class BNComplex(object):
                 if pair[0]*face>0:# same face
                     if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
                         self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]]),"unsafe")
+    
+    def clean_up_once(self,SD):
+        """ Simplify complex wrt the face D (1) or S (-1).
+        """
+        remaining=list(range(len(self.gens))) # list of unsimplified generators
         
+        while remaining !=[]:
+            #print(remaining)
+            start_current=choice(remaining)
+            #print(start_current)
+            end_current = -1
+            index_current = -1
+            power_current = SD*math.inf
+            
+            changed=True
+            
+            while changed == True:
+                
+                changed=False
+                for end in remaining: # find shortest arrow of the given face starting at start_current
+                    for index, pair in enumerate(self.diff[end,start_current].pairs):
+                        if pair[0]*SD > 0: # same face
+                            if (power_current-pair[0])*SD > 0:
+                                end_current = end
+                                index_current = index
+                                power_current = pair[0]
+                                changed = True
+            
+                if end_current==-1: # if no element: subtract from remaining
+                    end_current=start_current
+                    start_current=-1
+                
+                changed=False
+                for start in remaining: # try to find shorter arrow of the given face ending at end_current
+                    for index, pair in enumerate(self.diff[end_current,start].pairs):
+                        if pair[0]*SD > 0: # same face
+                            if (power_current-pair[0])*SD > 0:
+                                start_current = start
+                                index_current = index
+                                power_current = pair[0]
+                                changed = True
+                
+            if (end_current == -1) or (start_current == -1): # if no element: subtract from remaining
+                if end_current == -1:
+                    remaining.remove(start_current)
+                else:
+                    remaining.remove(end_current)
+                
+            else: # isolate this shortest arrow
+                self.isolate_arrow(start_current, end_current, BNmor([self.diff[end_current,start_current].pairs[index_current]]))
+                #print("start:", start_current,"end:", end_current, "isotopy:",self.diff[end_current,start_current].pairs[index_current])
+                remaining.remove(start_current)
+                remaining.remove(end_current)
+    
+    def is_looptype(self):# todo: This could be made much more efficient!!
+        """Return 'True' is the complex is loop-type.
+        """
+        matrix_D=np.array([[entry.contains_D() for entry in row] for row in self.diff])
+        matrix_S=np.array([[entry.contains_S() for entry in row] for row in self.diff])
+        size=len(matrix_D)
+        return  all([list(matrix_D[:,index]).count(True)<2 for index in range(size)]) & \
+                all([list(matrix_D[index,:]).count(True)<2 for index in range(size)]) & \
+                all([list(matrix_S[:,index]).count(True)<2 for index in range(size)]) & \
+                all([list(matrix_S[index,:]).count(True)<2 for index in range(size)])
+    
+    def clean_up(self,max_iter=200):
+        """ Simplify complex alternatingly wrt D and S faces and stop after at most max_iter iterations. The default is 200 iterations. 
+        """
+        
+        iter=0
+        while iter<max_iter:
+            if iter % 10 == 0: # check every now and then during the iteration, whether the complex is already loop-type.
+                if self.is_looptype():
+                    print("Finished after "+str(iter)+" iteration(s).")
+                    iter = max_iter
+            iter+=1
+            self.clean_up_once(-1)# faces S
+            self.clean_up_once(1) # faces D
+            print("iteration: "+str(iter), end='\r')# testing how to monitor a process
+            #time.sleep(1)
+                
 
 ZeroMor=BNmor([])
 
@@ -230,7 +321,7 @@ def CobComplex2BNComplex(complex):
     diff=[[CobordismToBNAlg(cob) for cob in row] for row in complex.morphisms]
     return BNComplex(gens,diff)
 
-def DrawBNComplex(complex, filename):
+def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
     "draw a graph of for the BNcomplex"
     g = Graph()
     size = len(complex.gens)
@@ -244,7 +335,7 @@ def DrawBNComplex(complex, filename):
             Vertex_colour[g.vertex(i)] = "black"
         else:
             Vertex_colour[g.vertex(i)] = "white"
-        Vertex_labelling[g.vertex(i)]=gen.BNobj2String("qhdelta")
+        Vertex_labelling[g.vertex(i)]=gen.BNobj2String(vertex_switch,i)
     vprops =  {'text' : Vertex_labelling,\
                'color' : "black",\
                'fill_color' : Vertex_colour,\
@@ -283,7 +374,6 @@ def PrettyPrintBNComplex(complex):
     print(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in complex.diff]),range(len(complex.diff)),tablefmt="fancy_grid"))
 
 # Claudius: I'll keep working on this list... 
-#todo: implement randomized Clean-Upping (alternatingly D and S)
 #todo: implement recognition of being loop-type 
 #todo: implement recognition of local systems (optional)
 #todo: implement Cancellation (optional)
@@ -292,36 +382,57 @@ def PrettyPrintBNComplex(complex):
 
 BNmor0 = BNmor([])
 
-b=CLT(1,3,[1,0,3,2],[2,3])
-c=CLT(1,3,[3,2,1,0],[1,0])
 
-alg=[[1,2],[-1,34],[0,9],[3,0],[-342,999],[0,-1],[1,-1],[-1,-1]]
-print(alg)
-print(BNmor(alg).BNAlg2String())
+#####################
+####### TESTS #######
+#####################
 
-complex1 = ChainComplex([b,b,c,c], \
-                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob ,ZeroCob ,ZeroCob ,ZeroCob],\
-                 [Cobordism(b, c, [[3,0,-1]]) ,Cobordism(b, c, [[2,0,-1]]) ,ZeroCob ,ZeroCob],\
-                 [Cobordism(b, c, [[3,0,-1]]) ,ZeroCob ,ZeroCob ,ZeroCob]])
-BNcomplex1 = CobComplex2BNComplex(complex1)
+def Test_TwoTwistTangle():
+    b=CLT(1,3,[1,0,3,2],[2,3])
+    c=CLT(1,3,[3,2,1,0],[1,0])
 
-PrettyPrintBNComplex(BNcomplex1)
+    complex1 = ChainComplex([b,c,c,b,c,c], \
+                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, ZeroCob],\
+                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, Cobordism(c, c, [[0,0,1,-1]]), ZeroCob]])
+    BNComplex1 = CobComplex2BNComplex(complex1)
+    DrawBNComplex(BNComplex1, "TwoTwistTangle_before_cleanup.svg","index_h")
+    PrettyPrintBNComplex(BNComplex1)
 
-#BNcomplex1.isolate_arrow(1,0,1,BNmor([[-5,-1]]))
-BNcomplex1.isolate_arrow(1,1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
+    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
+    #BNComplex1.clean_up_once(-1)
+    BNComplex1.clean_up()
+    DrawBNComplex(BNComplex1, "TwoTwistTangle_after_cleanup.svg","index_h")
+    PrettyPrintBNComplex(BNComplex1)
+    
+def Test_SplittingCurve():
+    b=CLT(1,3,[1,0,3,2],[2,3])
+    c=CLT(1,3,[3,2,1,0],[1,0])
+    
+    complex1 = ChainComplex([b,c,c,b,c,c], \
+                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob, ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, Cobordism(c, c, [[0,0,1,-1]])],\
+                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, ZeroCob, ZeroCob]])
+    BNComplex1 = CobComplex2BNComplex(complex1)
+    DrawBNComplex(BNComplex1, "SplittingCurve_before_cleanup.svg","index_h")
+    PrettyPrintBNComplex(BNComplex1)
 
-#BNcomplex1.isotopy(1,2,BNmor([[0,1]]))
-PrettyPrintBNComplex(BNcomplex1)
-
-DrawBNComplex(BNcomplex1, "BNcomplex1.svg")
-
-print(CobordismToBNAlg(Cobordism(b,c,[[1,0,24]])).pairs)
-print(CobordismToBNAlg(Cobordism(b,b,[[1,0,1,24]])).pairs)
-print(CobordismToBNAlg(Cobordism(b,b,[[1,1,1,24]])).pairs)
-print(CobordismToBNAlg(Cobordism(b,b,[[1,0,0,24]])).pairs)
-
-#print((BNmor([[0,1]])+BNmor([[0,-1],[2,24]])).pairs)
-#print((BNmor([[0,1]])*BNmor([[2,24]])).pairs)
-#print((BNmor([[-1,1]])*BNmor([[2,24]])).pairs)
+    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
+    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
+    #BNComplex1.clean_up_once(-1)
+    BNComplex1.clean_up()
+    DrawBNComplex(BNComplex1, "SplittingCurve_after_cleanup.svg","index_h")
+    PrettyPrintBNComplex(BNComplex1)
+    
+Test_TwoTwistTangle()
+Test_SplittingCurve()
 
