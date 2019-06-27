@@ -34,7 +34,6 @@ Sbc=Cobordism(b,c,[[0,0,1]])
 Scb=Cobordism(c,b,[[0,0,1]])
 MinusScb = Cobordism(c,b,[[0,0,-1]])
 RightDc = Cobordism(c,c,[[0,0,1,1]])
-
    
 # testcobordism=Cobordism(b,c,[[2,1,2],[0,0,4]])
 # drawclt(cup(10,3)*cap(10,2)*cup(10,4)*cup(8,6)+cap(2,1),"test1")
@@ -45,16 +44,6 @@ T1=CLT(2,4,[2,5,0,4,3,1],[0,0])
 T2=CLT(2,4,[2,3,0,1,5,4],[0,0])
 cob1=Cobordism(T1,T2,[[4,1,0,1]])
 cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,0,1,1],[1,1,1,19]])
-
-
-complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [ZeroCob, Cobordism(b,b, [[0,0,1,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [Cobordism(c, c, [[1,0,0,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob, Scb, ZeroCob, ZeroCob],\
-                                        [ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]]), ZeroCob, Cobordism(b,b,[[0,0,1,1]]), ZeroCob]])
-DrawFourEndedChainComplex(complex5, "complex5.png")
-complex5.ValidMorphism()
 
 NewT1 = AddCapToCLT(T1, 1)
 drawclt(NewT1, "NewT1")
@@ -98,6 +87,15 @@ def TestSet1():
     return 0
 
 def TestSet2():
+    complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [ZeroCob, Cobordism(b,b, [[0,0,1,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [Cobordism(c, c, [[1,0,0,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                                        [ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob, Scb, ZeroCob, ZeroCob],\
+                                        [ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]]), ZeroCob, Cobordism(b,b,[[0,0,1,1]]), ZeroCob]])
+    DrawFourEndedChainComplex(complex5, "complex5.png")
+    complex5.ValidMorphism()
+
     complex5cap = AddCap(complex5, 1)
     # PrintComplexMorphismIntMatrix(complex5cap)
     # PrintComplexMorphismDecoCompMatrix(complex5cap)
@@ -105,6 +103,13 @@ def TestSet2():
     DrawFourEndedChainComplex(complex5again1, "complex5again1.png")
     complex5again2 = AddCup(AddCap(complex5, 0), 1)
     DrawFourEndedChainComplex(complex5again2, "complex5again2.png")
+    
+    complex5double = AddCup(AddCap(complex5, 0),0)
+    DrawFourEndedChainComplex(complex5double, "complex5double.png")
+    
+    complex5cup = AddCup(complex5, 0)
+    print("complex5cup")
+    PrettyPrintComplex(complex5cup, "old long")
 
 def TestSet3():
     CLT01 = CLT(1,3,[1,0,3,2],[0,0])
@@ -163,6 +168,8 @@ def TestSet5():
     
     complex1double = AddCup(complex1cap0, 0)
     DrawFourEndedChainComplex(complex1double, "complex1double.png")
+    
+    AddPosCrossing(complex1, 0)
     
 def TestSet6():
     RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
@@ -245,16 +252,27 @@ def TestSet7():
     PrettyPrintComplex(complex2cup, "old long")
     print("complex2again")
     PrettyPrintComplex(complex2, "old long")
-    
-TestSet0()
-TestSet1()
-TestSet2()
-TestSet3()
-TestSet4()
-TestSet5()
-TestSet6()
-TestSet7()
 
+def TestSet8():
+    TangleC = CLT(2,2, [2,3,0,1], [0,0])
+    BasicComplex = ChainComplex([TangleC], [[ZeroCob]])
+    temp1 = AddCap(BasicComplex,1)
+    temp2 = AddNegCrossing(temp1,0)
+    temp3 = AddNegCrossing(temp2,2)
+    TwoNegCrossing = AddCup(temp3,1)
+    DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossing.png")
+    PrettyPrintComplex(TwoNegCrossing, "old long")
+    
+
+# TestSet0()
+# TestSet1()
+# TestSet2()
+# TestSet3()
+# TestSet4()
+# TestSet5()
+# TestSet6()
+# TestSet7()
+TestSet8()
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
 
@@ -278,6 +296,7 @@ def TestAlgTest():
     C=[[1,1],[0,0]]
     print(np.tensordot(C,B, axes=(-1,-2)))
 
+
 # TestAlgTest()
 
 ## comparing efficiency of two functions
@@ -286,4 +305,3 @@ def TestAlgTest():
 #print(timeit.timeit('simplify_decos([[1,0,1,1],[0,0,1,2],[0,0,1,3],[0,1,1,5],[1,0,1,12]])',setup="from __main__ import simplify_decos", number=1000))
 ## old vs new: 0.14744883000093978 vs 0.009813104006752837
 print("File executed successfully")
-
