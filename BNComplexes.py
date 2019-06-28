@@ -374,7 +374,6 @@ def PrettyPrintBNComplex(complex):
     print(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in complex.diff]),range(len(complex.diff)),tablefmt="fancy_grid"))
 
 # Claudius: I'll keep working on this list... 
-#todo: implement recognition of being loop-type 
 #todo: implement recognition of local systems (optional)
 #todo: implement Cancellation (optional)
 #todo: add a way to convert BNComplexes into Complexes (optional; could be useful for twisting)
