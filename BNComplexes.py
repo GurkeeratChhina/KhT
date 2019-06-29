@@ -10,7 +10,7 @@ from Cobordisms import *
 import time
 
 def ToExponent(exponent):
-    return str(exponent).translate(str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹"))
+    return str(exponent).translate(str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹"))
 
 class BNobj(object):
     """A BNobject is a pair [idempotent,q,h,delta(optional)], where idempotent is either 0 (b=solid dot) or 1 (c=hollow dot). 
@@ -321,7 +321,7 @@ def CobComplex2BNComplex(complex):
     diff=[[CobordismToBNAlg(cob) for cob in row] for row in complex.morphisms]
     return BNComplex(gens,diff)
 
-def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
+def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta",canvas_size=(1200, 600)):
     "draw a graph of for the BNcomplex"
     g = Graph()
     size = len(complex.gens)
@@ -341,7 +341,6 @@ def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
                'fill_color' : Vertex_colour,\
                'font_size' : 20,\
                'size' : 20}
-    #Position[g.vertex(i)] = [50*(2*i+1), 200]
     
     Edge_labeling = g.new_edge_property("string")
     for i in range(size):
@@ -358,7 +357,11 @@ def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
                 'font_weight' : cairo.FONT_WEIGHT_BOLD,\
                 'marker_size' : 20,\
                 'font_size' : 22}   
-    graph_draw(g, vprops=vprops, eprops=eprops, output_size=(1200, 400), bg_color=[1,1,1,1],  output="Output/" + filename)
+                
+    position = fruchterman_reingold_layout(g, n_iter=1000)
+    #Position[g.vertex(i)] = [50*(2*i+1), 200]
+    
+    graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
 
 def PrettyPrintBNComplex(complex):
     """Print a complex in human readable form.
@@ -432,6 +435,34 @@ def Test_SplittingCurve():
     DrawBNComplex(BNComplex1, "SplittingCurve_after_cleanup.svg","index_h")
     PrettyPrintBNComplex(BNComplex1)
     
-Test_TwoTwistTangle()
-Test_SplittingCurve()
+def Test_2m3pt():# (2,-3)-pretzel tangle
+    
+    BNComplex1 = BNComplex(\
+        [BNobj(1,-12,-5), BNobj(1,-10,-4),\
+         BNobj(0,-11,-4), BNobj(0,-9,-3), BNobj(0,-7,-2),\
+         BNobj(0,-9,-3),  BNobj(0,-7,-2), BNobj(0,-5,-1), BNobj(1,-4,0)],\
+         [[BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor([[1,1],[-2,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor([[-1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor([[-1,-1]]),BNmor([[-2,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor([[1,-1]]),BNmor0,BNmor([[-2,1]]),BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor([[1,1]]),BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[-1,1]]),BNmor0]])
+    DrawBNComplex(BNComplex1, "2m3pt_before_cleanup.svg","index")
+    PrettyPrintBNComplex(BNComplex1)
+
+    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
+    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
+    #BNComplex1.clean_up_once(-1)
+    BNComplex1.clean_up()
+    DrawBNComplex(BNComplex1, "2m3pt_after_cleanup.svg","index")
+    PrettyPrintBNComplex(BNComplex1)
+
+
+Test_2m3pt()
+#Test_TwoTwistTangle()
+#Test_SplittingCurve()
 
