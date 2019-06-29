@@ -43,7 +43,7 @@ class BNobj(object):
         if (index == -1) or ("index" not in switch):
             index = ""
         else:
-            index = str(index)+":"
+            index = str(index)
         if "q" in switch:
             q="q"+ToExponent(self.q)
         else:
@@ -57,14 +57,18 @@ class BNobj(object):
         else:
             delta=""
         
-        return index+q+h+delta+idem
+        grading=q+h+delta
+        
+        if grading == "":
+            return index+grading+idem
+        else:
+            return index+":"+grading+idem
     
     def shift_q(self,shift): #shift q, keep h fixed; create new object
-        return BNobj(self.idem,self.h,self.q+shift,self.delta+shift/2)
+        return BNobj(self.idem,self.q+shift,self.h,self.delta+shift/2)
         
-    
     def shift_h(self,shift): #shift h, keep q fixed; create new object
-        return BNobj(self.idem,self.h+shift,self.q,self.delta-shift)
+        return BNobj(self.idem,self.q,self.h+shift,self.delta-shift)
 
 class BNmor(object):
     """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
@@ -297,16 +301,20 @@ class BNComplex(object):
         else:
             raise Exception('Why are you trying to shift homological grading by something other than an integer? I cannot do that!')
         return BNComplex(new_gens,new_diff)
-      
+    
+    def shift_q(self,shift): # modify the complex
+        self.gens = [gen.shift_q(shift) for gen in self.gens]
+    
     def cone(self,Hpower):
         
         shifted_complex = self.shift_h(1)
+        shifted_complex.shift_q(2*Hpower)
         
         zero_matrix=np.array([[ZeroMor for i in range(len(self.gens))] for i in range(len(self.gens))])
         
         def fill_diagonal(i,j):
             if i==j:
-                return BNmor([[Hpower,1],[-2*Hpower,-1]])
+                return BNmor([[Hpower,1],[-2*Hpower,(-1)**Hpower]])
             else:
                 return ZeroMor
         
@@ -315,9 +323,6 @@ class BNComplex(object):
         new_diff = np.concatenate(\
                 (np.concatenate((self.diff,zero_matrix),axis=1),\
                 np.concatenate((Hdiagonal,shifted_complex.diff),axis=1)),axis=0)
-        
-        for row in new_diff:
-            print([mor.pairs for mor in row])
         
         return BNComplex(self.gens+shifted_complex.gens,new_diff)
 
@@ -400,7 +405,8 @@ def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta",canvas_size=(1
                 'marker_size' : 20,\
                 'font_size' : 22}   
                 
-    position = arf_layout(g, max_iter=0)
+    #position = arf_layout(g, max_iter=0)
+    position = sfdp_layout(g, max_iter=0)
     #Position[g.vertex(i)] = [50*(2*i+1), 200]
     
     graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
@@ -492,7 +498,7 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
           [BNmor0,BNmor0,BNmor0,BNmor([[1,-1]]),BNmor0,BNmor([[-2,1]]),BNmor0,BNmor0,BNmor0],\
           [BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor([[1,1]]),BNmor0,BNmor0],\
           [BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[-1,1]]),BNmor0]])
-    DrawBNComplex(BNComplex1, "2m3pt_before_cleanup.svg","index")
+    DrawBNComplex(BNComplex1, "2m3pt_redBN_before_cleanup.svg","index_qh")
     PrettyPrintBNComplex(BNComplex1)
 
     #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
@@ -500,15 +506,25 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
     #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
     #BNComplex1.clean_up_once(-1)
     BNComplex1.clean_up()
-    DrawBNComplex(BNComplex1, "2m3pt_after_cleanup.svg","index")
+    DrawBNComplex(BNComplex1, "2m3pt_redBN_after_cleanup.svg","index_qh")
     PrettyPrintBNComplex(BNComplex1)
+    # This is the arc invariant = reduced Bar-Natan homology of the (2,-3)-pretzel tangle
     
     BNComplex2 = BNComplex1.cone(1)
     PrettyPrintBNComplex(BNComplex2)
-    DrawBNComplex(BNComplex2, "2m3pt_cone_before_cleanup.svg","index")
+    DrawBNComplex(BNComplex2, "2m3pt_redKh_before_cleanup.svg","index_qh",(2000,2000))
     
     BNComplex2.clean_up()
-    DrawBNComplex(BNComplex2, "2m3pt_cone_before_cleanup.svg","index")
+    DrawBNComplex(BNComplex2, "2m3pt_redKh_after_cleanup.svg","index_qh",(2000,2000))
+    # This is the figure-8 invariant = reduced Khovanov homology of the (2,-3)-pretzel tangle
+    
+    BNComplex3 = BNComplex1.cone(2)
+    PrettyPrintBNComplex(BNComplex3)
+    DrawBNComplex(BNComplex3, "2m3pt_Kh_before_cleanup.svg","index_qh",(2000,2000))
+    
+    BNComplex3.clean_up()
+    DrawBNComplex(BNComplex3, "2m3pt_Kh_after_cleanup.svg","index_qh",(2000,2000))
+    # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
 
 Test_2m3pt()
 #Test_TwoTwistTangle()
