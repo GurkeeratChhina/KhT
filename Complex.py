@@ -108,9 +108,11 @@ def AddCup(Complex, i): # TODO: reduce decorations
                 else:
                     return j
             magic_index = 0
-            for x,comp in enumerate(cob.comps): #TODO: find magic index without iterating twice, dont need defining function
-                if cob.front.top +i in comp:
-                    magic_index = x
+            if cob.decos != []:
+                for x,comp in enumerate(cob.comps): #TODO: find magic index without iterating twice, dont need defining function
+                    if cob.front.top +i in comp:
+                        magic_index = x
+                        break
             def compcup(component): #computes the new component after adding a cup, for components containing at least 3 ends
                 return [decrementby2(j) for j in component if j != cob.front.top+i and j!= cob.front.top+i+1]
             def incrementH(decoration):
@@ -253,15 +255,53 @@ def AddCup(Complex, i): # TODO: reduce decorations
   
 def AddPosCrossing(Complex, i):
     CapCup = AddCap(AddCup(Complex, i), i, "true")
+    sourceelements = Complex.elements
+    targetelements = CapCup.elements
+    NewElements = sourceelements + targetelements
     TopLeft = Complex.morphisms
     BottomRight = CapCup.morphisms
     length1 = len(Complex.elements)
     length2 = len(CapCup.elements)
     TopRight = np.full((length1, length2), ZeroCob, Cobordism)
-    BottomLeft = np. full((length2, length1), ZeroCob, Cobordism) #compute this manually
+    BottomLeft = []
+    for x, targetclt in enumerate(Complex.elements):
+        if targetclt.arcs[targetclt.top +i] == targetclt.top+i+1: #targetclt is closed
+            newRow = []
+            nextRow = []
+            for y, sourceclt in enumerate(Complex.elements):
+                if x == y:
+                    newTarget1 = AddCapToCLT(AddCupToCLT(targetclt, i)[0], i, "true")
+                    newTarget2 = AddCapToCLT(AddCupToCLT(targetclt, i)[1], i, "true")
+                    newcomps = components(sourceclt, newTarget1)
+                    magic_index = 0
+                    for x,comp in enumerate(newcomps):
+                        if sourceclt.top +i in comp:
+                            magic_index = x
+                            break
+                    decos1 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1], [1] + [0 for comp in newcomps] + [-1]] #Compute new decos via neckcutting
+                    decos2 = [[0] + [0 for comp in newcomps] + [1]]
+                    NewCobordism1 = Cobordism(sourceclt, newTarget1, decos1)
+                    NewCobordism2 = Cobordism(sourceclt, newTarget2, decos2)
+                    newRow.append(NewCobordism1)
+                    nextRow.append(NewCobordism2)
+                else:
+                    newRow.append(ZeroCob)
+                    nextRow.append(ZeroCob)
+            BottomLeft.append(newRow)
+            BottomLeft.append(nextRow)
+        else:
+            newRow = []
+            for y, sourceclt in enumerate(Complex.elements):
+                if x == y:
+                    newTarget = AddCapToCLT(AddCupToCLT(targetclt, i)[0], i, "true")
+                    decos = [[0] + [0 for comp in components(sourceclt, newTarget)] + [1]]
+                    NewCobordism = Cobordism(sourceclt, newTarget, decos)
+                    newRow.append(NewCobordism)
+                else:
+                    newRow.append(ZeroCob)
+            BottomLeft.append(newRow)
     NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
                                    np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
-    NewElements = Complex.elements + CapCup.elements
     NewComplex = ChainComplex(NewElements, NewMorphisms)
     return NewComplex
 
@@ -275,34 +315,46 @@ def AddNegCrossing(Complex, i):
     CapCup = AddCap(AddCup(Complex, i), i)
     targetelements = [grshiftclt(clt) for clt in Complex.elements]
     sourceelements = CapCup.elements
-    print("sourceelements", sourceelements)
-    print("targetelements", targetelements)
     NewElements = sourceelements + targetelements
     TopLeft = CapCup.morphisms
     BottomRight = [[grshiftcob(cob) for cob in row] for row in Complex.morphisms]
     length1 = len(sourceelements)
     length2 = len(targetelements)
     TopRight = np.full((length1, length2), ZeroCob, Cobordism)
-    BottomLeft = [] #np. full((length2, length1), ZeroCob, Cobordism) #compute this manually
-    for x, targetclt in enumerate(Complex.elements): #maybe dont need enumerate here
+    BottomLeft = [] 
+    for x, targetclt in enumerate(Complex.elements):
         newRow = []
-        for sourceclt in Complex.elements:
-            fronts = iter(sourceelements)
+        for y, sourceclt in enumerate(Complex.elements):
             if sourceclt.arcs[sourceclt.top +i] == sourceclt.top+i+1: #sourceclt is closed
-                print("closed")
-                decos1 = []
-                decos2 = []
-                newCobordism1 = Cobordism(next(fronts), targetelements[x], decos1) #fill out decos and comps
-                newCobordism2 = Cobordism(next(fronts), targetelements[x], decos2)
-                newRow.append(newCobordism1)
-                newRow.append(newCobordism2)
+                if x == y:
+                    newSource1 = AddCapToCLT(AddCupToCLT(sourceclt, i)[0], i)
+                    newSource2 = AddCapToCLT(AddCupToCLT(sourceclt, i)[1], i)
+                    newTarget = targetelements[x]
+                    newcomps = components(newSource2, newTarget)
+                    magic_index = 0
+                    for x,comp in enumerate(newcomps):
+                        if sourceclt.top +i in comp:
+                            magic_index = x
+                            break
+                    decos1 = [[0] + [0 for comp in newcomps] + [1]]
+                    decos2 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1]]
+                    newCobordism1 = Cobordism(newSource1, newTarget, decos1) #fill out decos and comps
+                    newCobordism2 = Cobordism(newSource2, newTarget, decos2)
+                    newRow.append(newCobordism1)
+                    newRow.append(newCobordism2)
+                else:
+                    newRow.append(ZeroCob)
+                    newRow.append(ZeroCob)
             else: #sourceclt is open
-                print("open")
-                decos = []
-                newCobordism = Cobordism(next(fronts), targetelements[x], decos)
-                newRow.append(newCobordism)
+                if x == y:
+                    newSource = AddCapToCLT(AddCupToCLT(sourceclt, i)[0], i)
+                    newTarget = targetelements[x]
+                    decos = [[0] + [0 for comp in components(newSource, newTarget)] + [1]]
+                    newCobordism = Cobordism(newSource, newTarget, decos)
+                    newRow.append(newCobordism)
+                else:
+                    newRow.append(ZeroCob)
         BottomLeft.append(newRow)
-    print(length1, length2, BottomLeft)
     NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
                                    np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
     NewComplex = ChainComplex(NewElements, NewMorphisms)
