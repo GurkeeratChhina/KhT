@@ -120,7 +120,8 @@ def TestSet3():
     # PrintComplexMorphismIntMatrix(BasicSaddleCup)
     # PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
     # PrettyPrintComplex(BasicSaddleCup)
-    # PrettyPrintComplex(BasicSaddleCup,"long")
+    print("Basic Saddle with Cup")
+    PrettyPrintComplex(BasicSaddleCup,"old long")
     return 0
 
 def TestSet4():
@@ -158,8 +159,8 @@ def TestSet5():
     complex1.ValidMorphism()
    
     complex1cap0 = AddCap(complex1, 0)
-    # print("complex1cap0")
-    # PrettyPrintComplex(complex1cap0,"long")
+    print("complex1cap0")
+    PrettyPrintComplex(complex1cap0,"old long")
     
     DrawFourEndedChainComplex(complex1, "complex1.png")
     
@@ -182,11 +183,11 @@ def TestSet6():
     # This should fail:
     # complex4.ValidMorphism()
     
-    # print("complex3")
-    # PrettyPrintComplex(complex3, "old long")
+    print("complex3")
+    PrettyPrintComplex(complex3, "old long")
     complex3cap0 = AddCap(complex3, 0)
-    # print("complex3cap")
-    # PrettyPrintComplex(complex3cap0, "old long")
+    print("complex3cap")
+    PrettyPrintComplex(complex3cap0, "old long")
     complex3again1 = AddCup(complex3cap0, 1)
     complex3again2 = AddCup(AddCap(complex3, 1), 0)
     complex3again3 = AddCup(AddCap(complex3, 1), 2)
@@ -221,16 +222,16 @@ def TestSet7():
     DrawFourEndedChainComplex(complex2, "complex2.png")
     
     complex2cap1 = AddCap(complex2, 1)
-    # print("complex2cap1")
-    # PrettyPrintComplex(complex2cap1,"long")
+    print("complex2cap1")
+    PrettyPrintComplex(complex2cap1,"old long")
     complex2again = AddCup(complex2cap1, 0)
     DrawFourEndedChainComplex(complex2again, "complex2again.png")
     complex2cap0 = AddCap(complex2, 0)
-    # print("complex2cap0")
-    # PrettyPrintComplex(complex2cap0)
-    # print("\n")
+    print("complex2cap0")
+    PrettyPrintComplex(complex2cap0)
     complex2again2 = AddCup(complex2cap0, 1)
-    # PrettyPrintComplex(complex2again2, "long")
+    print("complex2again2")
+    PrettyPrintComplex(complex2again2, "old long")
     DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
     
     PrettyPrintComplex(complex2cap0, "old long")
@@ -255,13 +256,35 @@ def TestSet7():
 
 def TestSet8():
     TangleC = CLT(2,2, [2,3,0,1], [0,0])
-    BasicComplex = ChainComplex([TangleC], [[ZeroCob]])
-    temp1 = AddCap(BasicComplex,1)
+    TangleB = CLT(2,2, [1,0,3,2], [0,0])
+    BasicComplex1 = ChainComplex([TangleC], [[ZeroCob]])
+    BasicComplex2 = ChainComplex([TangleB], [[ZeroCob]])
+    
+    temp1 = AddCap(BasicComplex1,1)
     temp2 = AddNegCrossing(temp1,0)
     temp3 = AddNegCrossing(temp2,2)
     TwoNegCrossing = AddCup(temp3,1)
     DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossing.png")
+    print("TwoNegCrossing")
     PrettyPrintComplex(TwoNegCrossing, "old long")
+    
+    ClosedOpenNeg = AddNegCrossing(BasicComplex2, 0)
+    DrawFourEndedChainComplex(ClosedOpenNeg, "ClosedOpenNeg.png")
+    print("ClosedOpenNeg")
+    PrettyPrintComplex(ClosedOpenNeg, "old long")
+    
+    temp4 = AddCap(BasicComplex1,1)
+    temp5 = AddPosCrossing(temp4,0)
+    temp6 = AddPosCrossing(temp5,2)
+    TwoPosCrossing = AddCup(temp6,1)
+    DrawFourEndedChainComplex(TwoPosCrossing, "TwoPosCrossing.png")
+    print("TwoPosCrossing")
+    PrettyPrintComplex(TwoPosCrossing, "old long")
+    
+    ClosedOpenPos = AddPosCrossing(BasicComplex2, 0)
+    DrawFourEndedChainComplex(ClosedOpenPos, "ClosedOpenPos.png")
+    print("ClosedOpenPos")
+    PrettyPrintComplex(ClosedOpenPos, "old long")
     
 
 # TestSet0()
@@ -269,7 +292,7 @@ def TestSet8():
 # TestSet2()
 # TestSet3()
 # TestSet4()
-# TestSet5()
+TestSet5()
 # TestSet6()
 # TestSet7()
 TestSet8()
