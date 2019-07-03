@@ -16,7 +16,6 @@ class ChainComplex(object):
         self.morphisms = morphisms
     
     def ValidMorphism(self):
-        # return True
         length = len(self.elements)
         if len(self.morphisms) != length:
             raise Exception('Differential does not have n rows (where n is the number of elements in chain complex)')
@@ -31,6 +30,24 @@ class ChainComplex(object):
         for i in flatten(squared):
             if i.ReduceDecorations() != []:
                 raise Exception('Differential does not square to 0')
+    
+    def findIsom(self):
+        for targetindex, row in enumerate(self.morphisms):
+            for sourceindex, cob in enumerate(row):
+                if cob.isIsom():
+                    return [sourceindex, targetindex]
+        return None
+    
+    def eliminateIsom(self, sourceindex, targetindex):
+        return True
+    
+    def eliminateAll(self):
+        while True:
+            index_to_eliminate = self.findIsom()
+            if index_to_eliminate is None:
+                break
+            else:
+                self.eliminateIsom(index_to_eliminate[0], index_to_eliminate[1])
 
 def AddCapToCLT(clt, i, grshift = "false"):
     def incrementby2(j): #increment TEI by 2 if greater than where cap is to be inserted
@@ -62,8 +79,12 @@ def AddCap(Complex, i, grshift = "false"):
                         return j+2
                     else:
                         return j
-                newcomps=[[incrementby2(x) for x in comp] for comp in cob.comps] + [[cob.front.top +i, cob.front.top+i+1]]         
-                NewCob = Cobordism(NewElements[j], NewElements[k], [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos], newcomps)
+                newcomps=[[incrementby2(x) for x in comp] for comp in cob.comps] + [[cob.front.top +i, cob.front.top+i+1]]
+                if grshift == "true":
+                    newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos]
+                else: 
+                    newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos]
+                NewCob = Cobordism(NewElements[j], NewElements[k], newDecos, newcomps)
                 NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
@@ -309,7 +330,8 @@ def grshiftclt(clt):
     return CLT(clt.top, clt.bot, clt.arcs, [j+1 for j in clt.gr])
 
 def grshiftcob(cob):
-    return Cobordism(grshiftclt(cob.front), grshiftclt(cob.back), cob.decos, cob.comps)
+    newDecos = [deco[:-1] + [deco[-1]*-1] for deco in cob.decos]
+    return Cobordism(grshiftclt(cob.front), grshiftclt(cob.back), newDecos, cob.comps)
     
 def AddNegCrossing(Complex, i):
     CapCup = AddCap(AddCup(Complex, i), i)

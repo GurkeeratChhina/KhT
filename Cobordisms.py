@@ -158,7 +158,16 @@ class Cobordism(object):
         self.decos = ReducedDecorations
         return ReducedDecorations
     
-   
+    def isIsom(self):
+        if len(self.decos) != 1 or len(self.decos[0]) != len(self.comps) +2:
+            return False
+        for x in self.decos[0][:-1]:
+            if x != 0:
+                return False
+        if self.decos[0][-1] != 1 and self.decos[0][-1] != -1:
+            return False
+        return True
+
 def simplify_decos(decos):
     """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
     if decos == []:
