@@ -1,3 +1,19 @@
+# -*- coding: utf-8 -*-
+# COPYRIGHT 2019 Gurkeerat Chhina, Claudius Zibrowius
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import itertools as itertools
 import numpy as np
 import math
@@ -10,7 +26,7 @@ from Cobordisms import *
 import time
 
 def ToExponent(exponent):
-    return str(exponent).translate(str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹"))
+    return str(exponent).translate(str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹"))
 
 class BNobj(object):
     """A BNobject is a pair [idempotent,q,h,delta(optional)], where idempotent is either 0 (b=solid dot) or 1 (c=hollow dot). 
@@ -43,7 +59,7 @@ class BNobj(object):
         if (index == -1) or ("index" not in switch):
             index = ""
         else:
-            index = str(index)+":"
+            index = str(index)
         if "q" in switch:
             q="q"+ToExponent(self.q)
         else:
@@ -57,7 +73,18 @@ class BNobj(object):
         else:
             delta=""
         
-        return index+q+h+delta+idem
+        grading=q+h+delta
+        
+        if grading == "":
+            return index+grading+idem
+        else:
+            return index+":"+grading+idem
+    
+    def shift_q(self,shift): #shift q, keep h fixed; create new object
+        return BNobj(self.idem,self.q+shift,self.h,self.delta+shift/2)
+        
+    def shift_h(self,shift): #shift h, keep q fixed; create new object
+        return BNobj(self.idem,self.q,self.h+shift,self.delta-shift)
 
 class BNmor(object):
     """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
@@ -104,6 +131,9 @@ class BNmor(object):
     
     def contains_S(self):
         return all([pair[0]>=0 for pair in self.pairs])==False
+    
+    def negative(self): #create new morphism
+        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs])
     
     def BNAlg2String(self):
         string=""
@@ -169,10 +199,7 @@ class BNComplex(object):
         """
         if (switch=="safe") & ((self.diff)[start,end].pairs != []):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
-        alg_neg=BNmor([[pair[0],(-1)*pair[1]] for pair in alg.pairs])
-        #print("precomp: ",[(alg_neg*element).pairs for element in self.diff[start,:]])
-        self.diff[end,:]+=[alg_neg*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
-        #print("postcomp: ",[(element*alg).pairs for element in self.diff[:,end]])
+        self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
     
     def isolate_arrow(self,start, end, alg):
@@ -277,7 +304,43 @@ class BNComplex(object):
             self.clean_up_once(1) # faces D
             print("iteration: "+str(iter), end='\r')# testing how to monitor a process
             #time.sleep(1)
-                
+    
+    def negative(self): #create new morphism
+        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs])
+    
+    def shift_h(self,shift): # create new complex
+        new_gens = [gen.shift_h(shift) for gen in self.gens]
+        if shift % 2 == 0:
+            new_diff = self.diff
+        elif shift % 2 == 1:
+            new_diff = [[alg.negative() for alg in row] for row in self.diff]
+        else:
+            raise Exception('Why are you trying to shift homological grading by something other than an integer? I cannot do that!')
+        return BNComplex(new_gens,new_diff)
+    
+    def shift_q(self,shift): # modify the complex
+        self.gens = [gen.shift_q(shift) for gen in self.gens]
+    
+    def cone(self,Hpower):
+        
+        shifted_complex = self.shift_h(1)
+        shifted_complex.shift_q(2*Hpower)
+        
+        zero_matrix=np.array([[ZeroMor for i in range(len(self.gens))] for i in range(len(self.gens))])
+        
+        def fill_diagonal(i,j):
+            if i==j:
+                return BNmor([[Hpower,1],[-2*Hpower,(-1)**Hpower]])
+            else:
+                return ZeroMor
+        
+        Hdiagonal=np.array([[fill_diagonal(i,j) for j in range(len(self.gens))] for i in range(len(self.gens))])
+        
+        new_diff = np.concatenate(\
+                (np.concatenate((self.diff,zero_matrix),axis=1),\
+                np.concatenate((Hdiagonal,shifted_complex.diff),axis=1)),axis=0)
+        
+        return BNComplex(self.gens+shifted_complex.gens,new_diff)
 
 ZeroMor=BNmor([])
 
@@ -321,7 +384,7 @@ def CobComplex2BNComplex(complex):
     diff=[[CobordismToBNAlg(cob) for cob in row] for row in complex.morphisms]
     return BNComplex(gens,diff)
 
-def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
+def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta",canvas_size=(1200, 600)):
     "draw a graph of for the BNcomplex"
     g = Graph()
     size = len(complex.gens)
@@ -341,7 +404,6 @@ def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
                'fill_color' : Vertex_colour,\
                'font_size' : 20,\
                'size' : 20}
-    #Position[g.vertex(i)] = [50*(2*i+1), 200]
     
     Edge_labeling = g.new_edge_property("string")
     for i in range(size):
@@ -358,7 +420,12 @@ def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
                 'font_weight' : cairo.FONT_WEIGHT_BOLD,\
                 'marker_size' : 20,\
                 'font_size' : 22}   
-    graph_draw(g, vprops=vprops, eprops=eprops, output_size=(1200, 400), bg_color=[1,1,1,1],  output="Output/" + filename)
+                
+    #position = arf_layout(g, max_iter=0)
+    position = sfdp_layout(g, max_iter=0)
+    #Position[g.vertex(i)] = [50*(2*i+1), 200]
+    
+    graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
 
 def PrettyPrintBNComplex(complex):
     """Print a complex in human readable form.
@@ -432,6 +499,50 @@ def Test_SplittingCurve():
     DrawBNComplex(BNComplex1, "SplittingCurve_after_cleanup.svg","index_h")
     PrettyPrintBNComplex(BNComplex1)
     
-Test_TwoTwistTangle()
-Test_SplittingCurve()
+def Test_2m3pt():# (2,-3)-pretzel tangle
+    
+    BNComplex1 = BNComplex(\
+        [BNobj(1,-12,-5), BNobj(1,-10,-4),\
+         BNobj(0,-11,-4), BNobj(0,-9,-3), BNobj(0,-7,-2),\
+         BNobj(0,-9,-3),  BNobj(0,-7,-2), BNobj(0,-5,-1), BNobj(1,-4,0)],\
+         [[BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor([[1,1],[-2,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor([[-1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor([[-1,-1]]),BNmor([[-2,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor([[1,-1]]),BNmor0,BNmor([[-2,1]]),BNmor0,BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor([[1,1]]),BNmor0,BNmor0],\
+          [BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[-1,1]]),BNmor0]])
+    DrawBNComplex(BNComplex1, "2m3pt_redBN_before_cleanup.svg","index_qh")
+    PrettyPrintBNComplex(BNComplex1)
+
+    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
+    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
+    #BNComplex1.clean_up_once(-1)
+    BNComplex1.clean_up()
+    DrawBNComplex(BNComplex1, "2m3pt_redBN_after_cleanup.svg","index_qh")
+    PrettyPrintBNComplex(BNComplex1)
+    # This is the arc invariant = reduced Bar-Natan homology of the (2,-3)-pretzel tangle
+    
+    BNComplex2 = BNComplex1.cone(1)
+    PrettyPrintBNComplex(BNComplex2)
+    DrawBNComplex(BNComplex2, "2m3pt_redKh_before_cleanup.svg","index_qh",(2000,2000))
+    
+    BNComplex2.clean_up()
+    DrawBNComplex(BNComplex2, "2m3pt_redKh_after_cleanup.svg","index_qh",(2000,2000))
+    # This is the figure-8 invariant = reduced Khovanov homology of the (2,-3)-pretzel tangle
+    
+    BNComplex3 = BNComplex1.cone(2)
+    PrettyPrintBNComplex(BNComplex3)
+    DrawBNComplex(BNComplex3, "2m3pt_Kh_before_cleanup.svg","index_qh",(2000,2000))
+    
+    BNComplex3.clean_up()
+    DrawBNComplex(BNComplex3, "2m3pt_Kh_after_cleanup.svg","index_qh",(2000,2000))
+    # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
+
+Test_2m3pt()
+#Test_TwoTwistTangle()
+#Test_SplittingCurve()
 
