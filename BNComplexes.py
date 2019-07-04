@@ -375,9 +375,9 @@ def CLT2BNObj(clt):
     if clt.top !=1 or clt.bot !=3:
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     elif clt.arcs[0]==1:
-        return BNobj(0,clt.gr[0],clt.gr[1]) #b
+        return BNobj(0,clt.qgr,clt.pgr) #b
     elif clt.arcs[0]==3:
-        return BNobj(1,clt.gr[0],clt.gr[1]) #c
+        return BNobj(1,clt.qgr,clt.pgr) #c
 
 def CobComplex2BNComplex(complex):
     gens=[CLT2BNObj(clt) for clt in complex.elements]

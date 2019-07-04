@@ -20,6 +20,7 @@ from KhT import *
 from Tangles import *
 from Cobordisms import *
 from Drawing import *
+import time
 
 class ChainComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -418,3 +419,43 @@ def AddNegCrossing(Complex, i):
                                    np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
     NewComplex = ChainComplex(NewElements, NewMorphisms)
     return NewComplex
+
+def BNbracket(string,start=1):
+    """compute the Bar-Natan bracket for tangle spectified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
+    <type> is equal to:
+        'pos': positive crossing
+        'neg': negative crossing
+        'cup': cup
+        'cap': cap
+    <index> is the index at which the crossing, cap or cup sits. 
+    The optional paramter 'start' is an integer which specifies the number of tangle ends at the top.
+    E.g. 'BNbracket('cup0pos0',2)' is a (2,0)-tangle which is decomposed as a positive crossing followed by a cap.
+    """
+    stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
+    stringlist.reverse()
+    
+    cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
+    
+    for i,word in enumerate(stringlist):
+        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\r')# testing how to monitor a process
+        time.sleep(0.1)
+        
+        if word[0]=="pos":
+            cx=AddPosCrossing(cx, word[1])
+            cx.eliminateAll()
+        
+        if word[0]=="neg":
+            cx=AddNegCrossing(cx, word[1])
+            cx.eliminateAll()
+        
+        if word[0]=="cup":
+            cx=AddCup(cx, word[1])
+            cx.eliminateAll()
+        
+        if word[0]=="cap":
+            cx=AddCap(cx, word[1])
+    
+    print("Successfully computed the complex for the tangle: \n"+string)
+    return cx
+
+

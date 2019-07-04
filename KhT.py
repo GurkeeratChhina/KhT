@@ -58,6 +58,7 @@ def prod(iterable):
         prod *= x
     return prod
 
+
 #
 # dictionary
 #

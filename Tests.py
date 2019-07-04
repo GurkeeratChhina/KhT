@@ -20,6 +20,7 @@ from Tangles import *
 from Cobordisms import *
 from Complex import *
 from Drawing import *
+from BNComplexes import *
 
 # create basic crossingless tangles
 def cup_alt(n,i):
@@ -325,6 +326,18 @@ def TestSet9():
     temp7.eliminateAll()
     DrawFourEndedChainComplex(temp7, "-2_3_pretzel.png")
 
+def TestSet10():
+    cx=BNbracket("cup1.pos2.pos2.neg0.neg0.neg0.cap1",2)
+    DrawFourEndedChainComplex(cx, "-2_3_pretzel.png")
+    
+def TestSet10():
+    cx=BNbracket("cup1.neg2.neg2.neg2.cap3.pos0.pos0.cap1")
+    BNcx=CobComplex2BNComplex(cx)
+    DrawBNComplex(BNcx, "2m3pt_redBN_before_cleanupX.svg","index_h")
+    PrettyPrintBNComplex(BNcx)
+    BNcx.clean_up()
+    DrawBNComplex(BNcx, "2m3pt_redBN_after_cleanupX.svg","index_h")
+    PrettyPrintBNComplex(BNcx)
 
 # TestSet0()
 # TestSet1()
@@ -335,30 +348,8 @@ def TestSet9():
 # TestSet6()
 # TestSet7()
 # TestSet8()
-TestSet9()
-
-# proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
-
-class testalg(object):
-	def __init__(self,x):
-		self.x = x
-	def __mul__(self, other):
-		return testalg(2*self.x*other.x)
-	def __add__(self, other):
-		return testalg(2+self.x+other.x)
-        
-
-def TestAlgTest():
-    a=testalg(1)
-    b=testalg(2)
-    c=testalg(3)
-    d=testalg(4)
-    A=[[a,b],[c,d]]
-    print((np.tensordot(A,A, axes=(-1,-2)))[0,0].x)        
-    B=[[1,2],[3,4]]
-    C=[[1,1],[0,0]]
-    print(np.tensordot(C,B, axes=(-1,-2)))
-
+# TestSet9()
+TestSet10()
 
 # TestAlgTest()
 
