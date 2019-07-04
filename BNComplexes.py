@@ -69,7 +69,7 @@ class BNobj(object):
         else:
             h=""
         if "delta" in switch:
-            delta="δ"+ToExponent(self.h)
+            delta="δ"+ToExponent(self.h) #should this be self.delta?
         else:
             delta=""
         
@@ -384,11 +384,12 @@ def CobComplex2BNComplex(complex):
     diff=[[CobordismToBNAlg(cob) for cob in row] for row in complex.morphisms]
     return BNComplex(gens,diff)
 
-def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta",canvas_size=(1200, 600)):
+def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
     "draw a graph of for the BNcomplex"
     g = Graph()
     size = len(complex.gens)
     g.add_vertex(size)
+    canvas_size = (200*size, 150*size)
     
     Vertex_colour = g.new_vertex_property("string") # "black" is the horizontal CLT (b) and "white" is the vertical CLT (c)
     Vertex_labelling = g.new_vertex_property("string")
@@ -528,18 +529,18 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
     
     BNComplex2 = BNComplex1.cone(1)
     PrettyPrintBNComplex(BNComplex2)
-    DrawBNComplex(BNComplex2, "2m3pt_redKh_before_cleanup.svg","index_qh",(2000,2000))
+    DrawBNComplex(BNComplex2, "2m3pt_redKh_before_cleanup.svg","index_qh")
     
     BNComplex2.clean_up()
-    DrawBNComplex(BNComplex2, "2m3pt_redKh_after_cleanup.svg","index_qh",(2000,2000))
+    DrawBNComplex(BNComplex2, "2m3pt_redKh_after_cleanup.svg","index_qh")
     # This is the figure-8 invariant = reduced Khovanov homology of the (2,-3)-pretzel tangle
     
     BNComplex3 = BNComplex1.cone(2)
     PrettyPrintBNComplex(BNComplex3)
-    DrawBNComplex(BNComplex3, "2m3pt_Kh_before_cleanup.svg","index_qh",(2000,2000))
+    DrawBNComplex(BNComplex3, "2m3pt_Kh_before_cleanup.svg","index_qh")
     
     BNComplex3.clean_up()
-    DrawBNComplex(BNComplex3, "2m3pt_Kh_after_cleanup.svg","index_qh",(2000,2000))
+    DrawBNComplex(BNComplex3, "2m3pt_Kh_after_cleanup.svg","index_qh")
     # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
 
 Test_2m3pt()

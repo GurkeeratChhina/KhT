@@ -330,7 +330,7 @@ def TestSet10():
     cx=BNbracket("cup1.pos2.pos2.neg0.neg0.neg0.cap1",2)
     DrawFourEndedChainComplex(cx, "-2_3_pretzel.png")
     
-def TestSet10():
+def TestSet11():
     cx=BNbracket("cup1.neg2.neg2.neg2.cap3.pos0.pos0.cap1")
     BNcx=CobComplex2BNComplex(cx)
     DrawBNComplex(BNcx, "2m3pt_redBN_before_cleanupX.svg","index_h")
@@ -350,6 +350,7 @@ def TestSet10():
 # TestSet8()
 # TestSet9()
 TestSet10()
+TestSet11()
 
 # TestAlgTest()
 

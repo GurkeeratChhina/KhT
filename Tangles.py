@@ -96,7 +96,7 @@ class CLT(object):
                 else:
                     return self.top+self.bot+index
             return [aux1(m1[i]) for i in range(self.top)]+[aux2(m2[i]) for i in range(other.top)]+[aux1(m1[self.top+i]) for i in range(self.bot)]+[aux2(m2[other.top+i]) for i in range(other.bot)]
-        return CLT(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr) #TODO: check grading computations
+        return CLT(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr+other.dgr) #TODO: check grading computations
     
     def __mul__(self, other):
         def mul(m1,m2):
@@ -124,7 +124,7 @@ class CLT(object):
                 return middle+self.top-other.top 
             
             return [aux1(i) for i in range(self.top)]+[aux2(i+other.top) for i in range(other.bot)]
-        return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr) #TODO: check grading computations
+        return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr+other.dgr) #TODO: check grading computations
 
     def __eq__(self, other):
         if self.top == other.top and self.bot == other.bot and self.arcs == other.arcs and self.pgr == other.pgr and self.qgr == other.qgr and self.dgr == other.dgr:
