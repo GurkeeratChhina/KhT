@@ -55,8 +55,23 @@ class ChainComplex(object):
         return None
     
     def eliminateIsom(self, sourceindex, targetindex):
-        return True
-    
+        Isom = self.morphisms[targetindex][sourceindex]
+        Inverse = Cobordism(Isom.back, Isom.front, Isom.decos, Isom.comps)
+        newElements = [elem for x, elem in enumerate(self.elements) if x != sourceindex and x != targetindex]
+        newMorphisms = []
+        for target, row in enumerate(self.morphisms):
+            newRow = []
+            if target != sourceindex and target != targetindex:
+                for source, cob in enumerate (row):
+                    if source != sourceindex and source != targetindex:
+                        temp1 = self.morphisms[targetindex][source]*Inverse
+                        temp2 = temp1*self.morphisms[target][sourceindex]
+                        newCob = cob + temp2.negative()
+                        newRow.append(newCob)
+                newMorphisms.append(newRow)
+        self.elements = newElements
+        self.morphisms = newMorphisms
+
     def eliminateAll(self):
         while True:
             index_to_eliminate = self.findIsom()
@@ -73,10 +88,14 @@ def AddCapToCLT(clt, i, grshift = "false"):
             return j
     newarcs = [incrementby2(x) for x in clt.arcs[:clt.top+i]] + [clt.top+i +1, clt.top+i] + [incrementby2(x) for x in clt.arcs[clt.top+i:]]
     if grshift == "true":
-        newgr = [j+1 for j in clt.gr]
+        newpgr = clt.pgr +1
+        newqgr = clt.qgr +1
+        newdgr = clt.dgr +0.5
     else:
-        newgr = clt.gr
-    return CLT(clt.top, clt.bot+2, newarcs, newgr)
+        newpgr = clt.pgr
+        newqgr = clt.qgr
+        newdgr = clt.dgr
+    return CLT(clt.top, clt.bot+2, newarcs, newpgr, newqgr, newdgr)
 
 def AddCap(Complex, i, grshift = "false"):
     """ Adds a cap to every tangle and every cobordism in Complex, at index i
@@ -100,7 +119,7 @@ def AddCap(Complex, i, grshift = "false"):
                     newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos]
                 else: 
                     newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos]
-                NewCob = Cobordism(NewElements[j], NewElements[k], newDecos, newcomps)
+                NewCob = Cobordism(NewElements[k], NewElements[j], newDecos, newcomps)
                 NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
@@ -117,8 +136,8 @@ def AddCupToCLT(clt, i): #TODO: check usages of .copy()
                 return j
     if clt.arcs[clt.top +i] == clt.top+i+1: # adding the cup makes a closed component
         newarcs = [decrementby2(x) for x in clt.arcs if x != clt.top+i and x!= clt.top+i+1]
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]+1, clt.gr[1]]))
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs, [clt.gr[0]-1, clt.gr[1]]))
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr+1, clt.dgr-0.5))
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr-1, clt.dgr-0.5))
     else: # adding the cup doesnt make closed components
         leftend = clt.arcs[clt.top + i]
         rightend = clt.arcs[clt.top+i+1]
@@ -126,7 +145,7 @@ def AddCupToCLT(clt, i): #TODO: check usages of .copy()
         newarcs[leftend] = rightend # connecting the two arcs via the cup
         newarcs[rightend] = leftend
         newarcs1 = [decrementby2(entry) for x, entry in enumerate(newarcs) if x != clt.top+i and x != clt.top+i+1]
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs1, clt.gr))
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs1, clt.pgr, clt.qgr, clt.dgr))
     return newElements
 
 def AddCup(Complex, i): # TODO: reduce decorations
@@ -343,15 +362,17 @@ def AddPosCrossing(Complex, i):
     return NewComplex
 
 def grshiftclt(clt):
-    return CLT(clt.top, clt.bot, clt.arcs, [j+1 for j in clt.gr])
+    return CLT(clt.top, clt.bot, clt.arcs, clt.pgr+1, clt.qgr+1, clt.dgr+0.5)
 
 def grshiftcob(cob):
     newDecos = [deco[:-1] + [deco[-1]*-1] for deco in cob.decos]
     return Cobordism(grshiftclt(cob.front), grshiftclt(cob.back), newDecos, cob.comps)
     
 def AddNegCrossing(Complex, i):
-    CapCup = AddCap(AddCup(Complex, i), i)
+    complexgradings = [ [clt.pgr, clt.qgr] for clt in Complex.elements]
     targetelements = [grshiftclt(clt) for clt in Complex.elements]
+    newgradings = [ [clt.pgr, clt.qgr] for clt in targetelements]
+    CapCup = AddCap(AddCup(Complex, i), i)
     sourceelements = CapCup.elements
     NewElements = sourceelements + targetelements
     TopLeft = CapCup.morphisms
@@ -370,9 +391,9 @@ def AddNegCrossing(Complex, i):
                     newTarget = targetelements[x]
                     newcomps = components(newSource2, newTarget)
                     magic_index = 0
-                    for x,comp in enumerate(newcomps):
+                    for z,comp in enumerate(newcomps):
                         if sourceclt.top +i in comp:
-                            magic_index = x
+                            magic_index = z
                             break
                     decos1 = [[0] + [0 for comp in newcomps] + [1]]
                     decos2 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1]]

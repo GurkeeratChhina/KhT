@@ -98,8 +98,8 @@ class Cobordism(object):
         x=self.front
         y=self.back
         z=other.back
-        if y!=other.front: # incomposable cobordisms
-            raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on {}'.format(y)+' are not composable; the first ends on {}'.format(other.clt1))
+        if self.back != other.front: # incomposable cobordisms
+            raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on',self.back.top, self.back.bot, self.back.arcs, self.back.pgr, self.back.qgr, 'and the second starts on', other.front.top, other.front.bot, other.front.arcs, other.front.pgr, other.front.qgr)
         #components of the fully simplified cobordism from x to z, ordered according to their smallest TEI
         dC=components(x,z)
         comps1=self.comps
@@ -175,15 +175,22 @@ class Cobordism(object):
         return ReducedDecorations
     
     def isIsom(self):
-        if len(self.decos) != 1 or len(self.decos[0]) != len(self.comps) +2:
+        if len(self.decos) != 1: 
+            return False
+        if len(self.decos[0]) != self.front.total +2:
             return False
         for x in self.decos[0][:-1]:
             if x != 0:
                 return False
+        
         if self.decos[0][-1] != 1 and self.decos[0][-1] != -1:
             return False
         return True
 
+    def negative(self):
+        newDecos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
+        return Cobordism(self.front, self.back, newDecos, self.comps)
+        
 def simplify_decos(decos):
     """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
     if decos == []:
@@ -197,5 +204,5 @@ def simplify_decos(decos):
         for decos_without_coeff,grouped in groupby(sorted(decos),droplast)] \
         if x[-1]!=0]
         
-CLTA = CLT(1,1, [1,0], [0,0])
+CLTA = CLT(1,1, [1,0], 0, 0, 0)
 ZeroCob = Cobordism(CLTA,CLTA,[])

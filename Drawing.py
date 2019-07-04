@@ -51,8 +51,8 @@ def PrettyPrintComplex(Complex,switch="short"):
     print("The generators:")
     print(pd.DataFrame({\
         "clt.pairs": [clt.pairs for clt in Complex.elements],\
-        "q": [clt.gr[0] for clt in Complex.elements],\
-        "h": [clt.gr[1] for clt in Complex.elements]
+        "q": [clt.qgr for clt in Complex.elements],\
+        "h": [clt.pgr for clt in Complex.elements]
         },columns=["clt.pairs","q","h"]))
     print("The differential: ("+switch+" form)")
     #print(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]))

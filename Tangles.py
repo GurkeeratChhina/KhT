@@ -20,15 +20,16 @@ from KhT import *
 class CLT(object):
     """A crossingless tangle (CLT) is a matching of n+m ends (m=top,n=bot=bottom). 
     arcs is a list whose ith entry gives the value of the involution at the ith tangle end."""
-    # gr is a list of [qu, hom] of the bigradings, where qu is the quantum grading, hom is the homological grading
-    __slots__ = 'top','bot', 'total', 'arcs', 'gr', 'pairs'
+    __slots__ = 'top','bot', 'total', 'arcs', 'pgr', 'qgr', 'dgr', 'pairs'
     
-    def __init__(self,top,bot,arcs,gr):
+    def __init__(self,top,bot,arcs,pgr,qgr,dgr):
         self.top = top
         self.bot = bot
         self.total = int((top+bot)/2)# total number of arcs
         self.arcs = arcs
-        self.gr = gr 
+        self.pgr = pgr
+        self.qgr = qgr
+        self.dgr = dgr
         self.pairs = [pair for pair in [[i,arcs[i]] for i in range(top+bot)] if pair[0] < pair[1]] # testing alternative format for CLTs
     
     def check(self):
@@ -95,7 +96,7 @@ class CLT(object):
                 else:
                     return self.top+self.bot+index
             return [aux1(m1[i]) for i in range(self.top)]+[aux2(m2[i]) for i in range(other.top)]+[aux1(m1[self.top+i]) for i in range(self.bot)]+[aux2(m2[other.top+i]) for i in range(other.bot)]
-        return CLT(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.gr+other.gr)
+        return CLT(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr) #TODO: check grading computations
     
     def __mul__(self, other):
         def mul(m1,m2):
@@ -123,8 +124,12 @@ class CLT(object):
                 return middle+self.top-other.top 
             
             return [aux1(i) for i in range(self.top)]+[aux2(i+other.top) for i in range(other.bot)]
-        return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.gr+other.gr)
+        return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr) #TODO: check grading computations
 
+    def __eq__(self, other):
+        if self.top == other.top and self.bot == other.bot and self.arcs == other.arcs and self.pgr == other.pgr and self.qgr == other.qgr and self.dgr == other.dgr:
+            return True
+        return False
 def components(clt1,clt2):
     """components of an elementary cobordism between two tangles (assuming the same clt.top and clt.bot)."""
     allcomponents=[]

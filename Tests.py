@@ -30,20 +30,20 @@ def cup_alt(n,i):
                [n+j for j in range(i,n)]+\
                [j for j in range(i-1)]+\
                [j+2 for j in range(i-1,n-1)]\
-               ,0)
+               ,0, 0, 0)
 def parallel(n):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cap"""
-    return CLT(n,n,[n+j for j in range(n)]+[j for j in range(n)],0)
+    return CLT(n,n,[n+j for j in range(n)]+[j for j in range(n)],0, 0, 0)
 def cup(n,i):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cap"""
-    return parallel(i-1)+CLT(2,0,[1,0],0)+parallel(n-i)
+    return parallel(i-1)+CLT(2,0,[1,0],0, 0, 0)+parallel(n-i)
 def cap(n,i):
     """Create a CLT with n strands of which all are parallel except for the ith which is a cup"""
-    return parallel(i-1)+CLT(0,2,[1,0],0)+parallel(n-i)
+    return parallel(i-1)+CLT(0,2,[1,0],0, 0, 0)+parallel(n-i)
 
 # Elementary tangles and cobordisms
-b=CLT(2,2,[1,0,3,2],[0,0])
-c=CLT(2,2,[2,3,0,1],[0,0])
+b=CLT(2,2,[1,0,3,2],0,0,0)
+c=CLT(2,2,[2,3,0,1],0,0,0)
 Sbc=Cobordism(b,c,[[0,0,1]])
 Scb=Cobordism(c,b,[[0,0,1]])
 MinusScb = Cobordism(c,b,[[0,0,-1]])
@@ -54,8 +54,8 @@ RightDc = Cobordism(c,c,[[0,0,1,1]])
 # drawclt(cap(5,5),"test2")
 # drawcob(testcobordism,"testcobordism")
 
-T1=CLT(2,4,[2,5,0,4,3,1],[0,0])
-T2=CLT(2,4,[2,3,0,1,5,4],[0,0])
+T1=CLT(2,4,[2,5,0,4,3,1],0,0,0)
+T2=CLT(2,4,[2,3,0,1,5,4],0,0,0)
 cob1=Cobordism(T1,T2,[[4,1,0,1]])
 cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,0,1,1],[1,1,1,19]])
 
@@ -78,7 +78,7 @@ def newCob(cob, i):
 drawcob(newCob(cob2, 1), "NewCob")
 
 def TestSet0():
-    BasicComplex = ChainComplex([CLT(1,1, [1,0], [0,0])], [[ZeroCob]])
+    BasicComplex = ChainComplex([CLT(1,1, [1,0], 0,0,0)], [[ZeroCob]])
     BasicCap = AddCap(BasicComplex, 0)
 
     drawclt(BasicCap.elements[0], "basiccap")
@@ -88,16 +88,9 @@ def TestSet0():
     return 0
 
 def TestSet1():
-    tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1]), [[0, 0, 1, 1]])
-    tempcomplex = ChainComplex([CLT(1,3, [1, 0, 3, 2], [0,0]), CLT(1,3, [1, 0, 3, 2], [0,1])], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
+    tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0), [[0, 0, 1, 1]])
+    tempcomplex = ChainComplex([CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0)], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
     tempcomplexwithcup = AddCup(tempcomplex, 1)
-    # PrintComplexMorphismIntMatrix(tempcomplexwithcup)
-    # print("Decorations at 3, 0", tempcomplexwithcup.morphisms[3][0].decos)
-    # print("Decorations at 3, 1", tempcomplexwithcup.morphisms[3][1].decos)
-    # print("Grading of element at 0", tempcomplexwithcup.elements[0].gr)
-    # print("Grading of element at 1", tempcomplexwithcup.elements[1].gr)
-    # print("Grading of element at 2", tempcomplexwithcup.elements[2].gr)
-    # print("Grading of element at 3", tempcomplexwithcup.elements[3].gr)
     return 0
 
 def TestSet2():
@@ -126,8 +119,8 @@ def TestSet2():
     PrettyPrintComplex(complex5cup, "old long")
 
 def TestSet3():
-    CLT01 = CLT(1,3,[1,0,3,2],[0,0])
-    CLT03 = CLT(1,3,[3,2,1,0],[0,1])
+    CLT01 = CLT(1,3,[1,0,3,2],0,0,0)
+    CLT03 = CLT(1,3,[3,2,1,0],1,1,0.5)
     BasicSaddle = Cobordism(CLT01, CLT03, [[0,0,1]])
     BasicSaddleComplex = ChainComplex([CLT01, CLT03], [[ZeroCob, ZeroCob], [BasicSaddle, ZeroCob]])
     BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
@@ -146,9 +139,9 @@ def TestSet4():
     drawcob((Sbc*Scb),"SSbb")
     drawcob((Scb*Sbc),"SScc")
     drawcob(RightDc, "RightDc")
-    T3=CLT(4,4,[4,7,3,2,0,6,5,1],[0,0])
-    T4=CLT(4,4,[6,7,3,2,5,4,0,1],[0,0])
-    T5=CLT(4,4,[3,2,1,0,7,6,5,4],[0,0])
+    T3=CLT(4,4,[4,7,3,2,0,6,5,1],0,0,0)
+    T4=CLT(4,4,[6,7,3,2,5,4,0,1],0,0,0)
+    T5=CLT(4,4,[3,2,1,0,7,6,5,4],0,0,0)
     cob3=Cobordism(T2,T1,[[2,0,1,-2]])
     cob4=cob1+cob2
     cob5=cob1*cob3
@@ -269,8 +262,8 @@ def TestSet7():
     PrettyPrintComplex(complex2, "old long")
 
 def TestSet8():
-    TangleC = CLT(2,2, [2,3,0,1], [0,0])
-    TangleB = CLT(2,2, [1,0,3,2], [0,0])
+    TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
+    TangleB = CLT(2,2, [1,0,3,2], 0,0,0)
     BasicComplex1 = ChainComplex([TangleC], [[ZeroCob]])
     BasicComplex2 = ChainComplex([TangleB], [[ZeroCob]])
     
@@ -280,6 +273,10 @@ def TestSet8():
     TwoNegCrossing = AddCup(temp3,1)
     DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossing.png")
     print("TwoNegCrossing")
+    PrettyPrintComplex(TwoNegCrossing, "old long")
+    TwoNegCrossing.eliminateAll()
+    DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossingReduced.png")
+    print("TwoNegCrossingReduced")
     PrettyPrintComplex(TwoNegCrossing, "old long")
     
     ClosedOpenNeg = AddNegCrossing(BasicComplex2, 0)
@@ -300,16 +297,45 @@ def TestSet8():
     print("ClosedOpenPos")
     PrettyPrintComplex(ClosedOpenPos, "old long")
     
+def TestSet9():
+    TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
+    BasicComplex = ChainComplex([TangleC], [[ZeroCob]])
+    temp1 = AddCap(BasicComplex, 1)
+    temp2 = AddNegCrossing(temp1, 0)
+    temp2.eliminateAll()
+    print("temp2")
+    PrettyPrintComplex(temp2, "old long")
+    temp3 = AddNegCrossing(temp2, 0)
+    print("temp3")
+    PrettyPrintComplex(temp3, "old long")
+    temp3.eliminateAll()
+    print("temp3eliminated")
+    PrettyPrintComplex(temp3, "old long")
+    temp4 = AddNegCrossing(temp3, 0)
+    print("temp4")
+    PrettyPrintComplex(temp4, "old long")
+    temp4.eliminateAll()
+    print("temp4eliminate")
+    PrettyPrintComplex(temp4, "old long")
+    temp5 = AddPosCrossing(temp4, 2)
+    temp5.eliminateAll()
+    temp6 = AddPosCrossing(temp5, 2)
+    temp6.eliminateAll()
+    temp7 = AddCup(temp6, 1)
+    temp7.eliminateAll()
+    DrawFourEndedChainComplex(temp7, "-2_3_pretzel.png")
+
 
 # TestSet0()
 # TestSet1()
 # TestSet2()
 # TestSet3()
 # TestSet4()
-TestSet5()
+# TestSet5()
 # TestSet6()
 # TestSet7()
-TestSet8()
+# TestSet8()
+TestSet9()
 
 # proof of concept for matrix multiplication for matrices with customized algebra addition and multiplication\n",
 
