@@ -80,6 +80,9 @@ class ChainComplex(object):
                 break
             else:
                 self.eliminateIsom(index_to_eliminate[0], index_to_eliminate[1])
+    
+    def shift_qhd(self,q,h,delta):
+        self.elements=[clt.shift_qhd(q,h,delta) for clt in self.elements]
 
 def AddCapToCLT(clt, i, grshift = "false"):
     def incrementby2(j): #increment TEI by 2 if greater than where cap is to be inserted
@@ -420,7 +423,7 @@ def AddNegCrossing(Complex, i):
     NewComplex = ChainComplex(NewElements, NewMorphisms)
     return NewComplex
 
-def BNbracket(string,start=1):
+def BNbracket(string,pos=0,neg=0,start=1):
     """compute the Bar-Natan bracket for tangle spectified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
     <type> is equal to:
         'pos': positive crossing
@@ -428,6 +431,7 @@ def BNbracket(string,start=1):
         'cup': cup
         'cap': cap
     <index> is the index at which the crossing, cap or cup sits. 
+    'pos' and 'neg' are the numbers of positive and negative crossings. 
     The optional paramter 'start' is an integer which specifies the number of tangle ends at the top.
     E.g. 'BNbracket('cup0pos0',2)' is a (2,0)-tangle which is decomposed as a positive crossing followed by a cap.
     """
@@ -438,7 +442,7 @@ def BNbracket(string,start=1):
     
     for i,word in enumerate(stringlist):
         print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\r')# testing how to monitor a process
-        time.sleep(0.1)
+        #time.sleep(0.1)
         
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
@@ -454,6 +458,8 @@ def BNbracket(string,start=1):
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
+    
+    cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     
     print("Successfully computed the complex for the tangle: \n"+string)
     return cx

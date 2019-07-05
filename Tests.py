@@ -331,13 +331,15 @@ def TestSet10():
     DrawFourEndedChainComplex(cx, "-2_3_pretzel.png")
     
 def TestSet11():
-    cx=BNbracket("cup1.neg2.neg2.neg2.cap3.pos0.pos0.cap1")
+    cx=BNbracket("cup1.neg2.neg2.neg2.cap3.pos0.pos0.cap1",0,5)# 0 positive twists, 5 negative twists. 
+    #cx=BNbracket("cup1.pos2.pos2.pos2.cap3.neg0.neg0.cap1") #mirror
+    #PrettyPrintComplex(cx)
     BNcx=CobComplex2BNComplex(cx)
-    DrawBNComplex(BNcx, "2m3pt_redBN_before_cleanupX.svg","index_h")
-    PrettyPrintBNComplex(BNcx)
+    DrawBNComplex(BNcx, "2m3pt_redBN_before_cleanupX.svg","delta_h")
+    #PrettyPrintBNComplex(BNcx)
     BNcx.clean_up()
-    DrawBNComplex(BNcx, "2m3pt_redBN_after_cleanupX.svg","index_h")
-    PrettyPrintBNComplex(BNcx)
+    DrawBNComplex(BNcx, "2m3pt_redBN_after_cleanupX.svg","delta_h")
+    #PrettyPrintBNComplex(BNcx)
 
 # TestSet0()
 # TestSet1()
@@ -349,7 +351,7 @@ def TestSet11():
 # TestSet7()
 # TestSet8()
 # TestSet9()
-TestSet10()
+# TestSet10()
 TestSet11()
 
 # TestAlgTest()

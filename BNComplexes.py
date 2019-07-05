@@ -26,7 +26,7 @@ from Cobordisms import *
 import time
 
 def ToExponent(exponent):
-    return str(exponent).translate(str.maketrans("-0123456789", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹"))
+    return str(exponent).translate(str.maketrans("-0123456789.", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹·"))
 
 class BNobj(object):
     """A BNobject is a pair [idempotent,q,h,delta(optional)], where idempotent is either 0 (b=solid dot) or 1 (c=hollow dot). 
@@ -69,13 +69,18 @@ class BNobj(object):
         else:
             h=""
         if "delta" in switch:
-            delta="δ"+ToExponent(self.h) #should this be self.delta?
+            if 2*self.delta % 2 == 0: # delta is an integer
+                delta="δ"+ToExponent(round(self.delta))
+            else:
+                #delta="δ"+ToExponent(round(2*self.delta))+"'²"
+                delta="δ"+ToExponent(self.delta)
+            
         else:
             delta=""
         
         grading=q+h+delta
         
-        if grading == "":
+        if (grading == "") or (index == ""):
             return index+grading+idem
         else:
             return index+":"+grading+idem
@@ -297,7 +302,7 @@ class BNComplex(object):
         while iter<max_iter:
             if iter % 10 == 0: # check every now and then during the iteration, whether the complex is already loop-type.
                 if self.is_looptype():
-                    print("Finished after "+str(iter)+" iteration(s).")
+                    print("Clean-Up: Finished after "+str(iter)+" iteration(s).")
                     iter = max_iter
             iter+=1
             self.clean_up_once(-1)# faces S
@@ -374,9 +379,9 @@ def CLT2BNObj(clt):
     """Convert a (1,3)-tangle into one of the two idempotents of BNAlg."""
     if clt.top !=1 or clt.bot !=3:
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
-    elif clt.arcs[0]==1:
-        return BNobj(0,clt.qgr,clt.pgr) #b
     elif clt.arcs[0]==3:
+        return BNobj(0,clt.qgr,clt.pgr) #b
+    elif clt.arcs[0]==1:
         return BNobj(1,clt.qgr,clt.pgr) #c
 
 def CobComplex2BNComplex(complex):
@@ -543,7 +548,7 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
     DrawBNComplex(BNComplex3, "2m3pt_Kh_after_cleanup.svg","index_qh")
     # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
 
-Test_2m3pt()
+#Test_2m3pt()
 #Test_TwoTwistTangle()
 #Test_SplittingCurve()
 
