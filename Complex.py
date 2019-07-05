@@ -32,7 +32,7 @@ class ChainComplex(object):
         self.elements = listofclt
         self.morphisms = morphisms
     
-    def ValidMorphism(self):
+    def ValidMorphism(self): #checks that the differential squares to 0, has no self loops, and is a matrix of the correct size
         length = len(self.elements)
         if len(self.morphisms) != length:
             raise Exception('Differential does not have n rows (where n is the number of elements in chain complex)')
@@ -48,7 +48,9 @@ class ChainComplex(object):
             if i.ReduceDecorations() != []:
                 raise Exception('Differential does not square to 0')
     
-    def findIsom(self):
+    def findIsom(self): 
+        """Returns the location of the first isomorphism it finds
+           If no isomorphism is found, returns None"""
         for targetindex, row in enumerate(self.morphisms):
             for sourceindex, cob in enumerate(row):
                 if cob.isIsom():
@@ -56,24 +58,25 @@ class ChainComplex(object):
         return None
     
     def eliminateIsom(self, sourceindex, targetindex):
+        """Mutates self by eliminating the isomorphism at the specified location, via the gaussian elimination lemma
+           Note that this does not check that the cobodism specified is actually an isomorphism"""
         Isom = self.morphisms[targetindex][sourceindex]
-        Inverse = Cobordism(Isom.back, Isom.front, Isom.decos, Isom.comps)
-        newElements = [elem for x, elem in enumerate(self.elements) if x != sourceindex and x != targetindex]
+        Inverse = Cobordism(Isom.back, Isom.front, Isom.decos, Isom.comps) #because the isomorphism is +- id, taking the inverse (ie flipping the cobordism upside down) amounts to swapping the front and back
+        newElements = [elem for x, elem in enumerate(self.elements) if x != sourceindex and x != targetindex] # both the source and the target are eliminated from the matrix via the lemma
         newMorphisms = []
         for target, row in enumerate(self.morphisms):
             newRow = []
-            if target != sourceindex and target != targetindex:
+            if target != sourceindex and target != targetindex: 
                 for source, cob in enumerate (row):
                     if source != sourceindex and source != targetindex:
-                        temp1 = self.morphisms[targetindex][source]*Inverse
-                        temp2 = temp1*self.morphisms[target][sourceindex]
-                        newCob = cob + temp2.negative()
+                        temp1 = (self.morphisms[targetindex][source]*Inverse)*self.morphisms[target][sourceindex] #composes the 3 morphisms as in the lemma
+                        newCob = cob + temp1.negative()
                         newRow.append(newCob)
                 newMorphisms.append(newRow)
         self.elements = newElements
         self.morphisms = newMorphisms
 
-    def eliminateAll(self):
+    def eliminateAll(self): #mutates self by eliminating isomorphisms as long as it can find one
         while True:
             index_to_eliminate = self.findIsom()
             if index_to_eliminate is None:
@@ -84,7 +87,11 @@ class ChainComplex(object):
     def shift_qhd(self,q,h,delta):
         self.elements=[clt.shift_qhd(q,h,delta) for clt in self.elements]
 
-def AddCapToCLT(clt, i, grshift = "false"):
+def AddCapToCLT(clt, i, grshift = "false"): 
+    """creates a new CLT which is clt with a cap added to it at index i
+       Here 0 <= i <= tangle.bot
+       If grshift is set to "true", then it also shifts the homological and quantum grading of the clt by 1 each
+       This should only be used when adding a crossing"""
     def incrementby2(j): #increment TEI by 2 if greater than where cap is to be inserted
         if j >= clt.top+i:
             return j+2
@@ -94,7 +101,7 @@ def AddCapToCLT(clt, i, grshift = "false"):
     if grshift == "true":
         newpgr = clt.pgr +1
         newqgr = clt.qgr +1
-        newdgr = clt.dgr +0.5
+        newdgr = clt.dgr -0.5
     else:
         newpgr = clt.pgr
         newqgr = clt.qgr
@@ -102,36 +109,38 @@ def AddCapToCLT(clt, i, grshift = "false"):
     return CLT(clt.top, clt.bot+2, newarcs, newpgr, newqgr, newdgr)
 
 def AddCap(Complex, i, grshift = "false"):
-    """ Adds a cap to every tangle and every cobordism in Complex, at index i
-        Here 0 <= i <= tangle.bot """
+    """ Creates a new complex by adding a cap to every tangle and every cobordism in Complex, at index i
+        Here 0 <= i <= tangle.bot
+        If grshift is set to "true", then it applies a grading shift to every tangle (as above)
+        Furthermore, it will flip the sign on every cobordism, which is the convention used so that the differential will square to 0 when adding a crossing"""
     NewElements = [AddCapToCLT(clt, i, grshift) for clt in Complex.elements]
     length = len(Complex.elements)
     NewMorphisms = []
     for j ,row in enumerate(Complex.morphisms):
         NewRow=[]
         for k, cob in enumerate(row):
-            if cob.decos == []:
+            if cob.decos == []: #adding a cap to the zero cobordism does nothing
                 NewRow.append(ZeroCob)
-            else:
+            else: #not the zero cobordism
                 def incrementby2(j):
                     if  j >= cob.front.top+i: #increment TEI by 2 if greater than where cap is to be inserted
                         return j+2
                     else:
                         return j
-                newcomps=[[incrementby2(x) for x in comp] for comp in cob.comps] + [[cob.front.top +i, cob.front.top+i+1]]
+                newcomps=[[incrementby2(x) for x in comp] for comp in cob.comps] + [[cob.front.top +i, cob.front.top+i+1]] #shifts TEI of old components, and adds new component to the end of the list
                 if grshift == "true":
-                    newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos]
+                    newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos] #adds the new component without a dot and flips the sign on the coefficient
                 else: 
-                    newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos]
+                    newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos] #adds the new component without a dot
                 NewCob = Cobordism(NewElements[k], NewElements[j], newDecos, newcomps)
                 NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
 
-def AddCupToCLT(clt, i): #TODO: check usages of .copy()
-    """ Here 0 <= i <= clt.bot
-        Returns a list of 2 clt if there is a closed component
-        otherwise returns a list of 1 clt """
+def AddCupToCLT(clt, i):
+    """ Adds a cup to the clt at index i, where 0 <= i <= clt.bot
+        Returns a list of 2 clt if there is a closed component, obtained by neckcutting
+        Otherwise returns a list of 1 clt """
     newElements = []
     def decrementby2(j):#decrement TEI by 2 if greater than where cup is to be inserted
             if j >= clt.top +i:
@@ -139,16 +148,16 @@ def AddCupToCLT(clt, i): #TODO: check usages of .copy()
             else:
                 return j
     if clt.arcs[clt.top +i] == clt.top+i+1: # adding the cup makes a closed component
-        newarcs = [decrementby2(x) for x in clt.arcs if x != clt.top+i and x!= clt.top+i+1]
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr+1, clt.dgr-0.5))
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr-1, clt.dgr-0.5))
+        newarcs = [decrementby2(x) for x in clt.arcs if x != clt.top+i and x!= clt.top+i+1] #removes the closed component from the arcs, shifts remaining TEI
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr+1, clt.dgr+0.5)) #neckcutting
+        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr-1, clt.dgr-0.5)) #neckcutting
     else: # adding the cup doesnt make closed components
-        leftend = clt.arcs[clt.top + i]
-        rightend = clt.arcs[clt.top+i+1]
+        leftend = clt.arcs[clt.top + i] #the endpoint of the arc which connects at i
+        rightend = clt.arcs[clt.top+i+1] #the endpoint of the arc which connects at i+1
         newarcs = clt.arcs.copy()
         newarcs[leftend] = rightend # connecting the two arcs via the cup
         newarcs[rightend] = leftend
-        newarcs1 = [decrementby2(entry) for x, entry in enumerate(newarcs) if x != clt.top+i and x != clt.top+i+1]
+        newarcs1 = [decrementby2(entry) for x, entry in enumerate(newarcs) if x != clt.top+i and x != clt.top+i+1] #removes the ends which don't exist anymore and shifts remaining TEI
         newElements.append(CLT(clt.top, clt.bot -2, newarcs1, clt.pgr, clt.qgr, clt.dgr))
     return newElements
 
@@ -366,7 +375,7 @@ def AddPosCrossing(Complex, i):
     return NewComplex
 
 def grshiftclt(clt):
-    return CLT(clt.top, clt.bot, clt.arcs, clt.pgr+1, clt.qgr+1, clt.dgr+0.5)
+    return CLT(clt.top, clt.bot, clt.arcs, clt.pgr+1, clt.qgr+1, clt.dgr-0.5)
 
 def grshiftcob(cob):
     newDecos = [deco[:-1] + [deco[-1]*-1] for deco in cob.decos]

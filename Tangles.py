@@ -89,7 +89,7 @@ class CLT(object):
     def arcs_all(self):
         return [[i,self.arcs[i]] for i in range(self.top+self.bot) if i<self.arcs[i]]
             
-    def __add__(self, other):
+    def __add__(self, other): #not currently used
         def add(m1,m2):
             def aux1(index):
                 if index<self.top:
@@ -104,7 +104,7 @@ class CLT(object):
             return [aux1(m1[i]) for i in range(self.top)]+[aux2(m2[i]) for i in range(other.top)]+[aux1(m1[self.top+i]) for i in range(self.bot)]+[aux2(m2[other.top+i]) for i in range(other.bot)]
         return CLT(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr+other.dgr) #TODO: check grading computations
     
-    def __mul__(self, other):
+    def __mul__(self, other): #not currently used
         def mul(m1,m2):
             # aux1 finds the end of a path through the tangle ending at the top of the first tangle
             def aux1(index):
@@ -132,10 +132,13 @@ class CLT(object):
             return [aux1(i) for i in range(self.top)]+[aux2(i+other.top) for i in range(other.bot)]
         return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr+other.dgr) #TODO: check grading computations
 
-    def __eq__(self, other):
-        if self.top == other.top and self.bot == other.bot and self.arcs == other.arcs and self.pgr == other.pgr and self.qgr == other.qgr and self.dgr == other.dgr:
+    def __eq__(self, other): # redefining eq so that the tangles don't have to be literally the same when composing cobordisms, but only need to have the same values
+        if self.top == other.top and self.bot == other.bot \
+        and self.arcs == other.arcs and self.pgr == other.pgr \
+        and self.qgr == other.qgr and self.dgr == other.dgr:
             return True
-        return False
+        else:
+            return False
 def components(clt1,clt2):
     """components of an elementary cobordism between two tangles (assuming the same clt.top and clt.bot)."""
     allcomponents=[]
