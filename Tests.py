@@ -339,6 +339,38 @@ def TestSet11():
     DrawBNComplex(BNcx, "2m3pt_redBN_after_cleanupX.svg","index_h")
     PrettyPrintBNComplex(BNcx)
 
+def TestSet12():
+    complex_4m5pt = BNbracket("cup1.neg2.neg2.neg2.neg2.neg2.cap3.pos0.pos0.pos0.pos0.cap1")
+    BN_complex_4m5pt = CobComplex2BNComplex(complex_4m5pt)
+    BN_complex_4m5pt.clean_up()
+    DrawBNComplex(BN_complex_4m5pt, "4m5pt_redBN_after_cleanup.svg","index_qh")
+    
+def TestSet13():
+    n = 6
+    pretzeltangle_n = "cup1."
+    for j in range(n):
+        pretzeltangle_n += "neg2.neg2."
+    pretzeltangle_n += "neg2.cap3."
+    for j in range(n):
+        pretzeltangle_n += "pos0.pos0."
+    pretzeltangle_n += "cap1"   
+    complex_ptn = BNbracket(pretzeltangle_n)
+    BN_complex_ptn = CobComplex2BNComplex(complex_ptn)
+    BN_complex_ptn.clean_up()
+    DrawBNComplex(BN_complex_ptn, "pretzel_tangle_6_redBN_after_cleanup.svg","index_qh")
+
+def TestSet14():
+    n=5
+    pretzeltangle_n = "cup1."
+    for j in range(n):
+        pretzeltangle_n += "neg2.neg2."
+    pretzeltangle_n += "neg2."
+    for j in range(n):
+        pretzeltangle_n += "pos0.pos0."
+    pretzeltangle_n += "cap1"   
+    complex_ptn = BNbracket(pretzeltangle_n, 2)
+    DrawFourEndedChainComplex(complex_ptn, "pretzeltangle_n.png")
+    
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -349,8 +381,11 @@ def TestSet11():
 # TestSet7()
 # TestSet8()
 # TestSet9()
-TestSet10()
-TestSet11()
+# TestSet10()
+# TestSet11()
+# TestSet12()
+TestSet13()
+# TestSet14()
 
 # TestAlgTest()
 

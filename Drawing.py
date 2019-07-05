@@ -41,7 +41,7 @@ def printdecos(cob,switch="short"):
         else:
             return len(cob.decos)
     
-def PrettyPrintComplex(Complex,switch="short"):
+def PrettyPrintComplex(Complex,switch="short"): #This is obsolete, use PrettyPrintBNComplex instead
     """Print a complex in human readable form. 
     The second argument is an optional parameter which should be one of the following strings: 
     - 'simple' (default) prints only the length of cobordisms.
@@ -58,14 +58,14 @@ def PrettyPrintComplex(Complex,switch="short"):
     #print(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]))
     print(tabulate(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]),range(len(Complex.morphisms)),tablefmt="fancy_grid"))
     
-def PrintComplexMorphismIntMatrix(Complex):
+def PrintComplexMorphismIntMatrix(Complex): #This is obsolete, use PrettyPrintComplex instead
     for i in Complex.morphisms:
         Row = []
         for j in i:
             Row.append(len(j.decos))
         print(Row)
 
-def PrintComplexMorphismDecoCompMatrix(Complex):
+def PrintComplexMorphismDecoCompMatrix(Complex): #This is obsolete, use PrettyPrintComplex instead
     for i in Complex.morphisms:
         Row = []
         for j in i:
@@ -75,7 +75,7 @@ def PrintComplexMorphismDecoCompMatrix(Complex):
                 Row.append([j.comps, j.decos])
         print(Row)
 
-def CobordismToDS(Cob): #more pythonic implementation
+def CobordismToDS(Cob): #more pythonic implementation # This is obsolete, done by CobordismToBNAlg
     """ DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
         an element of DS will be refered to a ds, which is a 3 element list
         the first element is D if the morphism is a power of D, and S if it is a power of S
@@ -268,7 +268,7 @@ def drawcob(cob,name):
     
     return IFrame('Output/' + name+'.pdf', width='100%', height='300')
 
-def DrawFourEndedChainComplex(complex, filename): #TODO: dont call reduce decorations when labeling edges
+def DrawFourEndedChainComplex(complex, filename): #TODO: dont call reduce decorations when labeling edges # This is now obsolete, use DrawBNComplex instead
     # For now assume that all CLT are 2-2
     for CLT in complex.elements:
         if CLT.top != 2 or CLT.bot !=2:
@@ -309,4 +309,4 @@ def DrawFourEndedChainComplex(complex, filename): #TODO: dont call reduce decora
     graph_draw(g, vertex_color = "black", vertex_fill_color = Vertex_labeling, vertex_size = 30,\
                 edge_color = "black", edge_pen_width = 6.0, edge_text = Edge_labeling, edge_text_color = "black",\
                 edge_text_distance = 10, edge_font_weight = cairo.FONT_WEIGHT_BOLD, edge_font_size = 30, \
-                output_size=(1600, 1000), edge_marker_size = 20, output="Output/" + filename)
+                output_size=(200*size, 150*size), edge_marker_size = 20, output="Output/" + filename)

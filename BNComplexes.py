@@ -543,7 +543,7 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
     DrawBNComplex(BNComplex3, "2m3pt_Kh_after_cleanup.svg","index_qh")
     # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
 
-Test_2m3pt()
+# Test_2m3pt()
 #Test_TwoTwistTangle()
 #Test_SplittingCurve()
 
