@@ -32,6 +32,12 @@ class CLT(object):
         self.dgr = dgr
         self.pairs = [pair for pair in [[i,arcs[i]] for i in range(top+bot)] if pair[0] < pair[1]] # testing alternative format for CLTs
     
+    def shift_qhd(self,q,h,delta):
+        self.pgr += h
+        self.qgr += q
+        self.dgr += delta
+        return self
+    
     def check(self):
         top = self.top
         bot = self.bot
