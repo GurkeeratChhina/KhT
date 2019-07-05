@@ -60,11 +60,11 @@ T2=CLT(2,4,[2,3,0,1,5,4],0,0,0)
 cob1=Cobordism(T1,T2,[[4,1,0,1]])
 cob2=Cobordism(T1,T2,[[4,1,0,-3],[2,0,1,1],[1,1,1,19]])
 
-NewT1 = AddCapToCLT(T1, 1)
-drawclt(NewT1, "NewT1")
+#NewT1 = AddCapToCLT(T1, 1)
+#drawclt(NewT1, "NewT1")
 
-NewT2 = AddCapToCLT(T2, 1)
-drawclt(NewT2, "NewT2")
+#NewT2 = AddCapToCLT(T2, 1)
+#drawclt(NewT2, "NewT2")
 
 def newCob(cob, i):
     def incrementindex(entry):
@@ -76,7 +76,7 @@ def newCob(cob, i):
     newcomps.append([cob.front.top +i, cob.front.top+i+1])          
     return Cobordism(AddCapToCLT(cob.front, i), AddCapToCLT(cob.back, i), [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos], newcomps)
 
-drawcob(newCob(cob2, 1), "NewCob")
+#drawcob(newCob(cob2, 1), "NewCob")
 
 def TestSet0():
     BasicComplex = ChainComplex([CLT(1,1, [1,0], 0,0,0)], [[ZeroCob]])
@@ -331,7 +331,10 @@ def TestSet10():
     DrawFourEndedChainComplex(cx, "-2_3_pretzel.png")
     
 def TestSet11():
-    cx=BNbracket("cup1.neg2.neg2.neg2.cap3.pos0.pos0.cap1",0,5)# 0 positive twists, 5 negative twists. 
+    tangle="cup1.neg2.neg2.neg2.cap3.pos0.pos0.cap1"
+    drawtangle(tangle,"2m3pt_diagram_slices","slices")
+    drawtangle(tangle,"2m3pt_diagram_plain","plain")
+    cx=BNbracket(tangle,0,5)# 0 positive twists, 5 negative twists. 
     #cx=BNbracket("cup1.pos2.pos2.pos2.cap3.neg0.neg0.cap1") #mirror
     #PrettyPrintComplex(cx)
     BNcx=CobComplex2BNComplex(cx)

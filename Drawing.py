@@ -197,6 +197,181 @@ def draw_dot_on_arc(arc,clt,h,ctx,deco_index):
     ctx.set_source_rgb(255,0,0)
     ctx.stroke()
 
+def drawtangle(string,name,style="plain",start=1):
+    """draw the tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
+    <type> is equal to:
+        'pos': positive crossing
+        'neg': negative crossing
+        'cup': cup
+        'cap': cap
+    <index> is the index at which the crossing, cap or cup sits. 
+    The optional parametrer 'style' is either 'plain' (simple tangle) or 'slices' (shows slices with labels).
+    The optional paramter 'start' is an integer which specifies the number of tangle ends at the top.
+    """
+    stringwidth=0.08
+    
+    # drawing code for elementary slices
+    def draw_cup(level,index,dotlength):
+        #arcs connecting dots
+        ctx.move_to(index,level)
+        ctx.curve_to(index,level+0.5,index+1,level+0.5,index+1,level)
+               
+        for i in range(index):
+            ctx.move_to(i,level)
+            ctx.line_to(i,level+1)
+        
+        for i in range(index+2,dotlength):
+            ctx.move_to(i,level)
+            ctx.curve_to(i,level+0.5,i-2,level+0.5,i-2,level+1)
+        
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(stringwidth)
+        ctx.stroke()
+    
+    def draw_cap(level,index,dotlength):
+        #arcs connecting dots
+        ctx.move_to(index,level+1)
+        ctx.curve_to(index,level+0.5,index+1,level+0.5,index+1,level+1)
+               
+        for i in range(index):
+            ctx.move_to(i,level)
+            ctx.line_to(i,level+1)
+        
+        for i in range(index,dotlength):
+            ctx.move_to(i,level)
+            ctx.curve_to(i,level+0.5,i+2,level+0.5,i+2,level+1)
+            
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(stringwidth)
+        ctx.stroke()
+    
+    def draw_pos(level,index,dotlength):
+        #arcs connecting dots
+        ctx.move_to(index,level)
+        ctx.curve_to(index,level+0.5,index+1,level+0.5,index+1,level+1)
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(stringwidth)
+        ctx.stroke()
+        
+        ctx.set_line_cap(cairo.LINE_CAP_BUTT)
+        ctx.move_to(index+1,level)
+        ctx.curve_to(index+1,level+0.5,index,level+0.5,index,level+1)
+        ctx.set_source_rgb(1,1,1)
+        ctx.set_line_width(3*stringwidth)
+        ctx.stroke()
+        
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.move_to(index+1,level)
+        ctx.curve_to(index+1,level+0.5,index,level+0.5,index,level+1)
+               
+        for i in range(index):
+            ctx.move_to(i,level)
+            ctx.line_to(i,level+1)
+        
+        for i in range(index+2,dotlength):
+            ctx.move_to(i,level)
+            ctx.line_to(i,level+1)
+        
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(stringwidth)
+        ctx.stroke()
+    
+    def draw_neg(level,index,dotlength):
+        #arcs connecting dots
+        ctx.move_to(index+1,level)
+        ctx.curve_to(index+1,level+0.5,index,level+0.5,index,level+1)
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(stringwidth)
+        ctx.stroke()
+        
+        ctx.set_line_cap(cairo.LINE_CAP_BUTT)
+        ctx.move_to(index,level)
+        ctx.curve_to(index,level+0.5,index+1,level+0.5,index+1,level+1)
+        ctx.set_source_rgb(1,1,1)
+        ctx.set_line_width(3*stringwidth)
+        ctx.stroke()
+        
+        ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+        ctx.move_to(index,level)
+        ctx.curve_to(index,level+0.5,index+1,level+0.5,index+1,level+1)
+               
+        for i in range(index):
+            ctx.move_to(i,level)
+            ctx.line_to(i,level+1)
+        
+        for i in range(index+2,dotlength):
+            ctx.move_to(i,level)
+            ctx.line_to(i,level+1)
+        
+        ctx.set_source_rgb(0,0,0)
+        ctx.set_line_width(stringwidth)
+        ctx.stroke()
+        
+    stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
+    stringlist.reverse()
+    scale = 100
+    
+    w_current = start
+    w_max = start
+    for word in stringlist:
+        if word[0]=="cap":
+            w_current+= 2
+            w_max = max(w_max,w_current)
+        if word[0]=="cup":
+            w_current-= 2
+    
+    if style=="slices":
+        w = w_max+1.5
+    else:
+        w = w_max
+    h = len(stringlist)
+    dotlength=start
+    
+    surface = cairo.SVGSurface("Output/"+name+'.svg',w*scale,(h+1)*scale)
+    ctx = cairo.Context(surface)
+    ctx.set_source_rgb(1, 1, 1) #background colour
+    ctx.paint()
+    matrix = cairo.Matrix(scale,0,0,scale,0.5*scale,0.5*scale)
+    ctx.set_matrix(matrix)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    
+    # Drawing code
+    for level,word in enumerate(stringlist):
+        
+        if word[0]=="pos":
+            draw_pos(level,word[1],dotlength)
+        
+        if word[0]=="neg":
+            draw_neg(level,word[1],dotlength)
+        
+        if word[0]=="cup":
+            draw_cup(level,word[1],dotlength)
+            dotlength-=2
+        
+        if word[0]=="cap":
+            draw_cap(level,word[1],dotlength)
+            dotlength+=2
+        
+        if (style=="slices") and (level>0):
+            ctx.move_to(-0.25,level)
+            ctx.line_to(w-1,level)
+        
+            ctx.set_source_rgb(0.8,0.8,0.8)
+            ctx.set_line_width(stringwidth)
+            ctx.stroke()
+        
+        if (style=="slices"):
+            ctx.set_font_size(0.40)
+            ctx.set_source_rgb(0.5,0.5,0.5)
+            ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
+            s = word[0]+str(word[1])
+            ctx.move_to(w-2,level+0.5)
+            ctx.show_text(s)
+        
+            
+    #return IFrame("Output/"+ name+'.svg', width='100%', height='300')
+
+
 def drawclt(clt,name):
     scale = 100
     w = max(clt.top,clt.bot)

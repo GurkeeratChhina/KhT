@@ -424,7 +424,7 @@ def AddNegCrossing(Complex, i):
     return NewComplex
 
 def BNbracket(string,pos=0,neg=0,start=1):
-    """compute the Bar-Natan bracket for tangle spectified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
+    """compute the Bar-Natan bracket for tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
     <type> is equal to:
         'pos': positive crossing
         'neg': negative crossing
