@@ -351,18 +351,21 @@ def TestSet12():
     DrawBNComplex(BN_complex_4m5pt, "4m5pt_redBN_after_cleanup.svg","index_qh")
     
 def TestSet13():
-    n = 6
+    n = 3
     pretzeltangle_n = "cup1."
     for j in range(n):
         pretzeltangle_n += "neg2.neg2."
     pretzeltangle_n += "neg2.cap3."
     for j in range(n):
         pretzeltangle_n += "pos0.pos0."
-    pretzeltangle_n += "cap1"   
+    pretzeltangle_n += "cap1"
+    drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_slices","slices",1)
+    drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_plain","plain",1) 
     complex_ptn = BNbracket(pretzeltangle_n)
     BN_complex_ptn = CobComplex2BNComplex(complex_ptn)
+    DrawBNComplex(BN_complex_ptn,str(2*n)+"m"+str(2*n+1)+"pt_redBN_before_cleanup.svg","qh")
     BN_complex_ptn.clean_up()
-    DrawBNComplex(BN_complex_ptn, "pretzel_tangle_6_redBN_after_cleanup.svg","index_qh")
+    DrawBNComplex(BN_complex_ptn,str(2*n)+"m"+str(2*n+1)+"pt_redBN_after_cleanup.svg","qh")
 
 def TestSet14():
     n=5
@@ -372,8 +375,10 @@ def TestSet14():
     pretzeltangle_n += "neg2."
     for j in range(n):
         pretzeltangle_n += "pos0.pos0."
-    pretzeltangle_n += "cap1"   
-    complex_ptn = BNbracket(pretzeltangle_n, 2)
+    pretzeltangle_n += "cap1" 
+    drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_slices","slices",2)
+    drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_plain","plain",2)  
+    complex_ptn = BNbracket(pretzeltangle_n, 2)# this gives an error "list index out of range in AddCupToCLT"
     DrawFourEndedChainComplex(complex_ptn, "pretzeltangle_n.png")
     
 # TestSet0()

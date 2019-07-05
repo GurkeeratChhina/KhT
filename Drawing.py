@@ -354,7 +354,7 @@ def drawtangle(string,name,style="plain",start=1):
         
         if (style=="slices") and (level>0):
             ctx.move_to(-0.25,level)
-            ctx.line_to(w-1,level)
+            ctx.line_to(w-0.75,level)
         
             ctx.set_source_rgb(0.8,0.8,0.8)
             ctx.set_line_width(stringwidth)
