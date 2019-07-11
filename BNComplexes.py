@@ -24,6 +24,7 @@ from Complex import *
 from Drawing import *
 from Cobordisms import *
 import time
+from fractions import Fraction
 
 def ToExponent(exponent):
     return str(exponent).translate(str.maketrans("-0123456789.", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹·"))
@@ -94,7 +95,7 @@ class BNobj(object):
 class BNmor(object):
     """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
-    'coeff' is some non-zero integer (= coefficient in the base ring/field)
+    'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
     """
     __slots__ = 'pairs'
     
@@ -171,7 +172,6 @@ class BNmor(object):
                     string += coeff + "id"
         return string
         
-
 class BNComplex(object):
     """ A chain complex is a directed graph, consisting of 
         - A list of BNobj as labels on the vertices

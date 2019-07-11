@@ -30,7 +30,7 @@ def find_first_index(mylist,function):
     return next(i for i,v in enumerate(mylist) if function(v))
 
 def find_first(mylist,function):
-    """compute the index of the first element in the list mylist on which function is true. 
+    """compute first element in the list mylist on which function is true. 
     Throws error if there is no such element"""
     return next(v for v in mylist if function(v))
 

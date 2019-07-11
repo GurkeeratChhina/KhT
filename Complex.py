@@ -199,7 +199,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     nextRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                 else: # is not the 0 cob
-                    magic_index = cob.comps.index([cob.front.top+i, cob.front.top+i+1]) #computes index of closed component
+                    magic_index = next(j for j, v in enumerate(cob.comps) if len(v) == 2 and cob.front.top+i in v and cob.front.top+i+1 in v) #computes index of closed component
                     newcomps = [[decrementby2(j) for j in comp] for comp in cob.comps if cob.front.top+i not in comp ]
                     def delclosedcomp(decoration):
                         return decoration[:magic_index+1] + decoration[magic_index+2:]
@@ -448,11 +448,9 @@ def BNbracket(string,pos=0,neg=0,start=1):
     stringlist.reverse()
     
     cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
-    
     for i,word in enumerate(stringlist):
         print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\r')# testing how to monitor a process
         #time.sleep(0.1)
-        
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
             cx.eliminateAll()

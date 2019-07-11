@@ -348,7 +348,7 @@ def TestSet12():
     DrawBNComplex(BN_complex_4m5pt, "4m5pt_redBN_after_cleanup.svg","index_qh")
     
 def TestSet13():
-    n = 6
+    n = 3
     pretzeltangle_n = "cup1."
     for j in range(n):
         pretzeltangle_n += "neg2.neg2."
@@ -359,7 +359,7 @@ def TestSet13():
     complex_ptn = BNbracket(pretzeltangle_n)
     BN_complex_ptn = CobComplex2BNComplex(complex_ptn)
     BN_complex_ptn.clean_up()
-    DrawBNComplex(BN_complex_ptn, "pretzel_tangle_6_redBN_after_cleanup.svg","index_qh")
+    DrawBNComplex(BN_complex_ptn, "pretzel_tangle_3_redBN_after_cleanup.svg","index_qh")
 
 def TestSet14():
     n=5
@@ -372,6 +372,61 @@ def TestSet14():
     pretzeltangle_n += "cap1"   
     complex_ptn = BNbracket(pretzeltangle_n, 2)
     DrawFourEndedChainComplex(complex_ptn, "pretzeltangle_n.png")
+    
+def TestSet15():
+    n = 0
+    tangle_pos_0 = "cup1.neg2.pos0.pos0.neg1."
+    for j in range(n):
+        tangle_pos_0 += "pos2."
+    tangle_pos_0 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    complex_pos_0 = BNbracket(tangle_pos_0)
+    BN_complex_pos_0 = CobComplex2BNComplex(complex_pos_0)
+    BN_complex_pos_0.clean_up()
+    DrawBNComplex(BN_complex_pos_0, "tangle_BN_0_after_cleanup.svg", "index_qh")
+    
+def TestSet16():
+    n = 1
+    tangle_pos_1 = "cup1.neg2.pos0.pos0.neg1."
+    for j in range(n):
+        tangle_pos_1 += "pos2."
+    tangle_pos_1 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    complex_pos_1 = BNbracket(tangle_pos_1)
+    BN_complex_pos_1 = CobComplex2BNComplex(complex_pos_1)
+    BN_complex_pos_1.clean_up()
+    DrawBNComplex(BN_complex_pos_1, "tangle_BN_1_after_cleanup.svg", "index_qh")
+
+def TestSet17():
+    n = 3
+    tangle_pos_3 = "cup1.neg2.pos0.pos0.neg1."
+    for j in range(n):
+        tangle_pos_3 += "pos2."
+    tangle_pos_3 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    complex_pos_3 = BNbracket(tangle_pos_3)
+    BN_complex_pos_3 = CobComplex2BNComplex(complex_pos_3)
+    BN_complex_pos_3.clean_up()
+    DrawBNComplex(BN_complex_pos_3, "tangle_BN_3_after_cleanup.svg", "index_qh")
+
+def TestSet18():
+    n = 4
+    tangle_pos_4 = "cup1.neg2.pos0.pos0.neg1."
+    for j in range(n):
+        tangle_pos_4 += "pos2."
+    tangle_pos_4 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    complex_pos_4 = BNbracket(tangle_pos_4)
+    BN_complex_pos_4 = CobComplex2BNComplex(complex_pos_4)
+    BN_complex_pos_4.clean_up()
+    DrawBNComplex(BN_complex_pos_4, "tangle_BN_4_after_cleanup.svg", "index_qh")
+
+def TestSet19():
+    n = 4
+    tangle_neg_4 = "cup1.neg2.pos0.pos0.neg1."
+    for j in range(n):
+        tangle_neg_4 += "neg2."
+    tangle_neg_4 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    complex_neg_4 = BNbracket(tangle_neg_4)
+    BN_complex_neg_4 = CobComplex2BNComplex(complex_neg_4)
+    BN_complex_neg_4.clean_up()
+    DrawBNComplex(BN_complex_neg_4, "tangle_BN_neg_4_after_cleanup.svg", "index_qh")
     
 # TestSet0()
 # TestSet1()
@@ -386,8 +441,16 @@ def TestSet14():
 # TestSet10()
 # TestSet11()
 # TestSet12()
-TestSet13()
+# TestSet13()
 # TestSet14()
+# TestSet15()
+# TestSet16()
+# TestSet17()
+# TestSet18()
+# TestSet19()
+
+
+
 
 # TestAlgTest()
 
