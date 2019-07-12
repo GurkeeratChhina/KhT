@@ -433,7 +433,7 @@ def AddNegCrossing(Complex, i):
     return NewComplex
 
 def BNbracket(string,pos=0,neg=0,start=1):
-    """compute the Bar-Natan bracket for tangle spectified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
+    """compute the Bar-Natan bracket for tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
     <type> is equal to:
         'pos': positive crossing
         'neg': negative crossing
@@ -446,10 +446,11 @@ def BNbracket(string,pos=0,neg=0,start=1):
     """
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
     stringlist.reverse()
-    
     cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
+    print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
+          " positive crossings and "+str(neg)+" negative crossings.")
     for i,word in enumerate(stringlist):
-        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\r')# testing how to monitor a process
+        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\r')# monitor
         #time.sleep(0.1)
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
@@ -468,7 +469,7 @@ def BNbracket(string,pos=0,neg=0,start=1):
     
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     
-    print("Successfully computed the complex for the tangle: \n"+string)
+    print("Completed the computation successfully.       ")
     return cx
 
 

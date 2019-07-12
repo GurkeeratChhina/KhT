@@ -398,7 +398,7 @@ def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
     g = Graph()
     size = len(complex.gens)
     g.add_vertex(size)
-    canvas_size = (200*size, 150*size)
+    canvas_size = (400*math.sqrt(size), 300*math.sqrt(size))
     
     Vertex_colour = g.new_vertex_property("string") # "black" is the horizontal CLT (b) and "white" is the vertical CLT (c)
     Vertex_labelling = g.new_vertex_property("string")
