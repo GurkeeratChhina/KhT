@@ -307,13 +307,15 @@ class BNComplex(object):
             if iter % 10 == 0: # check every now and then during the iteration, whether the complex is already loop-type.
                 if self.is_looptype():
                     print("Clean-Up: Finished after "+str(iter)+" iteration(s).")
-                    iter = max_iter
+                    break
             iter+=1
             self.clean_up_once(-1)# faces S
             self.clean_up_once(1) # faces D
             print("iteration: "+str(iter), end='\r')# testing how to monitor a process
             #time.sleep(1)
-    
+        else:
+            print("Clean-up: Terminated as a result of reaching maximum iteration value of", max_iter)
+            
     def negative(self): #create new morphism
         return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs])
     

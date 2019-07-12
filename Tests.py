@@ -401,7 +401,7 @@ def TestSet16():
     tangle_pos_1 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
     complex_pos_1 = BNbracket(tangle_pos_1)
     BN_complex_pos_1 = CobComplex2BNComplex(complex_pos_1)
-    BN_complex_pos_1.clean_up()
+    BN_complex_pos_1.clean_up(2000)
     DrawBNComplex(BN_complex_pos_1, "tangle_BN_1_after_cleanup.svg", "index_qh")
 
 def TestSet17():
@@ -450,13 +450,13 @@ def TestSet19():
 # TestSet10()
 # TestSet11()
 # TestSet12()
-TestSet13()
-TestSet14()
+# TestSet13()
+# TestSet14()
 # TestSet15()
 # TestSet16()
-# TestSet17()
-# TestSet18()
-# TestSet19()
+# TestSet17() # Doesn't seem to work
+# TestSet18() # Also doesn't seem to work
+TestSet19() # Also doesn't seem to work
 
 
 # TestAlgTest()
