@@ -97,7 +97,7 @@ class BNmor(object):
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
     'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
     """
-    __slots__ = 'pairs'
+    __slots__ = 'pairs', 'field'
     
     def __init__(self,pairs):
         self.pairs = pairs
@@ -207,13 +207,17 @@ class BNComplex(object):
         self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
     
-    def isolate_arrow(self,start, end, alg):
+    def isolate_arrow(self,start, end, alg, field = 'Q'):
         """ Try to isotope away all arrows with the same start or the same end as 'arrow'. 
         'arrow' is a list [start, end, alg], where 'alg' is a BNmor with a single entry.
+        field is the field we are working over, either 'Q', or some prime p for F_p
+
         """
         def inverse(num): #this only works over a field;could replace this by a suitable function for positive characteristic
-            return 1/num
-        
+            if field == 'Q':
+                return Fraction(1)/num
+            else: 
+                return 1/num #TODO: implement with F_p arithmetic
         face=alg.pairs[0][0]
         inverse_coeff=inverse(alg.pairs[0][1])
         # first remove all other arrows with the same start

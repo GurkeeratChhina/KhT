@@ -21,6 +21,7 @@ from Cobordisms import *
 from Complex import *
 from Drawing import *
 from BNComplexes import *
+from fractions import Fraction
 
 # create basic crossingless tangles
 def cup_alt(n,i):
@@ -441,15 +442,13 @@ def TestSet19():
 # TestSet10()
 # TestSet11()
 # TestSet12()
-# TestSet13()
-# TestSet14()
+TestSet13()
+TestSet14()
 # TestSet15()
 # TestSet16()
 # TestSet17()
 # TestSet18()
 # TestSet19()
-
-
 
 
 # TestAlgTest()
