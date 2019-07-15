@@ -44,9 +44,14 @@ class ChainComplex(object):
                 raise Exception('Differential has self loops')
         
         squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
-        for i in flatten(squared):
-            if i.ReduceDecorations() != []:
-                raise Exception('Differential does not square to 0')
+        for i,row in enumerate(squared):
+            for j,cob in enumerate(row):
+                if cob.ReduceDecorations() != []:
+                    print("!!!!!!!!!!!!!!!!!!")
+                    print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
+                    print(printdecos(cob,"long"))
+                    print("!!!!!!!!!!!!!!!!!!")
+                    raise Exception('Differential does not square to 0')
     
     def findIsom(self): 
         """Returns the location of the first isomorphism it finds
