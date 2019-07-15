@@ -103,7 +103,7 @@ class BNmor(object):
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
     'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
     """
-    __slots__ = 'pairs', 'field'# Claudius: not sure about 'field' here; what is it for?
+    __slots__ = 'pairs'
     
     def __init__(self,pairs):
         self.pairs = pairs
@@ -226,19 +226,21 @@ class BNComplex(object):
         self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
     
-    def isolate_arrow(self,start, end, alg, field = 2):
+    def isolate_arrow(self,start, end, alg):
         """ Try to isotope away all arrows with the same start or the same end as 'arrow'. 
         'arrow' is a list [start, end, alg], where 'alg' is a BNmor with a single entry.
-        field is the field we are working over, either 'Q', or some prime p for F_p
 
         """
         def inverse(num): #this only works over a field;could replace this by a suitable function for positive characteristic
-            if field == 0:
+            if self.field == 0:
                 return Fraction(1)/num
-            elif field == 2:
-                return num
+            elif self.field == 1:
+                if num in [1, -1]:
+                    return num
+                else: 
+                    raise Exception("Can't invert over Z")
             else: 
-                return 1/num #TODO: implement with F_p arithmetic
+                return pow(num, self.field-2, self.field) #TODO: implement with F_p arithmetic
         face=alg.pairs[0][0]
         inverse_coeff=inverse(alg.pairs[0][1])
         # first remove all other arrows with the same start
@@ -255,7 +257,7 @@ class BNComplex(object):
                     if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
                         self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]]),"unsafe")
     
-    def clean_up_once(self,SD,field):
+    def clean_up_once(self,SD):
         """ Simplify complex wrt the face D (1) or S (-1).
         """
         remaining=list(range(len(self.gens))) # list of unsimplified generators
@@ -303,7 +305,7 @@ class BNComplex(object):
                     remaining.remove(end_current)
                 
             else: # isolate this shortest arrow
-                self.isolate_arrow(start_current, end_current, BNmor([self.diff[end_current,start_current].pairs[index_current]]),field)
+                self.isolate_arrow(start_current, end_current, BNmor([self.diff[end_current,start_current].pairs[index_current]]))
                 #print("start:", start_current,"end:", end_current, "isotopy:",self.diff[end_current,start_current].pairs[index_current])
                 remaining.remove(start_current)
                 remaining.remove(end_current)
@@ -319,7 +321,7 @@ class BNComplex(object):
                 all([list(matrix_S[:,index]).count(True)<2 for index in range(size)]) & \
                 all([list(matrix_S[index,:]).count(True)<2 for index in range(size)])
     
-    def clean_up(self,field,max_iter=200):
+    def clean_up(self,max_iter=200):
         """ Simplify complex alternatingly wrt D and S faces and stop after at most max_iter iterations. The default is 200 iterations. 
         """
         
@@ -330,8 +332,8 @@ class BNComplex(object):
                     print("Clean-Up: Finished after "+str(iter)+" iteration(s).")
                     break
             iter+=1
-            self.clean_up_once(-1,field)# faces S
-            self.clean_up_once(1,field) # faces D
+            self.clean_up_once(-1)# faces S
+            self.clean_up_once(1) # faces D
             print("iteration: "+str(iter), end='\r')# testing how to monitor a process
             #time.sleep(1)
         else:

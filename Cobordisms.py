@@ -180,6 +180,8 @@ class Cobordism(object):
             return False
         if len(self.comps) != self.front.total: #checks if the number of components of the cobordism is exactly the number of arcs of the CLT
             return False
+        if len(self.comps) != self.back.total: # as above
+            return Fasle 
         for x in self.decos[0][:-1]: #checks that there are no dots or powers of H
             if x != 0:
                 return False

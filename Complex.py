@@ -43,12 +43,14 @@ class ChainComplex(object):
             if self.morphisms[i][i].decos != []:
                 raise Exception('Differential has self loops')
         
-        squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
-        for i,row in enumerate(squared):
-            for j,cob in enumerate(row):
+        # Computing morphisms squared:
+        transpose = np.transpose(self.morphisms)
+        for x, row in enumerate(self.morphisms):
+            for y, column in enumerate(transpose):
+                cob = np.dot(column, row) # computes the element at [x][y] in d^2
                 if cob.ReduceDecorations() != []:
                     print("!!!!!!!!!!!!!!!!!!")
-                    print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
+                    print("ERROR: Found non-zero term in d² in row "+str(x)+" and column "+str(y)+":")
                     print(printdecos(cob,"long"))
                     print("!!!!!!!!!!!!!!!!!!")
                     raise Exception('Differential does not square to 0')
@@ -71,11 +73,11 @@ class ChainComplex(object):
         newMorphisms = []
         for target, row in enumerate(self.morphisms):
             newRow = []
-            if target != sourceindex and target != targetindex: 
+            if target != sourceindex and target != targetindex: # Only keeping rows that are not corresponding to source or target
                 for source, cob in enumerate (row):
-                    if source != sourceindex and source != targetindex:
-                        temp1 = (self.morphisms[targetindex][source]*Inverse)*self.morphisms[target][sourceindex] #composes the 3 morphisms as in the lemma
-                        newCob = cob + temp1.negative()
+                    if source != sourceindex and source != targetindex: # Only keeping columns that are not corresponding to source or target
+                        temp1 = (self.morphisms[targetindex][source]*Inverse)*self.morphisms[target][sourceindex] #composes the 3 morphisms as in the lemma, this is gamma phi^-1 delta as in Benjamin Thompson's paper
+                        newCob = cob + temp1.negative() # This does epsilon - gamma phi^-1 delta
                         newRow.append(newCob)
                 newMorphisms.append(newRow)
         self.elements = newElements
@@ -103,11 +105,11 @@ def AddCapToCLT(clt, i, grshift = "false"):
         else:
             return j
     newarcs = [incrementby2(x) for x in clt.arcs[:clt.top+i]] + [clt.top+i +1, clt.top+i] + [incrementby2(x) for x in clt.arcs[clt.top+i:]]
-    if grshift == "true":
+    if grshift == "true": # shift grading
         newpgr = clt.pgr +1
         newqgr = clt.qgr +1
         newdgr = clt.dgr -0.5
-    else:
+    else: # dont shift grading
         newpgr = clt.pgr
         newqgr = clt.qgr
         newdgr = clt.dgr
@@ -121,9 +123,9 @@ def AddCap(Complex, i, grshift = "false"):
     NewElements = [AddCapToCLT(clt, i, grshift) for clt in Complex.elements]
     length = len(Complex.elements)
     NewMorphisms = []
-    for j ,row in enumerate(Complex.morphisms):
+    for target ,row in enumerate(Complex.morphisms):
         NewRow=[]
-        for k, cob in enumerate(row):
+        for source, cob in enumerate(row):
             if cob.decos == []: #adding a cap to the zero cobordism does nothing
                 NewRow.append(ZeroCob)
             else: #not the zero cobordism
@@ -137,13 +139,13 @@ def AddCap(Complex, i, grshift = "false"):
                     newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos] #adds the new component without a dot and flips the sign on the coefficient
                 else: 
                     newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos] #adds the new component without a dot
-                NewCob = Cobordism(NewElements[k], NewElements[j], newDecos, newcomps)
+                NewCob = Cobordism(NewElements[source], NewElements[target], newDecos, newcomps)
                 NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
 
 def AddCupToCLT(clt, i):
-    """ Adds a cup to the clt at index i, where 0 <= i <= clt.bot
+    """ Adds a cup to the clt at index i, where 0 <= i <= clt.bot -2
         Returns a list of 2 clt if there is a closed component, obtained by neckcutting
         Otherwise returns a list of 1 clt """
     newElements = []
@@ -172,39 +174,39 @@ def AddCup(Complex, i): # TODO: reduce decorations
     for clt in Complex.elements:
         newElements.extend(AddCupToCLT(clt, i))
     NewMorphisms = []
-    for j, row in enumerate(Complex.morphisms): # j is the target clt
+    for target, row in enumerate(Complex.morphisms):
         newRow = []
         nextRow = []
-        for k, cob in enumerate(row): # k is the source clt
+        for source, cob in enumerate(row):
             def decrementby2(j): #shifts TEI by -2 if it is greater than where the cup i added
-                if j > cob.front.top+i+1:
+                if j >= cob.front.top+i:
                     return j-2
                 else:
                     return j
-            magic_index = 0
-            if cob.decos != []:
-                for x,comp in enumerate(cob.comps): #TODO: find magic index without iterating twice, dont need defining function
+            magic_index = 0 # the index of the first component that the cup connects to
+            if cob.decos != []: # computes magic index
+                for x,comp in enumerate(cob.comps):
                     if cob.front.top +i in comp:
                         magic_index = x
                         break
             def compcup(component): #computes the new component after adding a cup, for components containing at least 3 ends
                 return [decrementby2(j) for j in component if j != cob.front.top+i and j!= cob.front.top+i+1]
-            def incrementH(decoration):
+            def incrementH(decoration): # Increments H of a decoration by 1
                 return [decoration[0]+1] + decoration[1:]
-            def negativeH(decoration):
+            def negativeH(decoration): # Increments H of a decoration by 1, and flips the sign on the coefficient
                 return [decoration[0]+1] + decoration[1:-1] +[decoration[-1]*-1]
-            def adddotonmagicindex(decoration):
+            def adddotonmagicindex(decoration): # adds dot to the component labeled by magic index if there is no dot already, otherwise does nothing
                 return decoration[:magic_index+1] + [1] + decoration[magic_index+2:]
             
-            if Complex.elements[k].arcs[Complex.elements[k].top +i] == Complex.elements[k].top+i+1 \
-                and Complex.elements[j].arcs[Complex.elements[j].top +i] == Complex.elements[j].top+i+1: # source and target are both closed, add 2 cobordisms to newRow and nextRow
+            if Complex.elements[source].arcs[Complex.elements[source].top +i] == Complex.elements[source].top+i+1 \
+                and Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # source and target are both closed, add 2 cobordisms to newRow and nextRow
                 if cob.decos == []: # is the 0 cob
                     newRow.append(ZeroCob)
                     newRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                 else: # is not the 0 cob
-                    magic_index = next(j for j, v in enumerate(cob.comps) if len(v) == 2 and cob.front.top+i in v and cob.front.top+i+1 in v) #computes index of closed component
+                    # magic_index = next(j for j, v in enumerate(cob.comps) if len(v) == 2 and cob.front.top+i in v and cob.front.top+i+1 in v) #computes index of closed component, should be the same as magic_index computed generally above
                     newcomps = [[decrementby2(j) for j in comp] for comp in cob.comps if cob.front.top+i not in comp ]
                     def delclosedcomp(decoration):
                         return decoration[:magic_index+1] + decoration[magic_index+2:]
@@ -231,7 +233,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     newRow.append(Cobordism2)
                     nextRow.append(Cobordism3)
                     nextRow.append(Cobordism4)
-            elif Complex.elements[j].arcs[Complex.elements[j].top +i] == Complex.elements[j].top+i+1: # source is open but target is closed, add 1 cobordism to each
+            elif Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # source is open but target is closed, add 1 cobordism to each
                 if cob.decos == []: # is the 0 cob
                     newRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
@@ -250,7 +252,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     Cobordism2 = Cobordism(tops[0], bots[1], NewDecos2, newcomps)
                     newRow.append(Cobordism1)
                     nextRow.append(Cobordism2)
-            elif Complex.elements[k].arcs[Complex.elements[k].top +i] == Complex.elements[k].top+i+1: # source is closed but target is open, add 2 cobordisms to newRow only
+            elif Complex.elements[source].arcs[Complex.elements[source].top +i] == Complex.elements[source].top+i+1: # source is closed but target is open, add 2 cobordisms to newRow only
                 if cob.decos == []: # is the 0 cob
                     newRow.append(ZeroCob)
                     newRow.append(ZeroCob)
@@ -323,7 +325,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     Cobordism1 = Cobordism(tops[0], bots[0], NewDecos1, newcomps)
                     newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
-        if Complex.elements[j].arcs[clt.top +i] == clt.top+i+1: # target is closed
+        if Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # target is closed
             NewMorphisms.append(nextRow)
     return ChainComplex(newElements, NewMorphisms)
   
@@ -387,9 +389,7 @@ def grshiftcob(cob):
     return Cobordism(grshiftclt(cob.front), grshiftclt(cob.back), newDecos, cob.comps)
     
 def AddNegCrossing(Complex, i):
-    complexgradings = [ [clt.pgr, clt.qgr] for clt in Complex.elements]
     targetelements = [grshiftclt(clt) for clt in Complex.elements]
-    newgradings = [ [clt.pgr, clt.qgr] for clt in targetelements]
     CapCup = AddCap(AddCup(Complex, i), i)
     sourceelements = CapCup.elements
     NewElements = sourceelements + targetelements
@@ -471,7 +471,9 @@ def BNbracket(string,pos=0,neg=0,start=1):
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
-    
+        
+        PrettyPrintComplex(cx, "old long")
+        cx.ValidMorphism()
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     
     print("Completed the computation successfully.       ")
