@@ -445,10 +445,11 @@ def TestDSquare():
     # tangle = "neg1.neg2.cap1.cap1" #this works fine
     # tangle = "pos1.pos2.cap1.cap1" #this works fine
     # tangle = "pos1.neg1.cap2.cap1" # this works fine
-    # tangle = "pos0.neg0.cap1.cap0"
+    # tangle = "pos0.neg0.cap1.cap0" # this works
     # tangle = "neg0.pos0" # this works!
-    # tangle = "pos0.neg0"
-    tangle = "neg1.pos2.neg0.cap1"
+    # tangle = "pos0.neg0" # this works
+    tangle = "neg1.pos2.neg0.cap1" #this does not work
+    # tangle = "pos1.pos2.neg0.cap1" # this works
     drawtangle(tangle,"test","slices",2)
     complex_test_tangle = BNbracket(tangle,1,1,2)
     PrettyPrintComplex(complex_test_tangle,"old long")
