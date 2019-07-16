@@ -439,6 +439,20 @@ def TestSet19():
     BN_complex_neg_4.clean_up(2000)
     DrawBNComplex(BN_complex_neg_4, "tangle_BN_neg_4_after_cleanup.svg", "index_qh")
 
+def TestDSquare():
+    # tangle = "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    # tangle = "pos1.neg2.cap1.cap1" #this works fine
+    # tangle = "neg1.neg2.cap1.cap1" #this works fine
+    # tangle = "pos1.pos2.cap1.cap1"
+    # tangle = "pos1.neg1.cap2.cap1"
+    # tangle = "pos0.neg0.cap1.cap0"
+    # tangle = "neg0.pos0" # this works!
+    tangle = "pos0.neg0"
+    drawtangle(tangle,"test","slices",2)
+    complex_R2 = BNbracket(tangle,1,1,2)
+    PrettyPrintComplex(complex_R2,"long")
+    
+
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -456,12 +470,11 @@ def TestSet19():
 # TestSet14()
 TestSet15()
 # TestSet16()
-# TestSet17()
-# TestSet18()
-# TestSet19()
+# TestSet17() # Doesn't seem to work
+# TestSet18() # Also doesn't seem to work
+# TestSet19() # Also doesn't seem to work
 
-
-# TestAlgTest()
+TestDSquare()
 
 ## comparing efficiency of two functions
 #import timeit

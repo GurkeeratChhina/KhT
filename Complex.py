@@ -457,28 +457,37 @@ def BNbracket(string,pos=0,neg=0,start=1):
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
     stringlist.reverse()
     cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
+    cx.ValidMorphism()
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings and "+str(neg)+" negative crossings.")
     for i,word in enumerate(stringlist):
-        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\r')# monitor
+        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\n')# monitor \n ->\r
         #time.sleep(0.1)
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
+            PrettyPrintComplex(cx,"long")
+            cx.ValidMorphism()
             cx.eliminateAll()
+            cx.ValidMorphism()
         
         if word[0]=="neg":
             cx=AddNegCrossing(cx, word[1])
+            cx.ValidMorphism()
             cx.eliminateAll()
+            cx.ValidMorphism()
         
         if word[0]=="cup":
             cx=AddCup(cx, word[1])
+            cx.ValidMorphism()
             cx.eliminateAll()
+            cx.ValidMorphism()
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
         
         PrettyPrintComplex(cx, "old long")
         cx.ValidMorphism()
+
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     
     print("Completed the computation successfully.       ")
