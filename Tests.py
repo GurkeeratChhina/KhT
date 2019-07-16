@@ -438,7 +438,7 @@ def TestSet19():
     # BN_complex_neg_4.ValidMorphism()
     BN_complex_neg_4.clean_up(2000)
     DrawBNComplex(BN_complex_neg_4, "tangle_BN_neg_4_after_cleanup.svg", "index_qh")
-    
+
 # TestSet0()
 # TestSet1()
 # TestSet2()

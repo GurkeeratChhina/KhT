@@ -33,9 +33,9 @@ def printdecos(cob,switch="short"):
             return [cob.comps,cob.decos]
         if switch == "long":
             table=[["H:"]+[deco[0] for deco in cob.decos]]+\
-                [[comp]+[deco[i+1] for deco in cob.decos] \
-                    for i,comp in enumerate(cob.comps)]+\
-                [["coeff:"]+[deco[-1] for deco in cob.decos]]
+                  [[comp]+[deco[i+1] for deco in cob.decos] \
+                          for i,comp in enumerate(cob.comps)]+\
+                  [["coeff:"]+[deco[-1] for deco in cob.decos]]
             tablealt=[["H:",0,1],[[1,2],0,1],["coeff:",3,4]]
             return tabulate(table,tablefmt="plain")
         else:
