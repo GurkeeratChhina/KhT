@@ -275,8 +275,8 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     simplify_decos(NewDecos2)
                     newsourceclts = AddCupToCLT(cob.front, i)
                     newtargetclt = AddCupToCLT(cob.back, i)[0]
-                    Cobordism1 = Cobordism(newsourceclt[0], newtargetclt, NewDecos1, newcomps)
-                    Cobordism2 = Cobordism(newsourceclt[1], newtargetclt, NewDecos2, newcomps)
+                    Cobordism1 = Cobordism(newsourceclts[0], newtargetclt, NewDecos1, newcomps)
+                    Cobordism2 = Cobordism(newsourceclts[1], newtargetclt, NewDecos2, newcomps)
                     newRow.append(Cobordism1)
                     newRow.append(Cobordism2)
             else: # source and target are both open, add 1 cobordism to newRow only
@@ -325,9 +325,9 @@ def AddCup(Complex, i): # TODO: reduce decorations
                         newDecos1 = [computedeco2comps(deco) for deco in cob.decos]
                     NewDecos1 = [deco for deco in newDecos1 if deco[find_first_index(newcomps,contains_0)+1] == 0]
                     simplify_decos(NewDecos1)
-                    tops = AddCupToCLT(cob.front, i)
-                    bots = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cobordism(tops[0], bots[0], NewDecos1, newcomps)
+                    newsourceclt = AddCupToCLT(cob.front, i)[0]
+                    newtargetclt = AddCupToCLT(cob.back, i)[0]
+                    Cobordism1 = Cobordism(newsourceclt, newtargetclt, NewDecos1, newcomps)
                     newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
         if Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # target is closed
@@ -355,9 +355,9 @@ def AddPosCrossing(Complex, i):
                     newTarget2 = AddCapToCLT(AddCupToCLT(targetclt, i)[1], i, "true")
                     newcomps = components(sourceclt, newTarget1)
                     magic_index = 0
-                    for x,comp in enumerate(newcomps):
+                    for z,comp in enumerate(newcomps):
                         if sourceclt.top +i in comp:
-                            magic_index = x
+                            magic_index = z
                             break
                     decos1 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1], [1] + [0 for comp in newcomps] + [-1]] #Compute new decos via neckcutting
                     decos2 = [[0] + [0 for comp in newcomps] + [1]]
@@ -465,27 +465,36 @@ def BNbracket(string,pos=0,neg=0,start=1):
         #time.sleep(0.1)
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
-            PrettyPrintComplex(cx,"long")
+            print("before eliminateAll")
+            PrettyPrintComplex(cx, "old long")
             cx.ValidMorphism()
             cx.eliminateAll()
-            cx.ValidMorphism()
+            print("after eliminateAll")
+            PrettyPrintComplex(cx, "old long")
         
         if word[0]=="neg":
             cx=AddNegCrossing(cx, word[1])
+            print("before eliminateAll")
+            PrettyPrintComplex(cx, "old long")
             cx.ValidMorphism()
             cx.eliminateAll()
-            cx.ValidMorphism()
+            print("after eliminateAll")
+            PrettyPrintComplex(cx, "old long")
         
         if word[0]=="cup":
             cx=AddCup(cx, word[1])
+            print("before eliminateAll")
+            PrettyPrintComplex(cx, "old long")
             cx.ValidMorphism()
             cx.eliminateAll()
-            cx.ValidMorphism()
+            print("after eliminateAll")
+            PrettyPrintComplex(cx, "old long")
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
+            print("cap")
+            PrettyPrintComplex(cx, "old long")
         
-        PrettyPrintComplex(cx, "old long")
         cx.ValidMorphism()
 
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
