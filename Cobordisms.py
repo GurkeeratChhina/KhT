@@ -64,7 +64,6 @@ class Cobordism(object):
             return self
         if self.front!=other.front or self.back!=other.back:# incompatible cobordisms
             raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not compatible, because they do not belong to the same morphism space.')
-        print("added cobs")
         return Cobordism(self.front,self.back,simplify_decos(self.decos+other.decos),self.comps)
 
 

@@ -47,15 +47,16 @@ class ChainComplex(object):
         transpose = np.transpose(self.morphisms)
         for x, row in enumerate(self.morphisms):
             for y, column in enumerate(transpose):
-                print("row, column", x, y)
-                temp = [column[z]*row[z] for z in range(len(row))]
-                cob = ZeroCob
-                for k, cobord in enumerate(temp):
-                    cob += cobord
+                # print("row, column", x, y)
+                # temp = [column[z]*row[z] for z in range(len(row))]
+                # cob = ZeroCob
+                # for k, cobord in enumerate(temp):
+                    # cob += cobord
+                cob = np.dot(column, row)
                 # cob = np.dot(column, row) # computes the element at [x][y] in d^2
                 if cob.ReduceDecorations() != []:
-                    for k, cobord in enumerate(temp):
-                        drawcob(cobord, "cobord"+str(k))
+                    # for k, cobord in enumerate(temp):
+                        # drawcob(cobord, "cobord"+str(k))
                     print("!!!!!!!!!!!!!!!!!!")
                     print("ERROR: Found non-zero term in d² in row "+str(x)+" and column "+str(y)+":")
                     print(printdecos(cob,"long"))
@@ -306,8 +307,8 @@ def AddCup(Complex, i): # TODO: reduce decorations
                         if cob.front.top+i+1 in comp:
                             magic_index_2 = x
                     if magic_index == magic_index_2: # only one component being connected via cup
-                        comp = cob.comps[magic_index]
-                        x1 = comp.index(cob.front.top +i)
+                        comp = cob.comps[magic_index] # the component being connected
+                        x1 = comp.index(cob.front.top +i) 
                         x2 = comp.index(cob.front.top +i + 1)
                         comp1 = comp[:min(x1, x2)] + comp[max(x1, x2)+1:]
                         comp2 = comp[min(x1, x2) +1:max(x1, x2)]
@@ -322,8 +323,8 @@ def AddCup(Complex, i): # TODO: reduce decorations
                         for deco in cob.decos:
                             newDecos1.extend(computedeco1comps(deco))
                     else: # two seperate components being connected via cup
-                        comp1 = cob.comps[magic_index]
-                        comp2 = cob.comps[magic_index_2]
+                        comp1 = cob.comps[magic_index] # the component containing i
+                        comp2 = cob.comps[magic_index_2] # the component containing i+1
                         location1 = comp1.index(cob.front.top+i)
                         location2 = comp2.index(cob.front.top+i+1)
                         comp2 = (comp2[location2+1:] + comp2[:location2]) #rotates list until i+1 is at front, and removes it
