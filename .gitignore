@@ -6,4 +6,5 @@ CLT1.pdf CLT2.pdf CLT3.pdf CLT4.pdf CLT5.pdf SSbb.pdf SScc.pdf Sbc.pdf Scb.pdf b
 *.svg
 Output
 output.txt
+output
 __pycache__
