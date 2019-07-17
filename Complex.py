@@ -36,6 +36,7 @@ class ChainComplex(object):
         length = len(self.elements)
         if len(self.morphisms) != length:
             raise Exception('Differential does not have n rows (where n is the number of elements in chain complex)')
+                
         for i in self.morphisms:
             if len(i) != length:
                 raise Exception('Differential does not have n columns (where n is the number of elements in chain complex)')
@@ -43,6 +44,28 @@ class ChainComplex(object):
             if self.morphisms[i][i].decos != []:
                 raise Exception('Differential has self loops')
         
+        for i,row in enumerate(self.morphisms):
+            for j,cob in enumerate(row):   
+                if cob.homogeneousQ() == False:
+                    print("!!!!!!!!!!!!!!!!!!")
+                    print("ERROR: The component of the differential in row "+str(i)+" and column "+str(j)+" is not homoegenous:")
+                    print(printdecos(cob,"long"))
+                    print("!!!!!!!!!!!!!!!!!!")
+                    raise Exception('Non-homogeneous morphism in differential!')
+                if cob.decos !=[]:
+                    if (self.elements[i]).pgr-(self.elements[j]).pgr!=1:
+                        print("!!!!!!!!!!!!!!!!!!")
+                        print("ERROR: The homological grading along the component of the differential in row "+str(i)+" and column "+str(j)+" does not increase by 1:")
+                        print(printdecos(cob,"long"))
+                        print("!!!!!!!!!!!!!!!!!!")
+                        raise Exception('Something is wrong with the homological grading!')
+                    if (self.elements[i]).qgr-(self.elements[j]).qgr+cob.deg()!=0:
+                        print("!!!!!!!!!!!!!!!!!!")
+                        print("ERROR: The quantum grading is not preserved along the component of the differential in row "+str(i)+"(q:"+str((self.elements[i]).qgr)+") and column "+str(j)+"(q:"+str((self.elements[j]).qgr)+"):")
+                        print(printdecos(cob,"long"), " degree:", cob.deg())
+                        print("!!!!!!!!!!!!!!!!!!")
+                        raise Exception('Something is wrong with the quantum grading!')
+
         # Computing morphisms squared:
         transpose = np.transpose(self.morphisms)
         for x, row in enumerate(self.morphisms):
@@ -479,39 +502,39 @@ def BNbracket(string,pos=0,neg=0,start=1):
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings and "+str(neg)+" negative crossings.")
     for i,word in enumerate(stringlist):
-        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle.", end='\n')# monitor \n ->\r
+        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\n')# monitor \n ->\r
         #time.sleep(0.1)
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
-            print("before eliminateAll")
-            PrettyPrintComplex(cx, "old long")
+            #print("before eliminateAll")
+            #PrettyPrintComplex(cx, "old long")
             cx.ValidMorphism()
             cx.eliminateAll()
-            print("after eliminateAll")
-            PrettyPrintComplex(cx, "old long")
+            #print("after eliminateAll")
+            #PrettyPrintComplex(cx, "old long")
         
         if word[0]=="neg":
             cx=AddNegCrossing(cx, word[1])
-            print("before eliminateAll")
-            PrettyPrintComplex(cx, "old long")
+            #print("before eliminateAll")
+            #PrettyPrintComplex(cx, "old long")
             cx.ValidMorphism()
             cx.eliminateAll()
-            print("after eliminateAll")
-            PrettyPrintComplex(cx, "old long")
+            #print("after eliminateAll")
+            #PrettyPrintComplex(cx, "old long")
         
         if word[0]=="cup":
             cx=AddCup(cx, word[1])
-            print("before eliminateAll")
-            PrettyPrintComplex(cx, "old long")
+            #print("before eliminateAll")
+            #PrettyPrintComplex(cx, "old long")
             cx.ValidMorphism()
             cx.eliminateAll()
-            print("after eliminateAll")
-            PrettyPrintComplex(cx, "old long")
+            #print("after eliminateAll")
+            #PrettyPrintComplex(cx, "old long")
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
-            print("cap")
-            PrettyPrintComplex(cx, "old long")
+            #print("cap")
+            #PrettyPrintComplex(cx, "old long")
         
         cx.ValidMorphism()
 

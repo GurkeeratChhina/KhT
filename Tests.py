@@ -404,7 +404,7 @@ def TestSet16():
     DrawBNComplex(BN_complex_pos_1, "tangle_BN_1_after_cleanup.svg", "index_qh")
 
 def TestSet17():
-    n = 3
+    n = 2
     tangle_pos_3 = "cup1.neg2.pos0.pos0.neg1."
     for j in range(n):
         tangle_pos_3 += "pos2."
@@ -416,7 +416,7 @@ def TestSet17():
     DrawBNComplex(BN_complex_pos_3, "tangle_BN_3_after_cleanup.svg", "index_qh")
 
 def TestSet18():
-    n = 4
+    n = 2
     tangle_pos_4 = "cup1.neg2.pos0.pos0.neg1."
     for j in range(n):
         tangle_pos_4 += "pos2."
@@ -428,7 +428,7 @@ def TestSet18():
     DrawBNComplex(BN_complex_pos_4, "tangle_BN_4_after_cleanup.svg", "index_qh")
 
 def TestSet19():
-    n = 2
+    n = 3
     tangle_neg_4 = "cup1.neg2.pos0.pos0.neg1."
     for j in range(n):
         tangle_neg_4 += "neg2."
@@ -442,22 +442,64 @@ def TestSet19():
     DrawBNComplex(BN_complex_neg_4, "tangle_BN_neg_4_after_cleanup.svg", "index_qh")
 
 def TestDSquare():
-    # tangle = "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
-    # tangle = "pos1.neg2.cap1.cap1" #this works fine
-    # tangle = "neg1.neg2.cap1.cap1" #this works fine
-    # tangle = "pos1.pos2.cap1.cap1" #this works fine
+    tangle = "neg1.pos2.cap3.neg0.neg0.neg0.cap1" # this works fine
+    # tangle = "pos1.neg2.cap1.cap1" # this works fine
+    # tangle = "neg1.neg2.cap1.cap1" # this works fine
+    # tangle = "pos1.pos2.cap1.cap1" # this works fine
     # tangle = "pos1.neg1.cap2.cap1" # this works fine
-    # tangle = "pos0.neg0.cap1.cap0" # this works
-    # tangle = "neg0.pos0" # this works!
-    # tangle = "pos0.neg0" # this works
-    tangle = "neg1.pos2.neg0.cap1" #this does not work
-    # tangle = "pos1.pos2.neg0.cap1" # this works
+    # tangle = "pos0.neg0.cap1.cap0" # this works fine
+    # tangle = "neg0.pos0" # this works fine
+    # tangle = "pos0.neg0" # this works fine
+    # tangle = "neg1.pos2.neg0.cap1" # this works fine
+    # tangle = "pos1.pos2.neg0.cap1" # this works fine
     drawtangle(tangle,"test","slices",2)
     complex_test_tangle = BNbracket(tangle,1,1,2)
     complex_test_tangle.ValidMorphism()
-    PrettyPrintComplex(complex_test_tangle,"old long")
+    PrettyPrintComplex(complex_test_tangle,"long")
+
+def TestSet20():
+    x0 = CLT(2,4,[2,5,0,4,3,1],0,0,0)
+    x5 = CLT(2,4,[4,5,3,2,0,1],0,0,0)
+
+    cob02 = Cobordism(x0,x0,[[1, 0, 0, 0, -1]])
+    cob26 = Cobordism(x0,x0,[[0, 0, 0, 0, 1]])
+
+    print("1:")
+    print(printdecos(cob02,"long"))
+    print(printdecos(cob26,"long"))
+    print(printdecos(cob02*cob26,"long"))
+
+    cob03 = Cobordism(x0,x0,[[0, 0, 0, 0, 1]])
+    cob36 = Cobordism(x0,x0,[[0, 0, 0, 1, 1]])
+
+    print("2:")
+    print(printdecos(cob03,"long"))
+    print(printdecos(cob36,"long"))
+    print(printdecos(cob03*cob36,"long"))
+
+    cob05 = Cobordism(x0,x5,[[0, 0, 0, 1]])
+    cob56 = Cobordism(x5,x0,[[0, 0, 0, -1]])
+
+    print("3:")
+    print(printdecos(cob05,"long"))
+    print(printdecos(cob56,"long"))
+    print(printdecos(cob05*cob56,"long"))
+
+    print("sum:")
+    print(printdecos(cob02*cob26+cob03*cob36+cob05*cob56,"long"))
     
-TestDSquare()
+    cob = Cobordism(x0,x0,[[1, 0, 0, 0, -1],[0,0,1,0,3]])
+    print(cob.homogeneousQ())
+    print(cob.deg())
+    
+    cob = Cobordism(x0,x0,[])
+    print(cob.homogeneousQ())
+    print(cob.deg())
+    
+    cob = Cobordism(x0,x0,[[1, 0, 0, 0, -1],[1,0,1,0,3]])
+    print(cob.homogeneousQ())
+    print(cob.deg())
+    
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -475,9 +517,11 @@ TestDSquare()
 # TestSet14()
 # TestSet15()
 # TestSet16()
-# TestSet17() # Doesn't seem to work
+TestSet17() # Doesn't seem to work
 # TestSet18() # Also doesn't seem to work
-# TestSet19() # Also doesn't seem to work
+# TestSet19() # Works fro n=2, but not for n=3
+# TestDSquare()
+# TestSet20()
 
 ## comparing efficiency of two functions
 #import timeit
