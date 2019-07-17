@@ -42,10 +42,8 @@ class Cobordism(object):
     - clt2=back, (these may just be pointers?)
     - components (alternative to clt1 and clt2)
     - a list decos of (row) vectors v_i in a numpy array of decorations (decos) of the form [Hpower,dot1,...,dotn,coeff]:
-        - the first entry Hpower is a non-negative integer which records the pwer of H
-        - the entries dot<i> specify the number of dots (0 or 1) on the ith component. 
-            The components are ordered such that each component starts with the lowest index appearing in that component
-            and all components are ordered by that first entry. 
+        - the first entry Hpower is a non-negative integer which records the power of H
+        - the entries dot<i> specify the number of dots (0 or 1) on the ith component.  
         - the last entry coeff is some non-zero integer (= coefficient in the base ring/field)
     """
     def __init__(self,clt1,clt2,decos,comps="default"):
@@ -67,9 +65,11 @@ class Cobordism(object):
         def reorder_decos(old_comps,new_comps,decos):
             """convert decos ordered wrt 'old_comps' into decos ordered wrt 'new_comps'
             """
-            old_comps_sorted=[sorted(comp) for comp in old_comps]
-            new_order=[indexQ(old_comps_sorted,sorted(comp)) for comp in new_comps]
-            return [[deco[0]]+[deco[index+1] for index in new_order]+[deco[-1]] for deco in decos]
+            if old_comps==new_comps:
+                return decos
+            else:
+                new_order=[indexMemberQ(old_comps,comp[0]) for comp in new_comps]
+                return [[deco[0]]+[deco[index+1] for index in new_order]+[deco[-1]] for deco in decos]
         return Cobordism(self.front,self.back,simplify_decos(self.decos+reorder_decos(other.comps,self.comps,other.decos)),self.comps)
 
     def __mul__(self, other):
