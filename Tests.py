@@ -386,6 +386,8 @@ def TestSet15():
     trivial_closure_tangle = "cup1.pos2.neg0.neg0.neg1.neg1.pos2.cap3.neg0.neg0.neg0.cap1"
     drawtangle(trivial_closure_tangle, "trivial_closure_tangle", "plain", 1)
     complex_tct = BNbracket(trivial_closure_tangle)
+    PrettyPrintComplex(complex_tct, "old long")
+    complex_tct.ValidMorphism()
     BN_complex_tct = CobComplex2BNComplex(complex_tct)
     BN_complex_tct.clean_up(500)
     DrawBNComplex(BN_complex_tct, "tct_BN_after_cleanup.svg", "index_qh")
@@ -452,6 +454,7 @@ def TestDSquare():
     # tangle = "pos1.pos2.neg0.cap1" # this works fine
     drawtangle(tangle,"test","slices",2)
     complex_test_tangle = BNbracket(tangle,1,1,2)
+    complex_test_tangle.ValidMorphism()
     PrettyPrintComplex(complex_test_tangle,"long")
 
 def TestSet20():

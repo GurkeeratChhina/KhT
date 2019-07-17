@@ -70,23 +70,35 @@ class ChainComplex(object):
         # transpose = np.transpose(self.morphisms)
         # for x, row in enumerate(self.morphisms):
             # for y, column in enumerate(transpose):
+
+        # Computing morphisms squared:
+        transpose = np.transpose(self.morphisms)
+        for x, row in enumerate(self.morphisms):
+            for y, column in enumerate(transpose):
+                print("row, column", x, y)
+                temp = [column[z]*row[z] for z in range(len(row))]
+                cob = ZeroCob
+                for k, cobord in enumerate(temp):
+                    cob += cobord
                 # cob = np.dot(column, row) # computes the element at [x][y] in d^2
-                # if cob.ReduceDecorations() != []:
-                    # print("!!!!!!!!!!!!!!!!!!")
-                    # print("ERROR: Found non-zero term in d² in row "+str(x)+" and column "+str(y)+":")
-                    # print(printdecos(cob,"long"))
-                    # print("!!!!!!!!!!!!!!!!!!")
-                    # raise Exception('Differential does not square to 0')
-        #Original morphisms squared:
-        squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
-        for i,row in enumerate(squared):
-            for j,cob in enumerate(row):
                 if cob.ReduceDecorations() != []:
+                    for k, cobord in enumerate(temp):
+                        drawcob(cobord, "cobord"+str(k))
                     print("!!!!!!!!!!!!!!!!!!")
-                    print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
+                    print("ERROR: Found non-zero term in d² in row "+str(x)+" and column "+str(y)+":")
                     print(printdecos(cob,"long"))
                     print("!!!!!!!!!!!!!!!!!!")
                     raise Exception('Differential does not square to 0')
+        #Original morphisms squared:
+        # squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
+        # for i,row in enumerate(squared):
+            # for j,cob in enumerate(row):
+                # if cob.ReduceDecorations() != []:
+                    # print("!!!!!!!!!!!!!!!!!!")
+                    # print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
+                    # print(printdecos(cob,"long"))
+                    # print("!!!!!!!!!!!!!!!!!!")
+                    # raise Exception('Differential does not square to 0')
     
     def findIsom(self): 
         """Returns the location of the first isomorphism it finds
