@@ -361,7 +361,8 @@ def TestSet13(n):
     pretzeltangle_n += "cap1"
     drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_slices","slices",1)
     drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_plain","plain",1) 
-    complex_ptn = BNbracket(pretzeltangle_n)
+    complex_ptn = BNbracket(pretzeltangle_n, 2*n, 2*n+1)
+    complex_ptn.ValidMorphism()
     BN_complex_ptn = CobComplex2BNComplex(complex_ptn)
     DrawBNComplex(BN_complex_ptn,str(2*n)+"m"+str(2*n+1)+"pt_redBN_before_cleanup.svg","qh")
     BN_complex_ptn.clean_up(1000)
@@ -377,7 +378,9 @@ def TestSet14(n):
     pretzeltangle_n += "cap1" 
     drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_slicesX","slices",2)
     drawtangle(pretzeltangle_n,str(2*n)+"m"+str(2*n+1)+"pt_diagram_plainX","plain",2)  
-    complex_ptn = BNbracket(pretzeltangle_n,0,0,2)
+    complex_ptn = BNbracket(pretzeltangle_n,2*n,2*n+1,2)
+    complex_ptn.ValidMorphism()
+    
     DrawFourEndedChainComplex(complex_ptn, "pretzeltangle_n.png")
     
 def TestSet15():
@@ -415,7 +418,7 @@ def TestSet17(n):
     DrawBNComplex(BN_complex_neg_n, "tangle_BN_neg_" + str(n)+ "_after_cleanup.svg", "index_qh")
 
 def TestDSquare():
-    tangle = "neg1.pos2.cap3.neg0.neg0.neg0.cap1" # this works fine
+    tangle = "neg1.pos2.cap3.neg0.neg0.neg0.cap1" # this works fine, check gradings on tangles?
     # tangle = "pos1.neg2.cap1.cap1" # this works fine
     # tangle = "neg1.neg2.cap1.cap1" # this works fine
     # tangle = "pos1.pos2.cap1.cap1" # this works fine
@@ -426,9 +429,9 @@ def TestDSquare():
     # tangle = "neg1.pos2.neg0.cap1" # this works fine
     # tangle = "pos1.pos2.neg0.cap1" # this works fine
     drawtangle(tangle,"test","slices",2)
-    complex_test_tangle = BNbracket(tangle,1,1,2)
+    complex_test_tangle = BNbracket(tangle,0,0,2)
     complex_test_tangle.ValidMorphism()
-    PrettyPrintComplex(complex_test_tangle,"long")
+    PrettyPrintComplex(complex_test_tangle,"old long")
 
 def TestSet18():
     x0 = CLT(2,4,[2,5,0,4,3,1],0,0,0)
@@ -482,8 +485,8 @@ def TestSet19():
     tangle2 = "neg2.neg0.neg0.pos1.neg2.neg2.pos1.neg2.pos0.cap3.cap1"
     drawtangle(tangle1,"test1","slices",1)
     drawtangle(tangle2, "test2", "slices", 1)
-    # complex_test_tangle1 = BNbracket(tangle1,0,0,1)
-    complex_test_tangle2 = BNbracket(tangle2, 0, 0, 1)
+    complex_test_tangle1 = BNbracket(tangle1,0,0,1, "safe")
+    complex_test_tangle2 = BNbracket(tangle2, 0, 0, 1, "safe")
 
 def TestListMutation():
     List1 = [[1,0,0,1], [0, 0, 1, -1], [1, 0, 0, -3]]
@@ -491,7 +494,23 @@ def TestListMutation():
     print(List1)
     print(List2)
     
-    
+def TestSet20():
+   tangle1 = "cup1.pos0.neg2.neg2.pos0.pos0.cap1.cap1"
+   tangle2 = "cup1.pos0.pos0.pos0.neg2.neg2.cap1.cap1"
+   drawtangle(tangle1,"test1.1","plain",1)
+   drawtangle(tangle2, "test2.1", "plain", 1)
+   complex_test_tangle1 = BNbracket(tangle1,0,0,1)
+   complex_test_tangle2 = BNbracket(tangle2, 0, 0, 1)
+   BN_complex_1 = CobComplex2BNComplex(complex_test_tangle1)
+   BN_complex_2 = CobComplex2BNComplex(complex_test_tangle2)
+   DrawBNComplex(BN_complex_1, "BN_complex_1.svg", "qh")
+   DrawBNComplex(BN_complex_2, "BN_complex_2.svg", "qh")
+   BN_complex_1.clean_up(1000)
+   BN_complex_2.clean_up(1000)
+   DrawBNComplex(BN_complex_1, "BN_complex_1_after_cleanup.svg", "qh")
+   DrawBNComplex(BN_complex_2, "BN_complex_2_after_cleanup.svg", "qh")
+
+
     
     
 # TestSet0()
@@ -511,12 +530,16 @@ def TestListMutation():
 # TestSet14(2)
 # TestSet15()
 # TestSet16(2)
+# TestSet16(3)
+TestSet16(4)
 # TestSet17(2)
 # TestSet17(4)
 # TestDSquare()
 # TestSet18()
 # TestSet19()
 # TestListMutation()
+# TestSet13(10)
+# TestSet20()
 
 ## comparing efficiency of two functions
 #import timeit

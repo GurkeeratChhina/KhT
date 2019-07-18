@@ -65,7 +65,7 @@ class ChainComplex(object):
                         print(printdecos(cob,"long"), " degree:", cob.deg())
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Something is wrong with the quantum grading!')
-
+        
         # Computing morphisms squared:
         #transpose = np.transpose(self.morphisms)
         #for x, row in enumerate(self.morphisms):
@@ -568,7 +568,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
-            cx.ValidMorphism()
+            if options=="safe": cx.ValidMorphism()
         
     cx.ValidMorphism()
 
