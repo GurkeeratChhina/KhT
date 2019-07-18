@@ -41,7 +41,7 @@ class ChainComplex(object):
             if len(i) != length:
                 raise Exception('Differential does not have n columns (where n is the number of elements in chain complex)')
         for i in range(length):
-            if self.morphisms[i][i].decos != []:
+            if self.morphisms[i][i].ReduceDecorations() != []:
                 raise Exception('Differential has self loops')
         
         for i,row in enumerate(self.morphisms):
@@ -52,7 +52,7 @@ class ChainComplex(object):
                     print(printdecos(cob,"long"))
                     print("!!!!!!!!!!!!!!!!!!")
                     raise Exception('Non-homogeneous morphism in differential!')
-                if cob.decos !=[]:
+                if cob.ReduceDecorations() !=[]:
                     if (self.elements[i]).pgr-(self.elements[j]).pgr!=1:
                         print("!!!!!!!!!!!!!!!!!!")
                         print("ERROR: The homological grading along the component of the differential in row "+str(i)+" and column "+str(j)+" does not increase by 1:")
@@ -65,11 +65,6 @@ class ChainComplex(object):
                         print(printdecos(cob,"long"), " degree:", cob.deg())
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Something is wrong with the quantum grading!')
-        
-        # # Computing morphisms squared:
-        # transpose = np.transpose(self.morphisms)
-        # for x, row in enumerate(self.morphisms):
-            # for y, column in enumerate(transpose):
 
         # Computing morphisms squared:
         #transpose = np.transpose(self.morphisms)
@@ -171,7 +166,7 @@ def AddCap(Complex, i, grshift = "false"):
     for target ,row in enumerate(Complex.morphisms):
         NewRow=[]
         for source, cob in enumerate(row):
-            if cob.decos == []: #adding a cap to the zero cobordism does nothing
+            if cob.ReduceDecorations() == []: #adding a cap to the zero cobordism does nothing
                 NewRow.append(ZeroCob)
             else: #not the zero cobordism
                 def incrementby2(j):
@@ -184,7 +179,8 @@ def AddCap(Complex, i, grshift = "false"):
                     newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos] #adds the new component without a dot and flips the sign on the coefficient
                 else: 
                     newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos] #adds the new component without a dot
-                NewCob = Cobordism(NewElements[source], NewElements[target], newDecos, newcomps)
+                NewCob = Cobordism(NewElements[source], NewElements[target], simplify_decos(newDecos), newcomps)
+                NewCob.ReduceDecorations()
                 NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
     return ChainComplex(NewElements, NewMorphisms)
@@ -228,29 +224,33 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     return j-2
                 else:
                     return j
-            magic_index = 0 # the index of the first component that the cup connects to
-            if cob.decos != []: # computes magic index
-                for x,comp in enumerate(cob.comps):
-                    if cob.front.top +i in comp:
-                        magic_index = x
-                        break
+            
             def compcup(component): #computes the new component after adding a cup, for components except those with only 2 entries, which are clt.top+i and clt.top+i+1
                 return [decrementby2(j) for j in component if j != cob.front.top+i and j!= cob.front.top+i+1]
             def incrementH(decoration): # Increments H of a decoration by 1
                 return [decoration[0]+1] + decoration[1:]
             def negativeH(decoration): # Increments H of a decoration by 1, and flips the sign on the coefficient
                 return [decoration[0]+1] + decoration[1:-1] +[decoration[-1]*-1]
-            def adddotonmagicindex(decoration): # adds dot to the component labeled by magic index if there is no dot already, otherwise does nothing
-                return decoration[:magic_index+1] + [1] + decoration[magic_index+2:]
+            def adddotonindex(decoration, index_to_add): # adds dot to the component labeled by index_to_add if there is no dot already, otherwise does nothing
+                return decoration[:index_to_add+1] + [1] + decoration[index_to_add+2:]
             
             if Complex.elements[source].arcs[Complex.elements[source].top +i] == Complex.elements[source].top+i+1 \
                 and Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # source and target are both closed, add 2 cobordisms to newRow and nextRow
-                if cob.decos == []: # is the 0 cob
+                if cob.ReduceDecorations() == []: # is the 0 cob
                     newRow.append(ZeroCob)
                     newRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                 else: # is not the 0 cob
+                    magic_index = 0 # the index of the first component that the cup connects to
+                    for x,comp in enumerate(cob.comps):
+                        if cob.front.top +i in comp:
+                            if len(comp) != 2:
+                                raise Exception("closed component doesn't have 2 TEI")
+                            magic_index = x
+                            break
+                    else:
+                        raise Exception("no magic_index")
                     # magic_index = next(j for j, v in enumerate(cob.comps) if len(v) == 2 and cob.front.top+i in v and cob.front.top+i+1 in v) #computes index of closed component, should be the same as magic_index computed generally above
                     newcomps = [[decrementby2(j) for j in comp] for comp in cob.comps if cob.front.top+i not in comp ]
                     def delclosedcomp(decoration): # deletes the decoration corresponding to the closed component, which is to be removed
@@ -264,78 +264,101 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     newDecos1 = [delclosedcomp(deco) for deco in cob.decos if deco[magic_index+1] == 0] # identity on all other components if no dot, otherwise 0
                     newDecos3 = [delclosedcomp(deco) for deco in cob.decos if deco[magic_index+1] == 1] # identity on all other components if dot, otherwise 0
                     newDecos4 = [computedeco4(deco) for deco in cob.decos] # see computedeco4()
-                    NewDecos1 = [deco for deco in newDecos1 if deco[find_first_index(newcomps,contains_0)+1] == 0] #only keep decorations that don't have a dot on basepoint component
-                    NewDecos3 = [deco for deco in newDecos3 if deco[find_first_index(newcomps,contains_0)+1] == 0] #only keep decorations that don't have a dot on basepoint component
-                    NewDecos4 = [deco for deco in newDecos4 if deco[find_first_index(newcomps,contains_0)+1] == 0] #only keep decorations that don't have a dot on basepoint component
-                    simplify_decos(NewDecos1)
-                    simplify_decos(NewDecos3)
-                    simplify_decos(NewDecos4)
                     newsourceclts = AddCupToCLT(cob.front, i)
                     newtargetclts = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cobordism(newsourceclts[0], newtargetclts[0], NewDecos1, newcomps)
+                    Cobordism1 = Cobordism(newsourceclts[0], newtargetclts[0], simplify_decos(newDecos1), newcomps)
                     Cobordism2 = ZeroCob # The neckcutting/delooping isomorphism will give us 0 for Cobordism 2
-                    Cobordism3 = Cobordism(newsourceclts[0], newtargetclts[1], NewDecos3, newcomps)
-                    Cobordism4 = Cobordism(newsourceclts[1], newtargetclts[1], NewDecos4, newcomps)
+                    Cobordism3 = Cobordism(newsourceclts[0], newtargetclts[1], simplify_decos(newDecos3), newcomps)
+                    Cobordism4 = Cobordism(newsourceclts[1], newtargetclts[1], simplify_decos(newDecos4), newcomps)
+                    Cobordism1.ReduceDecorations()
+                    Cobordism3.ReduceDecorations()
+                    Cobordism4.ReduceDecorations()
                     newRow.append(Cobordism1)
                     newRow.append(Cobordism2)
                     nextRow.append(Cobordism3)
                     nextRow.append(Cobordism4)
             elif Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # source is open but target is closed, add 1 cobordism to each
-                if cob.decos == []: # is the 0 cob
+                if cob.ReduceDecorations() == []: # is the 0 cob
                     newRow.append(ZeroCob)
                     nextRow.append(ZeroCob)
                 else: # is not the 0 cob
+                    magic_index = 0 # the index of the first component that the cup connects to
+                    for x,comp in enumerate(cob.comps):
+                        if cob.front.top +i in comp:
+                            magic_index = x
+                            break
+                    else:
+                        raise Exception("no magic_index")
                     newcomps = [compcup(component) for component in cob.comps]
                     newDecos1 = []
                     for decoration in cob.decos:
                         if decoration[magic_index+1] == 0: # is D - H if no dot, 0 otherwise
-                            newDecos1.extend([adddotonmagicindex(decoration), negativeH(decoration)])
+                            newDecos1.extend([adddotonindex(decoration, magic_index), negativeH(decoration)])
                     newDecos2 = [deco for deco in cob.decos] # is identity regardless of dot or not
-                    NewDecos1 = [deco for deco in newDecos1 if deco[find_first_index(newcomps,contains_0)+1] == 0] #only keep decorations without dot on basepoint component
-                    NewDecos2 = [deco for deco in newDecos2 if deco[find_first_index(newcomps,contains_0)+1] == 0] #only keep decorations without dot on basepoint component
-                    simplify_decos(NewDecos1)
-                    simplify_decos(NewDecos2)
                     newsourceclt = AddCupToCLT(cob.front, i)[0]
                     newtargetclts = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cobordism(newsourceclt, newtargetclts[0], NewDecos1, newcomps)
-                    Cobordism2 = Cobordism(newsourceclt, newtargetclts[1], NewDecos2, newcomps)
+                    Cobordism1 = Cobordism(newsourceclt, newtargetclts[0], simplify_decos(newDecos1), newcomps)
+                    Cobordism2 = Cobordism(newsourceclt, newtargetclts[1], simplify_decos(newDecos2), newcomps)
+                    Cobordism1.ReduceDecorations()
+                    Cobordism2.ReduceDecorations()
                     newRow.append(Cobordism1)
                     nextRow.append(Cobordism2)
             elif Complex.elements[source].arcs[Complex.elements[source].top +i] == Complex.elements[source].top+i+1: # source is closed but target is open, add 2 cobordisms to newRow only
-                if cob.decos == []: # is the 0 cob
+                if cob.ReduceDecorations() == []: # is the 0 cob
                     newRow.append(ZeroCob)
                     newRow.append(ZeroCob)
                 else: # is not the 0 cob
+                    magic_index = 0 # the index of the first component that the cup connects to
+                    for x,comp in enumerate(cob.comps):
+                        if cob.front.top +i in comp:
+                            magic_index = x
+                            break
+                    else:
+                        raise Exception("no magic_index")
                     newcomps = [compcup(component) for component in cob.comps]
                     def computedeco2(decoration):
                         if decoration[magic_index+1] == 1:
                             return incrementH(decoration) # H trading if already a dot
                         else:
-                            return adddotonmagicindex(decoration) # otherwise add a dot
+                            return adddotonindex(decoration, magic_index) # otherwise add a dot
                     newDecos1 = [deco for deco in cob.decos] # always the identity
                     newDecos2 = [computedeco2(deco) for deco in cob.decos]
-                    NewDecos1 = [deco for deco in newDecos1 if deco[find_first_index(newcomps,contains_0)+1] == 0] #only keep decorations without dot on basepoint component
-                    NewDecos2 = [deco for deco in newDecos2 if deco[find_first_index(newcomps,contains_0)+1] == 0] #only keep decorations without dot on basepoint component
-                    simplify_decos(NewDecos1)
-                    simplify_decos(NewDecos2)
                     newsourceclts = AddCupToCLT(cob.front, i)
                     newtargetclt = AddCupToCLT(cob.back, i)[0]
-                    Cobordism1 = Cobordism(newsourceclts[0], newtargetclt, NewDecos1, newcomps)
-                    Cobordism2 = Cobordism(newsourceclts[1], newtargetclt, NewDecos2, newcomps)
+                    Cobordism1 = Cobordism(newsourceclts[0], newtargetclt, simplify_decos(newDecos1), newcomps)
+                    Cobordism2 = Cobordism(newsourceclts[1], newtargetclt, simplify_decos(newDecos2), newcomps)
+                    Cobordism1.ReduceDecorations()
+                    Cobordism2.ReduceDecorations()
                     newRow.append(Cobordism1)
                     newRow.append(Cobordism2)
             else: # source and target are both open, add 1 cobordism to newRow only
-                if cob.decos == []: # is the 0 cob
+                if cob.ReduceDecorations() == []: # is the 0 cob
                     newRow.append(ZeroCob)
                 else: # is not the 0 cob
-                    newDecos1 = []
+                    # print("i", i)
+                    # print("cob.front.top", cob.front.top)
+                    # print("cob.front.top+i", cob.front.top+i)
+                    # print(cob.comps)
+                    magic_index = 0 # the index of the first component that the cup connects to
+                    for x1,comp in enumerate(cob.comps):
+                        if cob.front.top +i in comp:
+                            magic_index = x1
+                            break
+                    else:
+                        raise Exception("no magic_index")
                     magic_index_2 = 0 # index of component containing i+1
-                    for x,comp in enumerate(cob.comps):
+                    for x2,comp in enumerate(cob.comps):
                         if cob.front.top+i+1 in comp:
-                            magic_index_2 = x
+                            magic_index_2 = x2
+                            break
+                    else:
+                        raise Exception("no magic_index_2")
+                    # print("magic indices:", magic_index, magic_index_2)
+                    newDecos1 = []
                     if magic_index == magic_index_2: # only one component being connected via cup
-                        comp = cob.comps[magic_index]
-                        x1 = comp.index(cob.front.top +i)
+                        # print("magic indices are the same")
+                        comp = cob.comps[magic_index] # the component being connected
+                        x1 = comp.index(cob.front.top +i) 
                         x2 = comp.index(cob.front.top +i + 1)
                         comp1 = comp[:min(x1, x2)] + comp[max(x1, x2)+1:]
                         comp2 = comp[min(x1, x2) +1:max(x1, x2)]
@@ -350,8 +373,8 @@ def AddCup(Complex, i): # TODO: reduce decorations
                         for deco in cob.decos:
                             newDecos1.extend(computedeco1comps(deco))
                     else: # two seperate components being connected via cup
-                        comp1 = cob.comps[magic_index]
-                        comp2 = cob.comps[magic_index_2]
+                        comp1 = cob.comps[magic_index] # the component containing i
+                        comp2 = cob.comps[magic_index_2] # the component containing i+1
                         location1 = comp1.index(cob.front.top+i)
                         location2 = comp2.index(cob.front.top+i+1)
                         comp2 = (comp2[location2+1:] + comp2[:location2]) #rotates list until i+1 is at front, and removes it
@@ -362,17 +385,24 @@ def AddCup(Complex, i): # TODO: reduce decorations
                         del newcomps[magic_index_2]
                         def computedeco2comps(decoration):
                             if decoration[magic_index+1] == 1 and decoration[magic_index_2+1]==1:
+                                # newdecos = incrementH(decoration)
+                                # del newdecos[magic_index_2+1]
+                                # print("old decos:", incrementH(decoration)[:magic_index_2+1] + incrementH(decoration)[magic_index_2+2:])
+                                # print("newdecos:", newdecos)
                                 return incrementH(decoration)[:magic_index_2+1] + incrementH(decoration)[magic_index_2+2:]
                             elif decoration[magic_index+1] == 1 or decoration[magic_index_2+1]==1:
-                                return adddotonmagicindex(decoration)[:magic_index_2+1] + adddotonmagicindex(decoration)[magic_index_2+2:]
+                                # newdecos = adddotonindex(decoration, magic_index)
+                                # del newdecos[magic_index_2+1]
+                                # print("old decos:", adddotonindex(decoration, magic_index)[:magic_index_2+1] + adddotonindex(decoration, magic_index)[magic_index_2+2:])
+                                # print("newdecos:", newdecos)
+                                return adddotonindex(decoration, magic_index)[:magic_index_2+1] + adddotonindex(decoration, magic_index)[magic_index_2+2:]
                             else:
                                 return decoration[:magic_index_2+1] + decoration[magic_index_2+2:]
                         newDecos1 = [computedeco2comps(deco) for deco in cob.decos]
-                    NewDecos1 = [deco for deco in newDecos1 if deco[find_first_index(newcomps,contains_0)+1] == 0]
-                    simplify_decos(NewDecos1)
                     newsourceclt = AddCupToCLT(cob.front, i)[0]
                     newtargetclt = AddCupToCLT(cob.back, i)[0]
-                    Cobordism1 = Cobordism(newsourceclt, newtargetclt, NewDecos1, newcomps)
+                    Cobordism1 = Cobordism(newsourceclt, newtargetclt, simplify_decos(newDecos1), newcomps)
+                    Cobordism1.ReduceDecorations()
                     newRow.append(Cobordism1)
         NewMorphisms.append(newRow)
         if Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # target is closed
@@ -406,8 +436,8 @@ def AddPosCrossing(Complex, i):
                             break
                     decos1 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1], [1] + [0 for comp in newcomps] + [-1]] #Compute new decos via neckcutting
                     decos2 = [[0] + [0 for comp in newcomps] + [1]]
-                    NewCobordism1 = Cobordism(sourceclt, newTarget1, decos1)
-                    NewCobordism2 = Cobordism(sourceclt, newTarget2, decos2)
+                    NewCobordism1 = Cobordism(sourceclt, newTarget1, decos1, newcomps)
+                    NewCobordism2 = Cobordism(sourceclt, newTarget2, decos2, newcomps)
                     newRow.append(NewCobordism1)
                     nextRow.append(NewCobordism2)
                 else:
@@ -465,8 +495,8 @@ def AddNegCrossing(Complex, i):
                             break
                     decos1 = [[0] + [0 for comp in newcomps] + [1]]
                     decos2 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1]]
-                    newCobordism1 = Cobordism(newSource1, newTarget, decos1) #fill out decos and comps
-                    newCobordism2 = Cobordism(newSource2, newTarget, decos2)
+                    newCobordism1 = Cobordism(newSource1, newTarget, decos1, newcomps)
+                    newCobordism2 = Cobordism(newSource2, newTarget, decos2, newcomps)
                     newRow.append(newCobordism1)
                     newRow.append(newCobordism2)
                 else:
@@ -515,8 +545,8 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
             #PrettyPrintComplex(cx, "old long")
             if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
-            #print("after eliminateAll")
-            #PrettyPrintComplex(cx, "old long")
+            # print("after eliminateAll")
+            # PrettyPrintComplex(cx, "old long")
         
         if word[0]=="neg":
             cx=AddNegCrossing(cx, word[1])
@@ -524,8 +554,8 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
             #PrettyPrintComplex(cx, "old long")
             if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
-            #print("after eliminateAll")
-            #PrettyPrintComplex(cx, "old long")
+            # print("after eliminateAll")
+            # PrettyPrintComplex(cx, "old long")
         
         if word[0]=="cup":
             cx=AddCup(cx, word[1])
@@ -538,10 +568,9 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
-            #print("cap")
-            #PrettyPrintComplex(cx, "old long")
+            cx.ValidMorphism()
         
-        cx.ValidMorphism()
+    cx.ValidMorphism()
 
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     

@@ -103,7 +103,7 @@ def TestSet2():
                                         [ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob, Scb, ZeroCob, ZeroCob],\
                                         [ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]]), ZeroCob, Cobordism(b,b,[[0,0,1,1]]), ZeroCob]])
     DrawFourEndedChainComplex(complex5, "complex5.png")
-    complex5.ValidMorphism()
+    # complex5.ValidMorphism() #gradings
 
     complex5cap = AddCap(complex5, 1)
     # PrintComplexMorphismIntMatrix(complex5cap)
@@ -165,7 +165,7 @@ def TestSet4():
  
 def TestSet5():
     complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
-    complex1.ValidMorphism()
+    # complex1.ValidMorphism() #gradings
    
     complex1cap0 = AddCap(complex1, 0)
     print("complex1cap0")
@@ -185,7 +185,7 @@ def TestSet6():
     RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
     complex3 = ChainComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
     DrawFourEndedChainComplex(complex3, "complex3.png")
-    complex3.ValidMorphism()
+    # complex3.ValidMorphism() #gradings
 
     complex4 = ChainComplex([c,b,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob], [MinusScb, ZeroCob, ZeroCob, ZeroCob], [RightDc,ZeroCob, ZeroCob, ZeroCob], [ZeroCob, Sbc, Cobordism(c,c,[[0,0,0,1]]), ZeroCob]])
     DrawFourEndedChainComplex(complex4, "complex4.png")
@@ -224,7 +224,7 @@ def TestSet7():
     # drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
     complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
-    complex2.ValidMorphism()
+    # complex2.ValidMorphism() # gradings
     # drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
     # drawcob(Sbc*RightDc, "DottedSaddle")
     
@@ -351,8 +351,7 @@ def TestSet12():
     BN_complex_4m5pt.clean_up()
     DrawBNComplex(BN_complex_4m5pt, "4m5pt_redBN_after_cleanup.svg","index_qh")
     
-def TestSet13():
-    n = 4
+def TestSet13(n):
     pretzeltangle_n = "cup1."
     for j in range(n):
         pretzeltangle_n += "neg2.neg2."
@@ -368,8 +367,7 @@ def TestSet13():
     BN_complex_ptn.clean_up(1000)
     DrawBNComplex(BN_complex_ptn,str(2*n)+"m"+str(2*n+1)+"pt_redBN_after_cleanup.svg","qh")
 
-def TestSet14():
-    n=2
+def TestSet14(n):
     pretzeltangle_n = "cup1."
     for j in range(n):
         pretzeltangle_n += "neg2.neg2."
@@ -391,55 +389,30 @@ def TestSet15():
     BN_complex_tct = CobComplex2BNComplex(complex_tct)
     BN_complex_tct.clean_up(500)
     DrawBNComplex(BN_complex_tct, "tct_BN_after_cleanup.svg", "index_qh")
-    
-def TestSet16():
-    n = 1
-    tangle_pos_1 = "cup1.neg2.pos0.pos0.neg1."
-    for j in range(n):
-        tangle_pos_1 += "pos2."
-    tangle_pos_1 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
-    complex_pos_1 = BNbracket(tangle_pos_1)
-    BN_complex_pos_1 = CobComplex2BNComplex(complex_pos_1)
-    BN_complex_pos_1.clean_up(1000)
-    DrawBNComplex(BN_complex_pos_1, "tangle_BN_1_after_cleanup.svg", "index_qh")
 
-def TestSet17():
-    n = 2
-    tangle_pos_3 = "cup1.neg2.pos0.pos0.neg1."
+def TestSet16(n):
+    tangle_pos_n = "cup1.neg2.pos0.pos0.neg1."
     for j in range(n):
-        tangle_pos_3 += "pos2."
-    tangle_pos_3 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
-    drawtangle(tangle_pos_3, "tanglepos3", "plain", 1)
-    complex_pos_3 = BNbracket(tangle_pos_3)
-    BN_complex_pos_3 = CobComplex2BNComplex(complex_pos_3)
-    BN_complex_pos_3.clean_up(2000)
-    DrawBNComplex(BN_complex_pos_3, "tangle_BN_3_after_cleanup.svg", "index_qh")
+        tangle_pos_n += "pos2."
+    tangle_pos_n += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    drawtangle(tangle_pos_n, "tanglepos"+str(n), "plain", 1)
+    complex_pos_n = BNbracket(tangle_pos_n)
+    BN_complex_pos_n = CobComplex2BNComplex(complex_pos_n)
+    BN_complex_pos_n.clean_up(1000)
+    DrawBNComplex(BN_complex_pos_n, "tangle_BN_" + str(n)+ "_after_cleanup.svg", "index_qh")
 
-def TestSet18():
-    n = 3
-    tangle_pos_4 = "cup1.neg2.pos0.pos0.neg1."
+def TestSet17(n):
+    tangle_neg_n = "cup1.neg2.pos0.pos0.neg1."
     for j in range(n):
-        tangle_pos_4 += "pos2."
-    tangle_pos_4 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
-    complex_pos_4 = BNbracket(tangle_pos_4)
-    # complex_pos_4.ValidMorphism()
-    BN_complex_pos_4 = CobComplex2BNComplex(complex_pos_4)
-    BN_complex_pos_4.clean_up(2000)
-    DrawBNComplex(BN_complex_pos_4, "tangle_BN_4_after_cleanup.svg", "index_qh")
-
-def TestSet19():
-    n = 3
-    tangle_neg_4 = "cup1.neg2.pos0.pos0.neg1."
-    for j in range(n):
-        tangle_neg_4 += "neg2."
-    tangle_neg_4 += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
-    drawtangle(tangle_neg_4,"test","slices",1)
-    complex_neg_4 = BNbracket(tangle_neg_4)
-    # complex_neg_4.ValidMorphism()
-    BN_complex_neg_4 = CobComplex2BNComplex(complex_neg_4,2)
-    # BN_complex_neg_4.ValidMorphism()
-    BN_complex_neg_4.clean_up(2000)
-    DrawBNComplex(BN_complex_neg_4, "tangle_BN_neg_4_after_cleanup.svg", "index_qh")
+        tangle_neg_n += "neg2."
+    tangle_neg_n += "neg1.pos2.cap3.neg0.neg0.neg0.cap1"
+    drawtangle(tangle_neg_n,"tangle_neg_"+ str(n),"slices",1)
+    complex_neg_n = BNbracket(tangle_neg_n)
+    complex_neg_n.ValidMorphism()
+    BN_complex_neg_n = CobComplex2BNComplex(complex_neg_n,2)
+    BN_complex_neg_n.ValidMorphism()
+    BN_complex_neg_n.clean_up(1000)
+    DrawBNComplex(BN_complex_neg_n, "tangle_BN_neg_" + str(n)+ "_after_cleanup.svg", "index_qh")
 
 def TestDSquare():
     tangle = "neg1.pos2.cap3.neg0.neg0.neg0.cap1" # this works fine
@@ -457,7 +430,7 @@ def TestDSquare():
     complex_test_tangle.ValidMorphism()
     PrettyPrintComplex(complex_test_tangle,"long")
 
-def TestSet20():
+def TestSet18():
     x0 = CLT(2,4,[2,5,0,4,3,1],0,0,0)
     x5 = CLT(2,4,[4,5,3,2,0,1],0,0,0)
 
@@ -497,8 +470,29 @@ def TestSet20():
     print(cob.deg())
     
     cob = Cobordism(x0,x0,[[1, 0, 0, 0, -1],[1,0,1,0,3]])
-    print(cob.homogeneousQ())
-    print(cob.deg())
+    print(cob.homogeneousQ())# expected answer: False
+    print(cob.deg())# not homogeneous, so: Raise Exception
+    
+def TestSet19():
+    # tangle = "cup1.neg2.pos0.pos0.neg1.pos2.pos2.neg1.pos2.cap3.neg0.neg0.neg0.cap1" #Doesn't work
+    # tangle = "neg2.pos0.pos0.neg1.pos2.pos2.neg1.pos2.cap3.neg0.neg0.neg0.cap1" #Doesn't work
+    # tangle = "neg2.pos0.pos0.neg1.pos2.pos2.neg1.pos2.cap3.neg0.neg0.cap1" #Doesn't work
+    # tangle = "neg2.pos0.pos0.neg1.pos2.pos2.neg1.pos2.cap3.neg0.cap1" #Doesn't work
+    tangle1 = "pos2.pos0.pos0.neg1.pos2.pos2.neg1.pos2.neg0.cap3.cap1" # Doesn't work
+    tangle2 = "neg2.neg0.neg0.pos1.neg2.neg2.pos1.neg2.pos0.cap3.cap1"
+    drawtangle(tangle1,"test1","slices",1)
+    drawtangle(tangle2, "test2", "slices", 1)
+    # complex_test_tangle1 = BNbracket(tangle1,0,0,1)
+    complex_test_tangle2 = BNbracket(tangle2, 0, 0, 1)
+
+def TestListMutation():
+    List1 = [[1,0,0,1], [0, 0, 1, -1], [1, 0, 0, -3]]
+    List2 = simplify_decos(List1)
+    print(List1)
+    print(List2)
+    
+    
+    
     
 # TestSet0()
 # TestSet1()
@@ -513,15 +507,16 @@ def TestSet20():
 # TestSet10()
 # TestSet11()
 # TestSet12()
-# TestSet13()
-# TestSet14()
+# TestSet13(4)
+# TestSet14(2)
 # TestSet15()
-# TestSet16()
-# TestSet17()
-# TestSet18()
-TestSet19()
+# TestSet16(2)
+# TestSet17(2)
+# TestSet17(4)
 # TestDSquare()
-# TestSet20()
+# TestSet18()
+# TestSet19()
+# TestListMutation()
 
 ## comparing efficiency of two functions
 #import timeit
