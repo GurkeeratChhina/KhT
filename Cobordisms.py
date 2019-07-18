@@ -40,11 +40,14 @@ class Cobordism(object):
     """A cobordism from a crossingless tangle clt1=front to another clt2=back consists of 
     - clt1=front, (these may just be pointers?)
     - clt2=back, (these may just be pointers?)
-    - components (alternative to clt1 and clt2)
-    - a list decos of (row) vectors v_i in a numpy array of decorations (decos) of the form [Hpower,dot1,...,dotn,coeff]:
+    - a list decos of (row) vectors v_i in a numpy array of decorations (decos) of the form [Hpower,dot_1,...,dot_n,coeff]:
         - the first entry Hpower is a non-negative integer which records the power of H
-        - the entries dot<i> specify the number of dots (0 or 1) on the ith component.  
+        - the entries dot_<i> specify the number of dots (0 or 1) on the ith component.  
         - the last entry coeff is some non-zero integer (= coefficient in the base ring/field)
+    - components: a list of lists of TEIs, which be long to the same component; 
+      the order of the entries dot_<i> for i=1,...,n corresponds to the order of components. 
+      WARNING: No assumptions are made about each list, ie the TEIs may appear in *any* order!
+      (We might want to change this at some point)
     """
     def __init__(self,clt1,clt2,decos,comps="default"):
         self.front = clt1
@@ -73,26 +76,33 @@ class Cobordism(object):
         return Cobordism(self.front,self.back,simplify_decos(self.decos+reorder_decos(other.comps,self.comps,other.decos)),self.comps)
 
     def __mul__(self, other):
+        """The composition of two cobordism is computed by performing neck-cutting along push-offs of all boundary components of the composition and then removing all closed components.
+        The notation is as follows:
+            * new_comps is the list of components (lists of TEIs) of the composition after neck-cutting.
+            * old_comps_x is a list of indices of components of new_comps which belong to the same component before neck-cutting.
+            * old_comps is a list of lists of TEIs that belong to the same component before neck-cuttting.
+            * IdcI is the number of boundary components of old_comp.
+        """
         
-        def partition_dC(dC,arcs):
-            """find the finest partition of dC that is preserved by arcs. The output is a list of list of indices."""
+        def partition_new_comps(new_comps,arcs):
+            """The finest partition of new_comps such that the endpoints of any arc in arcs belong to the same subset. The output is a list of list of indices."""
             partition=[]
             # remaining components in our iteration
-            remaining=list(range(len(dC)))
+            remaining=list(range(len(new_comps)))
             while len(remaining)>0:
-                # pick the first of the remaining components as the nucleus of a new element of dC and remove from remaining
+                # pick the first of the remaining components as the nucleus of a new element of new_comps and remove from remaining
                 nucleus = [remaining.pop(0)]
                 # list of TEIs of nucleus
-                nucleusL = dC[nucleus[0]]
+                nucleusL = new_comps[nucleus[0]]
                 # find all TEIs of nucleus which arcs connects to a different component (which has to be in the set of remaining components)
                 joins = [i for i in nucleusL if arcs[i] not in nucleusL]
                 while len(joins)>0:
                     # for the first element of joins, find the component and remove it from the remaining components (strictly reducing len(remaining))
-                    new=remaining.pop(find_first_index(remaining,lambda s: arcs[joins[0]] in dC[s]))
-                    # add this component to the nucleus of the new element of dC 
+                    new=remaining.pop(find_first_index(remaining,lambda s: arcs[joins[0]] in new_comps[s]))
+                    # add this component to the nucleus of the new element of new_comps 
                     nucleus.append(new) 
                     # record the TEIs of the component
-                    nucleusL=nucleusL+dC[new]
+                    nucleusL=nucleusL+new_comps[new]
                     # add the new TEIs to joins if arcs sends them outside the nucleus
                     joins=[i for i in joins if arcs[i] not in nucleusL]
                 partition.append(nucleus)
@@ -100,64 +110,56 @@ class Cobordism(object):
         
         if self.decos == [] or other.decos == []: #Multiplying by the zero cobordism
             return ZeroCob
-        x=self.front
-        y=self.back
-        z=other.back
         if self.back != other.front: # incomposable cobordisms
             raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on',self.back.top, self.back.bot, self.back.arcs, self.back.pgr, self.back.qgr, 'and the second starts on', other.front.top, other.front.bot, other.front.arcs, other.front.pgr, other.front.qgr)
-        #components of the fully simplified cobordism from x to z, ordered according to their smallest TEI
-        dC=components(x,z)
+        
         comps1=self.comps
         comps2=other.comps
-
-        #finding the boundary component of each c of C
-        C=partition_dC(dC,y.arcs)# as lists dc of indices of components
         
-        comp1_indices=[[j for j,comp in enumerate(comps1) if comp[0] in dc] for dc in dC]
-        comp2_indices=[[j for j,comp in enumerate(comps2) if comp[0] in dc] for dc in dC]
+        #components of the fully simplified cobordism from self.front to other.back, ordered according to their smallest TEI
+        new_comps=components(self.front,other.back)
+        #boundary component of each old_comp_x of old_comps_x, as a list of indices of new_comps
+        old_comps_x=partition_new_comps(new_comps,self.back.arcs)
+        #boundary component of each old_comp_x of old_comps_x, as a list of TEIs
+        old_comps=[flatten([new_comps[index] for index in old_comp_x]) for old_comp_x in old_comps_x]
+        # list of lists of indices of components in first/second cobordism that belong to the old_comp in old_comps
+        comps1_x=[[j for j,comp in enumerate(comps1) if comp[0] in old_comp] for old_comp in old_comps]
+        # list of lists of indices of components in first/second cobordism that belong to the old_comp in old_comps
+        comps2_x=[[j for j,comp in enumerate(comps2) if comp[0] in old_comp] for old_comp in old_comps]
+         
+        def comp_genus(old_comp,old_comp_x):
+            def intersection(comp):
+                return sum([1 for i in comp if i[0] in old_comp])
+            return 1-(intersection(comps1)+intersection(comps2)-len(old_comp)//2+len(old_comp_x))//2
+        genus=[comp_genus(old_comp,old_comp_x) for old_comp,old_comp_x in zip(old_comps,old_comps_x)]# genus of the closure of old_comps
         
-        # |C_i intersect c|
-        def c_i_cap_c(c_i,c_flat):
-            #return sum(map(lambda s: s in c_flat, c_i))
-            return sum([1 for i in c_i if i[0] in c_flat])
-        genus=[1-int(0.5*(c_i_cap_c(self.comps,flatten([dC[j] for j in c]))\
-                         +c_i_cap_c(other.comps,flatten([dC[j] for j in c]))\
-                         -0.5*len(flatten([dC[j] for j in c]))\
-                         +len(c))) for c in C]
-        
-        def decos_from_c(g,r,IdcI):
+        def decos_from_old_comp(g,r,n):
             if r>0:# r>0 and v_c=1
-                return [[g+r-1]+[1 for j in range(IdcI)]+[1]]
+                return [[g+r-1]+[1 for j in range(n)]+[1]]
             else:
                 if g%2==0:# genus even
-                    return [[g+IdcI-sum(dots)-1]+list(dots)+[(-1)**(g+IdcI-sum(dots)-1)]\
-                            for dots in list(product([0,1], repeat=IdcI))[:-1]]
+                    return [[g+n-sum(dots)-1]+list(dots)+[(-1)**(g+n-sum(dots)-1)]\
+                            for dots in list(product([0,1], repeat=n))[:-1]]
                 if g%2==1:# genus odd
-                    return [[g+IdcI-sum(dots)-1]+list(dots)+[((-1)**(g+IdcI-sum(dots)-1))]\
-                            for dots in list(product([0,1], repeat=IdcI))[:-1]]\
-                            +[[g-1]+[1 for i in range(IdcI)]+[2]]
+                    return [[g+n-sum(dots)-1]+list(dots)+[((-1)**(g+n-sum(dots)-1))]\
+                            for dots in list(product([0,1], repeat=n))[:-1]]\
+                            +[[g-1]+[1 for i in range(n)]+[2]]
         
         def combine_decos(l,Hpower,coeff):
             return [sum([Hpower]+[i[0] for i in l])]+flatten([i[1:-1] for i in l])+[coeff*prod([i[-1] for i in l])]
         
         decos=[]
-        for e1 in self.decos:
-            for e2 in other.decos:
+        for deco1 in self.decos:
+            for deco2 in other.decos:
                 partial_decos=[]
-                for i,c in enumerate(C):
-                    r=sum([e1[index+1] for index in comp1_indices[i]]+[e2[index+1] for index in comp2_indices[i]])# number of dots on c
-                    g=genus[i]# genus of the closure of c
-                    IdcI=len(c)# number of boundary components of c
-                    partial_decos.append(decos_from_c(g,r,IdcI))
-                    
-                decos+=[combine_decos(l,e1[0]+e2[0],e1[-1]*e2[-1]) for l in product(*partial_decos)]
+                for comp1_x,comp2_x,gen,old_comp_x in zip(comps1_x,comps2_x,genus,old_comps_x):
+                    r=sum([deco1[index+1] for index in comp1_x]+[deco2[index+1] for index in comp2_x])# number of dots on old_comp
+                    partial_decos.append(decos_from_old_comp(gen,r,len(old_comp_x))) 
+                decos+=[combine_decos(l,deco1[0]+deco2[0],deco1[-1]*deco2[-1]) for l in product(*partial_decos)]
         
-        Output = Cobordism(x,z,simplify_decos(decos),[dC[index] for index in flatten(C)])
+        Output = Cobordism(self.front,other.back,simplify_decos(decos),[new_comps[index] for index in flatten(old_comps_x)])
         Output.ReduceDecorations() # This kills any cobordism in the linear combination that has a dot on the same component as the basepoint
         return Output
-    # def __rmul__(self, other):
-        # #print('__rmul__')
-        # return other
     
     def deg(self): #no parameter self.dots
         degrees = [sum(deco[:-1]) for deco in self.decos]

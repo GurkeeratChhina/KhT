@@ -416,7 +416,7 @@ def TestSet17():
     DrawBNComplex(BN_complex_pos_3, "tangle_BN_3_after_cleanup.svg", "index_qh")
 
 def TestSet18():
-    n = 2
+    n = 3
     tangle_pos_4 = "cup1.neg2.pos0.pos0.neg1."
     for j in range(n):
         tangle_pos_4 += "pos2."
@@ -517,9 +517,9 @@ def TestSet20():
 # TestSet14()
 # TestSet15()
 # TestSet16()
-TestSet17() # Doesn't seem to work
-# TestSet18() # Also doesn't seem to work
-# TestSet19() # Works fro n=2, but not for n=3
+# TestSet17()
+# TestSet18()
+TestSet19()
 # TestDSquare()
 # TestSet20()
 

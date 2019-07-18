@@ -72,33 +72,33 @@ class ChainComplex(object):
             # for y, column in enumerate(transpose):
 
         # Computing morphisms squared:
-        transpose = np.transpose(self.morphisms)
-        for x, row in enumerate(self.morphisms):
-            for y, column in enumerate(transpose):
-                print("row, column", x, y)
-                temp = [column[z]*row[z] for z in range(len(row))]
-                cob = ZeroCob
-                for k, cobord in enumerate(temp):
-                    cob += cobord
-                # cob = np.dot(column, row) # computes the element at [x][y] in d^2
+        #transpose = np.transpose(self.morphisms)
+        #for x, row in enumerate(self.morphisms):
+        #    for y, column in enumerate(transpose):
+        #        print("row, column", x, y)
+        #        temp = [column[z]*row[z] for z in range(len(row))]
+        #        cob = ZeroCob
+        #        for k, cobord in enumerate(temp):
+        #            cob += cobord
+        #        # cob = np.dot(column, row) # computes the element at [x][y] in d^2
+        #        if cob.ReduceDecorations() != []:
+        #            for k, cobord in enumerate(temp):
+        #                drawcob(cobord, "cobord"+str(k))
+        #            print("!!!!!!!!!!!!!!!!!!")
+        #            print("ERROR: Found non-zero term in d² in row "+str(x)+" and column "+str(y)+":")
+        #            print(printdecos(cob,"long"))
+        #            print("!!!!!!!!!!!!!!!!!!")
+        #            raise Exception('Differential does not square to 0')
+        ###Original morphisms squared:
+        squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
+        for i,row in enumerate(squared):
+            for j,cob in enumerate(row):
                 if cob.ReduceDecorations() != []:
-                    for k, cobord in enumerate(temp):
-                        drawcob(cobord, "cobord"+str(k))
                     print("!!!!!!!!!!!!!!!!!!")
-                    print("ERROR: Found non-zero term in d² in row "+str(x)+" and column "+str(y)+":")
+                    print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
                     print(printdecos(cob,"long"))
                     print("!!!!!!!!!!!!!!!!!!")
                     raise Exception('Differential does not square to 0')
-        #Original morphisms squared:
-        # squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
-        # for i,row in enumerate(squared):
-            # for j,cob in enumerate(row):
-                # if cob.ReduceDecorations() != []:
-                    # print("!!!!!!!!!!!!!!!!!!")
-                    # print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
-                    # print(printdecos(cob,"long"))
-                    # print("!!!!!!!!!!!!!!!!!!")
-                    # raise Exception('Differential does not square to 0')
     
     def findIsom(self): 
         """Returns the location of the first isomorphism it finds
@@ -487,7 +487,7 @@ def AddNegCrossing(Complex, i):
     NewComplex = ChainComplex(NewElements, NewMorphisms)
     return NewComplex
 
-def BNbracket(string,pos=0,neg=0,start=1):
+def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     """compute the Bar-Natan bracket for tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
     <type> is equal to:
         'pos': positive crossing
@@ -496,7 +496,8 @@ def BNbracket(string,pos=0,neg=0,start=1):
         'cap': cap
     <index> is the index at which the crossing, cap or cup sits. 
     'pos' and 'neg' are the numbers of positive and negative crossings. 
-    The optional paramter 'start' is an integer which specifies the number of tangle ends at the top.
+    The first optional parameter 'start' is an integer which specifies the number of tangle ends at the top.
+    The second optional parameter 'options' is either 'unsafe' (default) or 'safe'. The latter performs some sanity checks, but slows down the computation.
     E.g. 'BNbracket('cup0pos0',2)' is a (2,0)-tangle which is decomposed as a positive crossing followed by a cap.
     """
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
@@ -506,13 +507,13 @@ def BNbracket(string,pos=0,neg=0,start=1):
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings and "+str(neg)+" negative crossings.")
     for i,word in enumerate(stringlist):
-        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\n')# monitor \n ->\r
+        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\r')# monitor \n ->\r
         #time.sleep(0.1)
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
             #print("before eliminateAll")
             #PrettyPrintComplex(cx, "old long")
-            cx.ValidMorphism()
+            if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
             #print("after eliminateAll")
             #PrettyPrintComplex(cx, "old long")
@@ -521,7 +522,7 @@ def BNbracket(string,pos=0,neg=0,start=1):
             cx=AddNegCrossing(cx, word[1])
             #print("before eliminateAll")
             #PrettyPrintComplex(cx, "old long")
-            cx.ValidMorphism()
+            if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
             #print("after eliminateAll")
             #PrettyPrintComplex(cx, "old long")
@@ -530,7 +531,7 @@ def BNbracket(string,pos=0,neg=0,start=1):
             cx=AddCup(cx, word[1])
             #print("before eliminateAll")
             #PrettyPrintComplex(cx, "old long")
-            cx.ValidMorphism()
+            if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
             #print("after eliminateAll")
             #PrettyPrintComplex(cx, "old long")
@@ -544,7 +545,7 @@ def BNbracket(string,pos=0,neg=0,start=1):
 
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     
-    print("Completed the computation successfully.       ")
+    print("Completed the computation successfully.                                              ")
     return cx
 
 
