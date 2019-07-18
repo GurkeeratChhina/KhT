@@ -39,6 +39,11 @@ def indexQ(mylist,val):
     Throws error if there is no such element"""
     return next(i for i,v in enumerate(mylist) if v==val)
 
+def indexMemberQ(mylist,val):
+    """compute the index of the first element in the list mylist which contains val. 
+    Throws error if there is no such element"""
+    return next(i for i,v in enumerate(mylist) if val in v)
+
 def flatten(mylist):
     """analogue to Mathematica Flatten"""
     return [j for i in mylist for j in i]
