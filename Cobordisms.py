@@ -77,11 +77,6 @@ class Cobordism(object):
 
     def __mul__(self, other):
         """The composition of two cobordism is computed by performing neck-cutting along push-offs of all boundary components of the composition and then removing all closed components.
-        The notation is as follows:
-            * new_comps is the list of components (lists of TEIs) of the composition after neck-cutting.
-            * old_comps_x is a list of indices of components of new_comps which belong to the same component before neck-cutting.
-            * old_comps is a list of lists of TEIs that belong to the same component before neck-cuttting.
-            * IdcI is the number of boundary components of old_comp.
         """
         
         def partition_new_comps(new_comps,arcs):
@@ -116,11 +111,11 @@ class Cobordism(object):
         comps1=self.comps
         comps2=other.comps
         
-        #components of the fully simplified cobordism from self.front to other.back, ordered according to their smallest TEI
+        # list of components (lists of TEIs) of the fully simplified cobordism from self.front to other.back (after neck-cutting), ordered according to their smallest TEI
         new_comps=components(self.front,other.back)
-        #boundary component of each old_comp_x of old_comps_x, as a list of indices of new_comps
+        # list of indices of components of new_comps which belong to the same component before neck-cutting
         old_comps_x=partition_new_comps(new_comps,self.back.arcs)
-        #boundary component of each old_comp_x of old_comps_x, as a list of TEIs
+        # list of lists of TEIs that belong to the same component before neck-cuttting
         old_comps=[flatten([new_comps[index] for index in old_comp_x]) for old_comp_x in old_comps_x]
         # list of lists of indices of components in first/second cobordism that belong to the old_comp in old_comps
         comps1_x=[[j for j,comp in enumerate(comps1) if comp[0] in old_comp] for old_comp in old_comps]
