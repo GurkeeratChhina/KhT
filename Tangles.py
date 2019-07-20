@@ -133,14 +133,18 @@ class CLT(object):
         return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr+other.dgr) #TODO: check grading computations
 
     def __eq__(self, other): # redefining eq so that the tangles don't have to be literally the same when composing cobordisms, but only need to have the same values
-        if self.top == other.top and self.bot == other.bot and self.arcs == other.arcs:
-            if self.pgr == other.pgr and self.qgr == other.qgr and self.dgr == other.dgr:
-                return True
-            else:
-                print("tangles have different gradings, the first tangle has p,q,d:", self.pgr, self.qgr, self.dgr, "while the second has p,q,d:", other.pgr, other.qgr, other.dgr)
-                return True
-        else:
-            return False
+        """Check if two tangles are the same up to gradings.
+        """
+        #if self.top == other.top and self.bot == other.bot and self.arcs == other.arcs:
+        #    if self.pgr == other.pgr and self.qgr == other.qgr and self.dgr == other.dgr:
+        #        return True
+        #    else:
+        #        #print("tangles have different gradings, the first tangle has p,q,d:", self.pgr, self.qgr, self.dgr, "while the second has p,q,d:", other.pgr, other.qgr, other.dgr)
+        #        return True
+        #else:
+        #    return False
+        # Note: The above also checks gradings. However, it produces lots of messages during cancellation, since the homological grading changes. 
+        return self.top == other.top and self.bot == other.bot and self.arcs == other.arcs
 def components(clt1,clt2):
     """components of an elementary cobordism between two tangles (assuming the same clt.top and clt.bot)."""
     allcomponents=[]

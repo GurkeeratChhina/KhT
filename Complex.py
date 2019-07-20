@@ -30,7 +30,7 @@ class ChainComplex(object):
         Note that the matrix's rows and columns depend on the order the CLTS are given in the list """
     def __init__(self,listofclt,morphisms):
         self.elements = listofclt
-        self.morphisms = morphisms
+        self.morphisms = np.array(morphisms)
     
     def ValidMorphism(self): #checks that the differential squares to 0, has no self loops, and is a matrix of the correct size
         length = len(self.elements)
@@ -106,22 +106,25 @@ class ChainComplex(object):
     
     def eliminateIsom(self, sourceindex, targetindex):
         """Mutates self by eliminating the isomorphism at the specified location, via the gaussian elimination lemma
-           Note that this does not check that the cobodism specified is actually an isomorphism"""
-        Isom = self.morphisms[targetindex][sourceindex]
-        Inverse = Cobordism(Isom.back, Isom.front, Isom.decos, Isom.comps) #because the isomorphism is +- id, taking the inverse (ie flipping the cobordism upside down) amounts to swapping the front and back
-        newElements = [elem for x, elem in enumerate(self.elements) if x != sourceindex and x != targetindex] # both the source and the target are eliminated from the matrix via the lemma
-        newMorphisms = []
-        for target, row in enumerate(self.morphisms):
-            newRow = []
-            if target != sourceindex and target != targetindex: # Only keeping rows that are not corresponding to source or target
-                for source, cob in enumerate (row):
-                    if source != sourceindex and source != targetindex: # Only keeping columns that are not corresponding to source or target
-                        temp1 = (self.morphisms[targetindex][source]*Inverse)*self.morphisms[target][sourceindex] #composes the 3 morphisms as in the lemma, this is gamma phi^-1 delta as in Benjamin Thompson's paper
-                        newCob = cob + temp1.negative() # This does epsilon - gamma phi^-1 delta
-                        newRow.append(newCob)
-                newMorphisms.append(newRow)
-        self.elements = newElements
-        self.morphisms = newMorphisms
+           Note that this does not check that the cobodism specified is actually an isomorphism.
+        """
+        
+        Max=max(targetindex,sourceindex)
+        Min=min(targetindex,sourceindex)
+        
+        del self.elements[Max] # eliminate source and target from list of generators
+        del self.elements[Min] # eliminate source and target from list of generators
+        
+        out_source = np.delete(self.morphisms[:,sourceindex],[Min,Max],0) #arrows starting at the source, omiting indices targetindex and sourceindex
+        in_target = np.delete(self.morphisms[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
+        
+        if (self.morphisms[targetindex,sourceindex]).decos[0][-1]==1: # add minus sign; in the case the coefficient is -1, the signs cancel.
+            in_target=np.array([entry.negative() for entry in in_target])
+        
+        self.morphisms=np.delete(self.morphisms,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
+        self.morphisms=np.delete(self.morphisms,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
+        
+        self.morphisms = self.morphisms+np.transpose(np.tensordot(in_target,out_source, axes=0)) # update differential
 
     def eliminateAll(self): #mutates self by eliminating isomorphisms as long as it can find one
         while True:
