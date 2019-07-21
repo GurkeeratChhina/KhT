@@ -542,7 +542,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings and "+str(neg)+" negative crossings.")
     for i,word in enumerate(stringlist):
-        print("slice "+str(i)+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\r')# monitor \n ->\r
+        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\r')# monitor \n ->\r
         #time.sleep(0.1)
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
