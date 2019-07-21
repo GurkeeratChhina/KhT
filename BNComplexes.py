@@ -185,6 +185,8 @@ class BNComplex(object):
         - A field: 0 means Q, 1 means Z, prime p>1 means Z/pZ. 
         These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
         Note that the matrix's rows and columns depend on the order the CLTS are given in the list """
+    __slots__ = 'gens','diff','field'
+    
     def __init__(self,gens,diff,field):
         self.gens = gens
         self.diff = np.array(diff)

@@ -28,6 +28,8 @@ class ChainComplex(object):
         - A a matrix of cobordisms as the adjacency matrix.
         These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
         Note that the matrix's rows and columns depend on the order the CLTS are given in the list """
+    __slots__ = 'elements','morphisms'
+    
     def __init__(self,listofclt,morphisms):
         self.elements = listofclt
         self.morphisms = np.array(morphisms)

@@ -49,6 +49,8 @@ class Cobordism(object):
       WARNING: No assumptions are made about each list, ie the TEIs may appear in *any* order!
       (We might want to change this at some point)
     """
+    __slots__ = 'front','back','comps','decos'
+    
     def __init__(self,clt1,clt2,decos,comps="default"):
         self.front = clt1
         self.back = clt2
@@ -183,23 +185,18 @@ class Cobordism(object):
     
     def isIsom(self):
         """checks if self is the identity cobordism or the negative identity cobordism"""
-        if len(self.decos) != 1: # check that it is not linear combination of several cobordisms
-            return False
-        if len(self.comps) != self.front.total: #checks if the number of components of the cobordism is exactly the number of arcs of the CLT
-            return False
-        if len(self.comps) != self.back.total: # as above
-            return Fasle 
-        for x in self.decos[0][:-1]: #checks that there are no dots or powers of H
-            if x != 0:
-                return False
-        if self.decos[0][-1] not in [1, -1]: #checks that the coefficient is +-1
-            return False
-        return True 
+        # check if it is a single cobordism (and not a linear combination of several cobordisms or the zero cobordism)
+        # checks if the number of components of the cobordism is exactly the number of arcs of the front CLT (and hence also the back CLT)
+        # checks if there are no dots or powers of H (dots and Hpowers are non-negative)
+        # checks if the coefficient is +-1. 
+        # Note that if one of these conditions is not satified, then python does not evaluate the following ones and immediately returns False. 
+        return (len(self.decos) == 1) and (len(self.comps) == self.front.total) and (sum(self.decos[0][:-1])==0) and (self.decos[0][-1] in [1, -1]) 
 
     def negative(self):
         """returns a cobordism that is exactly the same as self, but with all the coefficients in the linear combination multiplied by -1"""
-        newDecos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
-        return Cobordism(self.front, self.back, newDecos, self.comps)
+        self.decos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
+        return self
+        #return Cobordism(self.front, self.back, newDecos, self.comps)
         
 def simplify_decos(decos):
     """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
