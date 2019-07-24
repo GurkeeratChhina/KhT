@@ -538,7 +538,6 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
     stringlist.reverse()
     cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
-    cx.ValidMorphism()
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings and "+str(neg)+" negative crossings.")
     for i,word in enumerate(stringlist):
@@ -574,8 +573,6 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
             if options=="safe": cx.ValidMorphism()
-        
-    cx.ValidMorphism()
 
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     

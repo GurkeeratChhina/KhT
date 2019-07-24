@@ -510,9 +510,75 @@ def TestSet20():
    DrawBNComplex(BN_complex_1, "BN_complex_1_after_cleanup.svg", "qh")
    DrawBNComplex(BN_complex_2, "BN_complex_2_after_cleanup.svg", "qh")
 
+def TestSet21(N, Twists):
+    """N is a positive integer, Twists is an list of integers of length N 
+       The elements of Twists correspond to the number of twists on each of the loops of the tangle
+       If k in Twists is postitive, it is positive twists, if negative, then negative twists """
+    tangle = "cup1.neg0.pos2."
+    for j in range(N):
+        tangle += "neg0.neg1."
+        for k in range(abs(Twists[j])):
+            if Twists[j] < 0:
+                tangle += "neg2."
+            if Twists[j] >= 0:
+                tangle += "pos2."
+        tangle += "neg1.neg0."
+    tangle += "pos2.cap3.neg0.neg0.cap1"
+    drawtangle(tangle,"testn","plain",1)
+    complex= BNbracket(tangle,0,0,1)
+    BN_complex = CobComplex2BNComplex(complex)
+    DrawBNComplex(BN_complex, "BN_complex_" + str(N) + "_" + str(Twists) + ".svg", "qh")
+    BN_complex.clean_up(1000)
+    DrawBNComplex(BN_complex, "BN_complex_" + str(N) + "_" + str(Twists) + "_after_cleanup" + ".svg", "qh")
 
+def TestSet22(N, M):
+    """makes prime tangles with N twists on the left and M twists on the right"""
+    tangle = "cup1."
+    for i in range(abs(N)):
+        if N < 0:
+            tangle += "neg0."
+        if N > 0:
+            tangle += "pos0."
+    for i in range(abs(M)):
+        if M < 0:
+            tangle += "neg2."
+        if M > 0:
+            tangle += "pos2."
+    tangle += "cap3.cap1"
+    drawtangle(tangle,"pt" + "_" + str(N) + "_" + str(M),"plain",1)
+    complex= BNbracket(tangle,0,0,1)
+    BN_complex = CobComplex2BNComplex(complex)
+    DrawBNComplex(BN_complex, "BN_complex_pt_" + str(N) + "_" + str(M) + ".svg", "qh")
+    BN_complex.clean_up(1000)
+    DrawBNComplex(BN_complex, "BN_complex_pt" + str(N) + "_" + str(M) + "_after_cleanup" + ".svg", "qh")
     
+def TestSet23():
+    tangle = "cup1.pos2.pos0.pos0.neg1.pos2.cap3.pos0.cap1"
+    drawtangle(tangle,"tangle_6","plain",1)
+    complex= BNbracket(tangle,0,0,1)
+    BN_complex = CobComplex2BNComplex(complex)
+    DrawBNComplex(BN_complex, "BN_complex_tangle_6.svg", "qh")
+    BN_complex.clean_up(1000)
+    DrawBNComplex(BN_complex, "BN_complex_tangle_6_after_cleanup.svg", "qh")
+
+def TestSet24():
+    tangle = "cup1.pos2.pos0.pos0.neg1.pos2.cap3.neg1.pos0.cap1"
+    drawtangle(tangle,"tangle_7","plain",1)
+    complex= BNbracket(tangle,0,0,1)
+    BN_complex = CobComplex2BNComplex(complex)
+    DrawBNComplex(BN_complex, "BN_complex_tangle_7.svg", "qh")
+    BN_complex.clean_up(1000)
+    DrawBNComplex(BN_complex, "BN_complex_tangle_7_after_cleanup.svg", "qh")
     
+def TestSet25():
+    tangle1= Tangle("cup1.pos2.pos0.pos0.neg1.pos2.cap3.pos0.cap1")
+    tangle2= Tangle("cup1.pos2.pos0.pos0.neg1.pos2.cap3.neg1.pos0.cap1")
+    tangle3 = tangle1.horizontal_sum(tangle2)
+    tangle4 = tangle1.vertical_sum(tangle2)
+    
+    drawtangle(tangle3.slices,"tangle6_hori_sum_tangle7","plain",1)
+    drawtangle(tangle4.slices,"tangle6_vert_sum_tangle7","plain",1)
+
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -531,15 +597,31 @@ def TestSet20():
 # TestSet15()
 # TestSet16(2)
 # TestSet16(3)
-TestSet16(4)
+# TestSet16(4)
 # TestSet17(2)
 # TestSet17(4)
 # TestDSquare()
 # TestSet18()
 # TestSet19()
 # TestListMutation()
-# TestSet13(10)
 # TestSet20()
+# TestSet15()
+# for k in range(-4, 4):
+    # TestSet21(1, [k])
+# for k in range(-2, 2):
+    # for l in range(-2, 2):
+        # TestSet21(2, [k, l])
+# TestSet21(3, [0,0,0])
+# TestSet21(4, [0,0,0,0])
+# TestSet22(2,-3)
+# TestSet22(2,-2)
+# TestSet22(2,-5)
+# TestSet22(3,-3)
+# TestSet22(3,3)
+TestSet23()
+TestSet24()
+TestSet25()
+
 
 ## comparing efficiency of two functions
 #import timeit
