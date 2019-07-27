@@ -245,18 +245,21 @@ class BNComplex(object):
                 return pow(num, self.field-2, self.field) #TODO: implement with F_p arithmetic
         face=alg.pairs[0][0]
         inverse_coeff=inverse(alg.pairs[0][1])
+        
+        #isotopy=[[for pair in entry if pair[0]*face>0] for entry in self.diff[:,start]]
+        
         # first remove all other arrows with the same start
         for index in range(len(self.gens)):
-            for pair in self.diff[index,start].pairs:
-                if pair[0]*face>0:# same face
-                    if ((self.diff)[index,end].pairs == []) & (index != end): # check that isotopy is valid.
+            if ((self.diff)[index,end].pairs == []) & (index != end): # check that isotopy is valid.
+                for pair in self.diff[index,start].pairs:
+                    if pair[0]*face>0:# same face
                         self.isotopy(end,index,BNmor([[pair[0]-face,pair[1]*inverse_coeff]]),"unsafe")
         
         # secondly, remove all remaining arrows with the same end
         for index in range(len(self.gens)):
-            for pair in self.diff[end,index].pairs:
-                if pair[0]*face>0:# same face
-                    if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
+            if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
+                for pair in self.diff[end,index].pairs:
+                    if pair[0]*face>0:# same face
                         self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]]),"unsafe")
     
     def clean_up_once(self,SD):
