@@ -409,6 +409,7 @@ def CobordismToBNAlg(cob,field=2):
 def CLT2BNObj(clt):
     """Convert a (1,3)-tangle into one of the two idempotents of BNAlg."""
     if clt.top !=1 or clt.bot !=3:
+        
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     elif clt.arcs[0]==3:
         return BNobj(0,clt.qgr,clt.pgr) #b
@@ -419,6 +420,38 @@ def CobComplex2BNComplex(complex,field=2):
     gens=[CLT2BNObj(clt) for clt in complex.elements]
     diff=[[CobordismToBNAlg(cob,field) for cob in row] for row in complex.morphisms]
     return BNComplex(gens,diff,field)
+
+def BNObj2CLT(bnobj):
+    if bnobj.idem == 0:
+        arcs = [3,2,1,0]
+    else:
+        arcs = [1,0,3,2]
+    return CLT(1,3, arcs, bnobj.h, bnobj.q, bnobj.delta)
+
+def BNAlg2Cob(morphism, sourceCLT, targetCLT):
+    decos = []
+    for pair in morphism.pairs:
+        if pair[0] > 0 : 
+            decos.append([0, 0, pair[0], pair[1]])
+        elif pair[0] == 0: 
+            decos.append([0, 0, 0, pair[1]])
+        elif pair[0] == 0 %2: 
+            power = Fraction(-1*pair[0], 2)
+            decos.append([power, 0, 0, ((-1)** power) *pair[1]]) #(-H)^(n/2)
+            decos.append([power - 1, 0, 1, ((-1)** (power -1)) *pair[1]]) #(-H)^(n/2-1) D
+        else: 
+            power = Fraction(-1*pair[0] -1, 2)
+            decos.append([power, 0, ((-1)** power)*pair[1] ])#(-H)^((n-1)/2) S
+    Cob = Cobordism(sourceCLT, targetCLT, decos)
+    Cob.ReduceDecorations()
+    return Cob
+    
+def BNComplex2CobComplex(BNcomplex):
+    elements = [BNObj2CLT(bnobj) for bnobj in BNcomplex.gens]
+    morphisms = [[BNAlg2Cob(morphism, elements[source], elements[target]) \
+                 for source, morphism in enumerate(row)] for target, row in enumerate(BNcomplex.diff)]
+    return ChainComplex(elements, morphisms)
+    
 
 def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
     "draw a graph of for the BNcomplex"
@@ -476,6 +509,7 @@ def PrettyPrintBNComplex(complex):
         },columns=[" ","q","h","δ"]))
     print("The differential:")
     print(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in complex.diff]),range(len(complex.diff)),tablefmt="fancy_grid"))
+
 
 # Claudius: I'll keep working on this list... 
 #todo: implement recognition of local systems (optional)

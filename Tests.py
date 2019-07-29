@@ -21,7 +21,9 @@ from Cobordisms import *
 from Complex import *
 from Drawing import *
 from BNComplexes import *
+from CrossingTangle import *
 from fractions import Fraction
+import timeit
 
 # create basic crossingless tangles
 def cup_alt(n,i):
@@ -573,11 +575,17 @@ def TestSet24():
 def TestSet25():
     tangle1= Tangle("cup1.pos2.pos0.pos0.neg1.pos2.cap3.pos0.cap1")
     tangle2= Tangle("cup1.pos2.pos0.pos0.neg1.pos2.cap3.neg1.pos0.cap1")
-    tangle3 = tangle1.horizontal_sum(tangle2)
+    # tangle3 = tangle1.horizontal_sum(tangle2)
     tangle4 = tangle1.vertical_sum(tangle2)
     
-    drawtangle(tangle3.slices,"tangle6_hori_sum_tangle7","plain",1)
+    # drawtangle(tangle3.slices,"tangle6_hori_sum_tangle7","plain",1)
     drawtangle(tangle4.slices,"tangle6_vert_sum_tangle7","plain",1)
+    
+    # BN_complex_1 = tangle3.toReduced_BNComplex()
+    # DrawBNComplex(BN_complex_1, "BN_complex_tangle6_hori_sum_tangle7_after_cleanup.svg", "qh")
+    
+    BN_complex_2 = tangle4.toReduced_BNComplex()
+    DrawBNComplex(BN_complex_2, "BN_complex_tangle6_vert_sum_tangle7_after_cleanup.svg", "qh")
 
 # TestSet0()
 # TestSet1()
@@ -618,9 +626,10 @@ def TestSet25():
 # TestSet22(2,-5)
 # TestSet22(3,-3)
 # TestSet22(3,3)
-TestSet23()
-TestSet24()
-TestSet25()
+# TestSet23()
+# TestSet24()
+print(timeit.timeit(TestSet25, number=1))
+# TestSet25()
 
 
 ## comparing efficiency of two functions

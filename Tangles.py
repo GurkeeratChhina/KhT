@@ -166,31 +166,3 @@ def components(clt1,clt2):
 def arc_to_involution(pairs):
     """convert a list of pairs of TEIs into an involution."""
     return [x[1] for x in sorted(pairs+[pair[::-1] for pair in pairs])]
-
-class Tangle(object):
-    __slots__ = 'slices', 'strlist'
-    
-    def __init__(self, string):
-        self.slices = string
-        
-    def vertical_sum(self, other):
-        return Tangle("cup2." + other.slices + "." + self.slices)
-    
-    def shift(self, n):
-        def shift_word(word):
-            return word[0:3] + str(int(word[3:]) + n)
-        splitlist = [shift_word(word) for word in self.slices.split('.')]
-        newstring = ""
-        for word in splitlist[:-1]:
-            newstring += word + "."
-        newstring += splitlist[-1]
-        return Tangle(newstring)
-    
-    def horizontal_sum(self, other):
-        return Tangle("cup1." + other.shift(2).slices + "." + self.slices)
-    
-    def toReduced_BNComplex(self):
-        cob_complex = BNbracket(self.slices, 0, 0, 1) #TODO: fix grading shifts automatically
-        BN_complex = CobComplex2BNComplex(cob_complex)
-        BN_complex.clean_up(1000)
-        return BN_complex
