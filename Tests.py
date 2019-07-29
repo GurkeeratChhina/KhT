@@ -24,6 +24,7 @@ from BNComplexes import *
 from CrossingTangle import *
 from fractions import Fraction
 import timeit
+from time import time
 
 # create basic crossingless tangles
 def cup_alt(n,i):
@@ -569,7 +570,7 @@ def TestSet24():
     complex= BNbracket(tangle,0,0,1)
     BN_complex = CobComplex2BNComplex(complex)
     DrawBNComplex(BN_complex, "BN_complex_tangle_7.svg", "qh")
-    BN_complex.clean_up(1000)
+    BN_complex.clean_up(10)
     DrawBNComplex(BN_complex, "BN_complex_tangle_7_after_cleanup.svg", "qh")
     
 def TestSet25():
@@ -603,7 +604,7 @@ def TestSet25():
 # TestSet13(4)
 # TestSet14(2)
 # TestSet15()
-# TestSet16(2)
+# TestSet16(4)
 # TestSet16(3)
 # TestSet16(4)
 # TestSet17(2)
@@ -626,11 +627,11 @@ def TestSet25():
 # TestSet22(2,-5)
 # TestSet22(3,-3)
 # TestSet22(3,3)
-# TestSet23()
-# TestSet24()
+# TestSet22(15,15)
+#TestSet23()
+#TestSet24()
 print(timeit.timeit(TestSet25, number=1))
-# TestSet25()
-
+#TestSet25()
 
 ## comparing efficiency of two functions
 #import timeit

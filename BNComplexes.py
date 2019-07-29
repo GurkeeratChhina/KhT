@@ -23,7 +23,7 @@ from Tangles import *
 from Complex import *
 from Drawing import *
 from Cobordisms import *
-import time
+from time import time
 from fractions import Fraction
 
 def ToExponent(exponent):
@@ -98,6 +98,58 @@ def coeff_simplify(num,field=2):
     else: # This probably needs to be fixed for field=0
         return num 
 
+class BNmor_alt(object):# work in progress
+    """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
+    'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
+    'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
+    """
+    #__slots__ = 'pairs'
+    
+    def __init__(self,S,D,I):
+        self.S = np.array(S) # list of coefficients
+        self.D = np.array(D) # list of coefficients
+        self.I = I #coefficient
+    
+    def simplify_BNmor(self,field=2):
+        """simplify algebra elements by omitting superflous zeros."""
+        self.S=[coeff_simplify(i) for i in self.S]
+        self.D=[coeff_simplify(i) for i in self.D]
+        self.I=coeff_simplify(self.I)
+        while self.S[-1] ==0:
+            del self.S[-1]
+        while self.D[-1] ==0:
+            del self.D[-1]
+        return self
+    
+    def __add__(self, other):
+        
+        #newS = [a+b for a,b in zip_longest(self.S,other.S)]
+        if len(self.S) < len(other.S):
+            newS = other.S.copy()
+            newS[:len(self.S)] += self.S
+        else:
+            newS = self.S.copy()
+            newS[:len(other.S)] += other.S
+        
+        #newD = [a+b for a,b in zip_longest(self.D,other.D)]
+        if len(self.D) < len(other.D):
+            newD = other.D.copy()
+            newD[:len(self.D)] += self.D
+        else:
+            newD = self.D.copy()
+            newD[:len(other.D)] += other.D
+        
+        return BNmor(newS,newD,self.I+other.I).simplify_BNmor()
+
+    def __mul__(self, other):
+        newSmatrix = np.tensordot(self.S,other.S,axes=0)
+        newS= [sum(np.diagonal(A[:, ::-1],len(other.S)-index)) for index in range(len(self.S)+len(other.S)-1)]
+        
+        newDmatrix = np.tensordot(self.D,other.D,axes=0)
+        newD= [sum(np.diagonal(A[:, ::-1],len(other.D)-index)) for index in range(len(self.D)+len(other.D)-1)]
+        
+        return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0]).simplify_BNmor()
+    
 class BNmor(object):
     """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
@@ -114,18 +166,25 @@ class BNmor(object):
             self.pairs=[]
         def droplast(l):
             return l[:-1]
-        def add_coeffs(l):
-            return coeff_simplify(sum([element[-1] for element in l]),field)
-        self.pairs=[x for x in \
-            [powers+[add_coeffs(list(grouped))] \
-            for powers,grouped in groupby(sorted(self.pairs),droplast)] \
-            if x[-1]!=0]
+        def add_coeffs(iterable):
+            coeff=0
+            for x in iterable:
+                coeff+=x[-1]
+            return coeff_simplify(coeff,field)
+        self.pairs = [power+[add_coeffs(grouped)] for power,grouped in groupby(sorted(self.pairs),droplast)]
+        self.pairs = [x for x in self.pairs if x[-1]!=0]
         return self
     
     def __add__(self, other):
+        if self.pairs == []:
+            return other
+        if other.pairs == []:
+            return self
         return BNmor(self.pairs+other.pairs).simplify_BNmor()
 
     def __mul__(self, other):
+        if (self.pairs == []) or (other.pairs == []):
+            return ZeroMor
         return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0]).simplify_BNmor()
     
     def is_identity(self):
@@ -228,8 +287,14 @@ class BNComplex(object):
         self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
     
+    def isotopy_via_vector_end(self,end,vector): # unused function: this is actually *much* slower
+        """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
+        """
+        self.diff+=np.outer([x.negative() for x in vector],self.diff[end,:]) # subtract all precompositions with the differential (rows of diff)
+        self.diff[:,end]+=np.dot(self.diff,vector) # add all postcompositions with the differential (columns of diff)
+    
     def isolate_arrow(self,start, end, alg):
-        """ Try to isotope away all arrows with the same start or the same end as 'arrow'. 
+        """ Try to isotope away all arrows with the same start or the same end as 'arrow'.
         'arrow' is a list [start, end, alg], where 'alg' is a BNmor with a single entry.
 
         """
@@ -245,18 +310,29 @@ class BNComplex(object):
                 return pow(num, self.field-2, self.field) #TODO: implement with F_p arithmetic
         face=alg.pairs[0][0]
         inverse_coeff=inverse(alg.pairs[0][1])
+        
+        def find_isotopy(index,entry):# Note: We are assuming here that there is at most one label to remove. 
+            for pair in entry.pairs:
+                if (pair[0]*face>0):
+                    if ((self.diff)[index,end].pairs == []) & (index != end):
+                        return BNmor([[pair[0]-face,pair[1]*inverse_coeff]])
+            return ZeroMor
+        
         # first remove all other arrows with the same start
         for index in range(len(self.gens)):
-            for pair in self.diff[index,start].pairs:
-                if pair[0]*face>0:# same face
-                    if ((self.diff)[index,end].pairs == []) & (index != end): # check that isotopy is valid.
+            if ((self.diff)[index,end].pairs == []) & (index != end): # check that isotopy is valid.
+                for pair in self.diff[index,start].pairs:
+                    if pair[0]*face>0:# same face
                         self.isotopy(end,index,BNmor([[pair[0]-face,pair[1]*inverse_coeff]]),"unsafe")
+        # attempt to speed up , but actually MUCH slower...
+        #isotopy_vector=np.array([find_isotopy(index,entry) for index,entry in enumerate(self.diff[:,start])])
+        #self.isotopy_via_vector_end(end,isotopy_vector)
         
         # secondly, remove all remaining arrows with the same end
         for index in range(len(self.gens)):
-            for pair in self.diff[end,index].pairs:
-                if pair[0]*face>0:# same face
-                    if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
+            if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
+                for pair in self.diff[end,index].pairs:
+                    if pair[0]*face>0:# same face
                         self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]]),"unsafe")
     
     def clean_up_once(self,SD):
@@ -328,15 +404,19 @@ class BNComplex(object):
         """
         
         iter=0
+        time0=time()
+        time1=time0
         while iter<max_iter:
-            if iter % 10 == 0: # check every now and then during the iteration, whether the complex is already loop-type.
+            if iter % 20 == 0: # check every now and then during the iteration, whether the complex is already loop-type.
                 if self.is_looptype():
-                    print("Clean-Up: Finished after "+str(iter)+" iteration(s).")
+                    print("Clean-Up: Finished after "+str(iter)+" iteration(s) in "+str(round(time1-time0,1))+" second(s).")
                     break
             iter+=1
             self.clean_up_once(-1)# faces S
             self.clean_up_once(1) # faces D
-            print("iteration: "+str(iter), end='\r')# testing how to monitor a process
+            time2=time()
+            print("iteration: "+str(iter)+" ("+str(round(time2-time1,1))+" sec)", end='\r')# testing how to monitor a process
+            time1=time2
             #time.sleep(1)
         else:
             print("Clean-up: Terminated as a result of reaching maximum iteration value of", max_iter)
@@ -379,6 +459,7 @@ class BNComplex(object):
         return BNComplex(self.gens+shifted_complex.gens,new_diff)
 
 ZeroMor=BNmor([])
+#ZeroMor=BNmor([],[],0)
 
 def CobordismToBNAlg(cob,field=2):
     """ Convert a cobordism between two (1,3)-tangles into an element of BNAlgebra."""
