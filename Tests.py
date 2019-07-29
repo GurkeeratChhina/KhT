@@ -22,6 +22,7 @@ from Complex import *
 from Drawing import *
 from BNComplexes import *
 from fractions import Fraction
+from time import time
 
 # create basic crossingless tangles
 def cup_alt(n,i):
@@ -618,7 +619,7 @@ def TestSet25():
 # TestSet22(2,-5)
 # TestSet22(3,-3)
 # TestSet22(3,3)
-TestSet22(10,10)
+TestSet22(15,15)
 #TestSet23()
 #TestSet24()
 #TestSet25()

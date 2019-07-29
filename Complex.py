@@ -20,7 +20,7 @@ from KhT import *
 from Tangles import *
 from Cobordisms import *
 from Drawing import *
-import time
+from time import time
 
 class ChainComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -539,10 +539,17 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     stringlist.reverse()
     cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
-          " positive crossings and "+str(neg)+" negative crossings.")
+          " positive crossings, "+str(neg)+" negative crossings and "+str(len(stringlist))+" slices in total.")
+          
+    time0=time()
+    time1=time0
+    
     for i,word in enumerate(stringlist):
-        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\r')# monitor \n ->\r
-        #time.sleep(0.1)
+        
+        time2=time()
+        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects, "+str(round(time2-time1,1))+" sec)", end='\r')# monitor \n ->\r
+        time1=time2
+        
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
             #print("before eliminateAll")
@@ -573,10 +580,12 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
             if options=="safe": cx.ValidMorphism()
+        
+        
 
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     
-    print("Completed the computation successfully.                                              ")
+    print("Completed the computation successfully after "+str(round(time1-time0,1))+" second(s).                        ")
     return cx
 
 
