@@ -548,10 +548,13 @@ def TestSet22(N, M):
         if M > 0:
             tangle += "pos2."
     tangle += "cap3.cap1"
-    drawtangle(tangle,"pt" + "_" + str(N) + "_" + str(M),"plain",1)
+    drawtangle(tangle,"pt" + "_" + str(N) + "_" + str(M),"slices",1)
     complex= BNbracket(tangle,0,0,1)
-    BN_complex = CobComplex2BNComplex(complex)
+    complex.ValidMorphism()
+    BN_complex = CobComplex2BNComplex(complex,3)
+    #PrettyPrintBNComplex(BN_complex)
     DrawBNComplex(BN_complex, "BN_complex_pt_" + str(N) + "_" + str(M) + ".svg", "qh")
+    BN_complex.ValidMorphism()
     BN_complex.clean_up(1000)
     DrawBNComplex(BN_complex, "BN_complex_pt" + str(N) + "_" + str(M) + "_after_cleanup" + ".svg", "qh")
     
@@ -661,7 +664,7 @@ def TestSet26():
         # TestSet21(2, [k, l])
 # TestSet21(3, [0,0,0])
 # TestSet21(4, [0,0,0,0])
-# TestSet22(2,-3)
+TestSet22(10,-11)
 # TestSet22(2,-2)
 # TestSet22(2,-5)
 # TestSet22(3,-3)
@@ -670,7 +673,7 @@ def TestSet26():
 #TestSet23()
 #TestSet24()
 # print(timeit.timeit(TestSet25, number=1))
-TestSet25()
+# TestSet25()
 # TestSet26()
 
 ## comparing efficiency of two functions

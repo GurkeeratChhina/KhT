@@ -155,10 +155,11 @@ class BNmor(object):
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
     'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
     """
-    __slots__ = 'pairs'
+    __slots__ = 'pairs','field'
     
-    def __init__(self,pairs):
+    def __init__(self,pairs,field=2):
         self.pairs = pairs
+        self.field = field
     
     def simplify_BNmor(self,field=2):
         """simplify algebra elements by adding all coeffients of the same power of D or S, omitting those with coefficient 0. This is very similar to simplify_decos"""
@@ -180,12 +181,12 @@ class BNmor(object):
             return other
         if other.pairs == []:
             return self
-        return BNmor(self.pairs+other.pairs).simplify_BNmor()
+        return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
 
     def __mul__(self, other):
         if (self.pairs == []) or (other.pairs == []):
             return ZeroMor
-        return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0]).simplify_BNmor()
+        return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
     
     def is_identity(self):
         if len(self.pairs)!=1:
@@ -204,7 +205,7 @@ class BNmor(object):
         return all([pair[0]>=0 for pair in self.pairs])==False
     
     def negative(self): #create new morphism
-        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs])
+        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
     
     def BNAlg2String(self):
         string=""
@@ -272,7 +273,7 @@ class BNComplex(object):
         squared = np.tensordot(self.diff,self.diff, axes=(-2,-1))
         for i,row in enumerate(squared):
             for j,mor in enumerate(row):
-                mor.simplify_BNmor()
+                mor.simplify_BNmor(self.field)
                 if mor.pairs != []:
                     print("!!!!!!!!!!!!!!!!!!")
                     print("ERROR: Found non-zero term "+mor.BNAlg2String()+" in d² in row "+str(i)+" and column "+str(j)+".")
@@ -282,10 +283,13 @@ class BNComplex(object):
     def isotopy(self,start,end,alg,switch="safe"):
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
         """
+        
         if (switch=="safe") & ((self.diff)[start,end].pairs != []):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
         self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
+        #self.ValidMorphism()
+            
     
     def isotopy_via_vector_end(self,end,vector): # unused function: this is actually *much* slower
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
@@ -306,8 +310,18 @@ class BNComplex(object):
                     return num
                 else: 
                     raise Exception("Can't invert over Z")
-            else: 
-                return pow(num, self.field-2, self.field) #TODO: implement with F_p arithmetic
+            else: #taken from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Pseudocode
+                s = 0
+                S = 1
+                r = self.field
+                R = num
+                while r != 0:
+                    q = R // r
+                    R, r = r, R - q * r
+                    S, s = s, S - q * s
+                #print((S*num)%self.field) # should be 1 if computed correctly
+                return S
+                
         face=alg.pairs[0][0]
         inverse_coeff=inverse(alg.pairs[0][1])
         
@@ -315,7 +329,7 @@ class BNComplex(object):
             for pair in entry.pairs:
                 if (pair[0]*face>0):
                     if ((self.diff)[index,end].pairs == []) & (index != end):
-                        return BNmor([[pair[0]-face,pair[1]*inverse_coeff]])
+                        return BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field)
             return ZeroMor
         
         # first remove all other arrows with the same start
@@ -323,7 +337,7 @@ class BNComplex(object):
             if ((self.diff)[index,end].pairs == []) & (index != end): # check that isotopy is valid.
                 for pair in self.diff[index,start].pairs:
                     if pair[0]*face>0:# same face
-                        self.isotopy(end,index,BNmor([[pair[0]-face,pair[1]*inverse_coeff]]),"unsafe")
+                        self.isotopy(end,index,BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field),"unsafe")
         # attempt to speed up , but actually MUCH slower...
         #isotopy_vector=np.array([find_isotopy(index,entry) for index,entry in enumerate(self.diff[:,start])])
         #self.isotopy_via_vector_end(end,isotopy_vector)
@@ -333,7 +347,7 @@ class BNComplex(object):
             if ((self.diff)[start,index].pairs == []) & (index != start): # check that isotopy is valid.
                 for pair in self.diff[end,index].pairs:
                     if pair[0]*face>0:# same face
-                        self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]]),"unsafe")
+                        self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]],self.field),"unsafe")
     
     def clean_up_once(self,SD):
         """ Simplify complex wrt the face D (1) or S (-1).
@@ -383,7 +397,7 @@ class BNComplex(object):
                     remaining.remove(end_current)
                 
             else: # isolate this shortest arrow
-                self.isolate_arrow(start_current, end_current, BNmor([self.diff[end_current,start_current].pairs[index_current]]))
+                self.isolate_arrow(start_current, end_current, BNmor([self.diff[end_current,start_current].pairs[index_current]],self.field))
                 #print("start:", start_current,"end:", end_current, "isotopy:",self.diff[end_current,start_current].pairs[index_current])
                 remaining.remove(start_current)
                 remaining.remove(end_current)
@@ -422,7 +436,7 @@ class BNComplex(object):
             print("Clean-up: Terminated as a result of reaching maximum iteration value of", max_iter)
             
     def negative(self): #create new morphism
-        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs])
+        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
     
     def shift_h(self,shift): # create new complex
         new_gens = [gen.shift_h(shift) for gen in self.gens]
@@ -446,7 +460,7 @@ class BNComplex(object):
         
         def fill_diagonal(i,j):
             if i==j:
-                return BNmor([[Hpower,1],[-2*Hpower,(-1)**Hpower]])
+                return BNmor([[Hpower,1],[-2*Hpower,(-1)**Hpower]],self.field)
             else:
                 return ZeroMor
         
@@ -458,7 +472,7 @@ class BNComplex(object):
         
         return BNComplex(self.gens+shifted_complex.gens,new_diff)
 
-ZeroMor=BNmor([])
+ZeroMor=BNmor([])# note that this morphism is has field=2 by default, but this information gets never used.
 #ZeroMor=BNmor([],[],0)
 
 def CobordismToBNAlg(cob,field=2):
@@ -471,7 +485,7 @@ def CobordismToBNAlg(cob,field=2):
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     
     if len(cob.comps)==1:# saddle
-        return BNmor([[-1-2*deco[0],(-1**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0]).simplify_BNmor(field)
+        return BNmor([[-1-2*deco[0],(-1**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0],field).simplify_BNmor(field)
         
     if len(cob.comps)==2:# identity/dot cobordism
         i=find_first_index(cob.comps,contains_0)+1 #component with TEI 0
@@ -485,7 +499,7 @@ def CobordismToBNAlg(cob,field=2):
         decos_DH=[[deco[0],deco[-1]]     for deco in decos_no_dots if deco[0]>0 ] # D contribution from H
         decos_SH=[[-2*deco[0],-deco[-1]] for deco in decos_no_dots if deco[0]>0 ] # SS contribution from H
         
-        return BNmor(decos_DD+decos_id+decos_DH+decos_SH).simplify_BNmor(field)
+        return BNmor(decos_DD+decos_id+decos_DH+decos_SH,field).simplify_BNmor(field)
 
 def CLT2BNObj(clt):
     """Convert a (1,3)-tangle into one of the two idempotents of BNAlg."""
