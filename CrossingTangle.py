@@ -38,8 +38,8 @@ class Tangle(object):
               " positive crossings and "+str(neg)+" negative crossings.")
         ends = start
         for i,word in enumerate(stringlist):
-            
-            print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\r')# monitor \n ->\r
+            # PrettyPrintComplex(cx, "old long")
+            print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\n')# monitor \n ->\r
             #time.sleep(0.1)
             if word[0]=="pos":
                 cx=AddPosCrossing(cx, word[1])
@@ -67,10 +67,17 @@ class Tangle(object):
                 ends += 2
             
             if ends == 3:
+                Draw_1_3_ChainComplex(cx, self.slices+"slice_" + str(i) + "_pre_cleanup.svg")
+                print("cleaning up")
                 BNcx = CobComplex2BNComplex(cx, field)
                 BNcx.clean_up(max_iter)
-                cx = BNComplex2CobComplex(BNcx)
+                # cx = BNComplex2CobComplex(BNcx)
+                # Draw_1_3_ChainComplex(cx, self.slices+"slice_" + str(i) + "_post_cleanup.svg")
+                print("finished cleaning up")
+                
             
         cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
         print("Completed the computation successfully.                                              ")
+        BN_complex= CobComplex2BNComplex(cx, field)
+        BN_complex.clean_up(max_iter)
         return BN_complex

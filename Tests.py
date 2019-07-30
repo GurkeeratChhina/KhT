@@ -587,7 +587,46 @@ def TestSet25():
     
     BN_complex_2 = tangle4.toReduced_BNComplex()
     DrawBNComplex(BN_complex_2, "BN_complex_tangle6_vert_sum_tangle7_after_cleanup.svg", "qh")
-
+    
+def TestSet26():
+    N = 2
+    M = -2
+    tangle_1 = "cup1."
+    for i in range(abs(N)):
+        if N < 0:
+            tangle_1 += "neg0."
+        if N > 0:
+            tangle_1 += "pos0."
+    for i in range(abs(M)):
+        if M < 0:
+            tangle_1 += "neg2."
+        if M > 0:
+            tangle_1 += "pos2."
+    tangle_1 += "cap3.cap1"
+    N = 2
+    M = -3
+    tangle_2 = "cup1."
+    for i in range(abs(N)):
+        if N < 0:
+            tangle_2 += "neg0."
+        if N > 0:
+            tangle_2 += "pos0."
+    for i in range(abs(M)):
+        if M < 0:
+            tangle_2 += "neg2."
+        if M > 0:
+            tangle_2 += "pos2."
+    tangle_2 += "cap3.cap1"
+    
+    Tangle1 = Tangle(tangle_1)
+    Tangle2 = Tangle(tangle_2)
+    
+    Tangle3 = Tangle1.vertical_sum(Tangle2)
+    drawtangle(Tangle3.slices, "2m2_pt_vert_sum_2m3_pt.svg", "plain", 1)
+    BN_complex = Tangle3.toReduced_BNComplex(200)
+    BN_complex.clean_up(200)
+    DrawBNComplex(BN_complex, "BN_complex_2m2_pt_vert_sum_2p3_pt_aftercleanup.svg", "qh")
+    
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -630,8 +669,9 @@ def TestSet25():
 # TestSet22(15,15)
 #TestSet23()
 #TestSet24()
-print(timeit.timeit(TestSet25, number=1))
-#TestSet25()
+# print(timeit.timeit(TestSet25, number=1))
+TestSet25()
+# TestSet26()
 
 ## comparing efficiency of two functions
 #import timeit

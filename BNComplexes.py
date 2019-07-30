@@ -415,7 +415,7 @@ class BNComplex(object):
             self.clean_up_once(-1)# faces S
             self.clean_up_once(1) # faces D
             time2=time()
-            print("iteration: "+str(iter)+" ("+str(round(time2-time1,1))+" sec)", end='\r')# testing how to monitor a process
+            print("iteration: "+str(iter)+" ("+str(round(time2-time1,1))+" sec)", end='\n')# testing how to monitor a process
             time1=time2
             #time.sleep(1)
         else:
@@ -471,7 +471,7 @@ def CobordismToBNAlg(cob,field=2):
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     
     if len(cob.comps)==1:# saddle
-        return BNmor([[-1-2*deco[0],deco[-1]] for deco in cob.decos if deco[1]==0]).simplify_BNmor(field)
+        return BNmor([[-1-2*deco[0],(-1**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0]).simplify_BNmor(field)
         
     if len(cob.comps)==2:# identity/dot cobordism
         i=find_first_index(cob.comps,contains_0)+1 #component with TEI 0
@@ -503,6 +503,7 @@ def CobComplex2BNComplex(complex,field=2):
     return BNComplex(gens,diff,field)
 
 def BNObj2CLT(bnobj):
+    arcs = []
     if bnobj.idem == 0:
         arcs = [3,2,1,0]
     else:
@@ -513,7 +514,7 @@ def BNAlg2Cob(morphism, sourceCLT, targetCLT):
     decos = []
     for pair in morphism.pairs:
         if pair[0] > 0 : 
-            decos.append([0, 0, pair[0], pair[1]])
+            decos.append([pair[0]-1, 0, 1, pair[1]])
         elif pair[0] == 0: 
             decos.append([0, 0, 0, pair[1]])
         elif pair[0] == 0 %2: 
@@ -524,6 +525,7 @@ def BNAlg2Cob(morphism, sourceCLT, targetCLT):
             power = Fraction(-1*pair[0] -1, 2)
             decos.append([power, 0, ((-1)** power)*pair[1] ])#(-H)^((n-1)/2) S
     Cob = Cobordism(sourceCLT, targetCLT, decos)
+    # print("COB", Cob.front.top, Cob.front.bot)
     Cob.ReduceDecorations()
     return Cob
     
