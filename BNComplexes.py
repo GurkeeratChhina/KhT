@@ -517,23 +517,28 @@ def BNAlg2Cob(morphism, sourceCLT, targetCLT):
             decos.append([pair[0]-1, 0, 1, pair[1]])
         elif pair[0] == 0: 
             decos.append([0, 0, 0, pair[1]])
-        elif pair[0] == 0 %2: 
-            power = Fraction(-1*pair[0], 2)
+        elif pair[0] %2 == 0:
+            power = int(Fraction(-1*pair[0], 2))
             decos.append([power, 0, 0, ((-1)** power) *pair[1]]) #(-H)^(n/2)
             decos.append([power - 1, 0, 1, ((-1)** (power -1)) *pair[1]]) #(-H)^(n/2-1) D
-        else: 
-            power = Fraction(-1*pair[0] -1, 2)
+        elif pair[0] %2== 1: 
+            power = int(Fraction(-1*pair[0] -1, 2))
             decos.append([power, 0, ((-1)** power)*pair[1] ])#(-H)^((n-1)/2) S
+        else: 
+            raise Exception("pair is not an integer?")
     Cob = Cobordism(sourceCLT, targetCLT, decos)
     # print("COB", Cob.front.top, Cob.front.bot)
     Cob.ReduceDecorations()
     return Cob
     
 def BNComplex2CobComplex(BNcomplex):
+    # PrettyPrintBNComplex(BNcomplex)
     elements = [BNObj2CLT(bnobj) for bnobj in BNcomplex.gens]
     morphisms = [[BNAlg2Cob(morphism, elements[source], elements[target]) \
                  for source, morphism in enumerate(row)] for target, row in enumerate(BNcomplex.diff)]
-    return ChainComplex(elements, morphisms)
+    complex = ChainComplex(elements, morphisms)
+    # PrettyPrintComplex(complex, "old long")
+    return complex
     
 
 def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):

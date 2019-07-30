@@ -28,7 +28,7 @@ class Tangle(object):
     def horizontal_sum(self, other):
         return Tangle("cup1." + other.shift(2).slices + "." + self.slices)
     
-    def toReduced_BNComplex(self, max_iter = 1000, start = 1, field = 2, options = "unsafe"):
+    def toReduced_BNComplex(self, max_iter = 100, start = 1, field = 2, options = "unsafe"):
         pos = 0 #TODO: Compute positive and negative crossings from orientation
         neg = 0
         stringlist=[[word[0:3],int(word[3:])] for word in self.slices.split('.')]
@@ -67,13 +67,10 @@ class Tangle(object):
                 ends += 2
             
             if ends == 3:
-                Draw_1_3_ChainComplex(cx, self.slices+"slice_" + str(i) + "_pre_cleanup.svg")
-                print("cleaning up")
                 BNcx = CobComplex2BNComplex(cx, field)
                 BNcx.clean_up(max_iter)
-                # cx = BNComplex2CobComplex(BNcx)
-                # Draw_1_3_ChainComplex(cx, self.slices+"slice_" + str(i) + "_post_cleanup.svg")
-                print("finished cleaning up")
+                cx = BNComplex2CobComplex(BNcx)
+
                 
             
         cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
