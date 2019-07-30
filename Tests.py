@@ -676,6 +676,7 @@ TestSet22(10,-11)
 # TestSet25()
 # TestSet26()
 
+
 ## comparing efficiency of two functions
 #import timeit
 #print(timeit.timeit('simplify_decos_old([[1,0,1,1],[0,0,1,2],[0,0,1,3],[0,1,1,5],[1,0,1,12]])',setup="from __main__ import simplify_decos_old", number=1000)) 
