@@ -670,8 +670,8 @@ def TestSet26():
 #TestSet23()
 #TestSet24()
 # print(timeit.timeit(TestSet25, number=1))
-TestSet25()
-# TestSet26()
+# TestSet25()
+TestSet26()
 
 
 ## comparing efficiency of two functions

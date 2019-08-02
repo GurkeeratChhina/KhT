@@ -78,3 +78,55 @@ class Tangle(object):
         BN_complex= CobComplex2BNComplex(cx, field)
         BN_complex.clean_up(max_iter)
         return BN_complex
+
+def ValidCup(word, i): #TODO: check if adding cup at index i is valid
+    return True
+def ValidPos(word, i): #TODO: check if adding pos at index i is valid
+    return True
+def ValidNeg(word, i): #TODO: check if adding neg at index i is valid
+    return True
+
+
+def GenerateTangleWords(max_length):
+    remaining_slices = max_length-1
+    currentListofWords = [ ["cap1", -1] ]
+    while remaining_slices > 1:
+        nextListofWords = []
+        for word in currentListofWords:
+            ends = 5 + 2*word[1]
+            if abs(word[1]) > remaining_slices -1:
+                continue #Do nothing, the tangle won't be a 4-ended tangle no matter what we do                
+            elif abs(word[1]) == remaining_slices -1 and word[1] < 0: 
+                continue #Do nothing as can only add caps to get 4 ends in time, and that wont be prime
+            elif abs(word[1]) == remaining_slices -1 and word[1] > 0: 
+                for i in range(ends-2):
+                    if ValidCup(word, i):
+                        newWord = ["cup" + str(i) + "." + word[0], word[1]-1]
+                        nextListofWords.append(newWord)
+            else:
+                for i in range(ends):
+                    newWord = ["cap" + str(i) + "." + word[0], word[1]+1]
+                    nextListofWords.append(newWord)
+                for i in range(ends-2):
+                    if ValidPos(word, i):
+                        newWord = ["pos" + str(i) + "." + word[0], word[1]]
+                        nextListofWords.append(newWord)
+                    if ValidNeg(word, i):
+                        newWord = ["neg" + str(i) + "." + word[0], word[1]]
+                        nextListofWords.append(newWord)
+                    if ValidCup(word, i): 
+                        newWord = ["cup" + str(i) + "." + word[0], word[1]-1]
+                        nextListofWords.append(newWord)
+        remaining_slices -= 1
+        currentListofWords = nextListofWords[:]
+        
+    ListofWords = []
+    for word in currentListofWords:
+        ends = 5 + 2*word[1]
+        for i in range(ends-2):
+            if ValidCup(word, i): 
+                newWord = "cup" + str(i) + "." + word[0]
+                nextListofWords.append(newWord)
+
+    return ListofWords
+    
