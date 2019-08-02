@@ -626,6 +626,11 @@ def TestSet26():
     BN_complex = Tangle3.toReduced_BNComplex(200)
     BN_complex.clean_up(200)
     DrawBNComplex(BN_complex, "BN_complex_2m2_pt_vert_sum_2p3_pt_aftercleanup.svg", "qh")
+
+def TestSet27():
+    print(GenerateTangleWords(3))
+    print(GenerateTangleWords(4))
+    print(GenerateTangleWords(5))
     
 # TestSet0()
 # TestSet1()
@@ -672,6 +677,7 @@ def TestSet26():
 # print(timeit.timeit(TestSet25, number=1))
 # TestSet25()
 TestSet26()
+TestSet27()
 
 
 ## comparing efficiency of two functions

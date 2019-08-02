@@ -80,11 +80,23 @@ class Tangle(object):
         return BN_complex
 
 def ValidCup(word, i): #TODO: check if adding cup at index i is valid
-    return True
+    previous = word[0].split(".")[0]
+    if previous in ["cap"+str(i-1), "cap"+str(i), "cap"+str(i+1)]:
+        return False
+    else:
+        return True
 def ValidPos(word, i): #TODO: check if adding pos at index i is valid
-    return True
+    previous = word[0].split(".")[0]
+    if previous in ["neg" + str(i)]:
+        return False
+    else:
+        return True
 def ValidNeg(word, i): #TODO: check if adding neg at index i is valid
-    return True
+    previous = word[0].split(".")[0]
+    if previous in ["pos" + str(i)]:
+        return False
+    else:
+        return True
 
 
 def GenerateTangleWords(max_length):
@@ -126,7 +138,7 @@ def GenerateTangleWords(max_length):
         for i in range(ends-2):
             if ValidCup(word, i): 
                 newWord = "cup" + str(i) + "." + word[0]
-                nextListofWords.append(newWord)
+                ListofWords.append(newWord)
 
     return ListofWords
     
