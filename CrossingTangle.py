@@ -79,66 +79,142 @@ class Tangle(object):
         BN_complex.clean_up(max_iter)
         return BN_complex
 
-def ValidCup(word, i): #TODO: check if adding cup at index i is valid
-    previous = word[0].split(".")[0]
-    if previous in ["cap"+str(i-1), "cap"+str(i), "cap"+str(i+1)]:
+def ValidCap(word, i): #check if adding cap at index i is valid
+    ends = len(word[0])
+    if i > ends - 2:
+        return True
+    previous_left = word[0][i]
+    previous_right = word[0][i+1]
+    if previous_left == ["cap", i] and previous_right == ["cap", i]:
         return False
     else:
         return True
-def ValidPos(word, i): #TODO: check if adding pos at index i is valid
-    previous = word[0].split(".")[0]
-    if previous in ["neg" + str(i)]:
+
+def ValidCup(word, i): # check if adding cup at index i is valid
+    previous_left = word[0][i]
+    previous_right = word[0][i+1]
+    if previous_left == ["cap", i-1]:
+        return False
+    elif previous_right == ["cap", i+1]:
+        return False
+    elif previous_left == ["cap", i] and previous_right == ["cap", i]:
+        return False
+    elif previous_left == ["neg", i] and previous_right == ["neg", i]:
+        return False
+    elif previous_left == ["pos", i] and previous_right == ["pos", i]:
         return False
     else:
         return True
-def ValidNeg(word, i): #TODO: check if adding neg at index i is valid
-    previous = word[0].split(".")[0]
-    if previous in ["pos" + str(i)]:
+        
+def ValidPos(word, i): #check if adding pos at index i is valid
+    previous_left = word[0][i]
+    previous_right = word[0][i+1]
+    if previous_left == ["neg", i] and previous_right == ["neg", i]:
+        return False
+    elif previous_left == ["cap", i] and previous_right == ["cap", i]:
+        return False
+    else:
+        return True
+        
+def ValidNeg(word, i): #check if adding neg at index i is valid
+    previous_left = word[0][i]
+    previous_right = word[0][i+1]
+    if previous_left == ["pos", i] and previous_right == ["pos", i]:
+        return False
+    elif previous_left == ["cap", i] and previous_right == ["cap", i]:
         return False
     else:
         return True
 
 
 def GenerateTangleWords(max_length):
+    """a Word is [ [strand info], [letter, index], [letter, index], ...  ]
+        where [letter, index] describes the tangle word, read left to right
+        and [strand info] is a list of [letter, index] such that [strand_info][i]
+        gives the first thing the i-th strand encounters, from bottom up"""
+    
+    def shiftstrand(strand, amount):
+        return [strand[0], strand[1] + amount]
+    
     remaining_slices = max_length-1
-    currentListofWords = [ ["cap1", -1] ]
+    currentListofWords = [ [[["null", 0], ["cap", 1], ["cap", 1]], ["cap", 1]] ]
     while remaining_slices > 1:
         nextListofWords = []
         for word in currentListofWords:
-            ends = 5 + 2*word[1]
-            if abs(word[1]) > remaining_slices -1:
-                continue #Do nothing, the tangle won't be a 4-ended tangle no matter what we do                
-            elif abs(word[1]) == remaining_slices -1 and word[1] < 0: 
-                continue #Do nothing as can only add caps to get 4 ends in time, and that wont be prime
-            elif abs(word[1]) == remaining_slices -1 and word[1] > 0: 
+            ends = len(word[0])
+            if ends - 2*(remaining_slices - 1) > 5: # only adding cups wont get ends down enough
+                continue #Do nothing
+            elif ends == 1 and remaining_slices in [3,2]: # can only add caps to get enough ends in time
+                continue #Do nothing, as wont be prime
+            elif ends == 3 and remaining_slices == 2: # can only add 1 cap to get enough ends in time
+                continue #Do nothing, as wont be prime
+            elif ends - 2*(remaining_slices - 1) == 5: # can only add cups 
                 for i in range(ends-2):
                     if ValidCup(word, i):
-                        newWord = ["cup" + str(i) + "." + word[0], word[1]-1]
+                        info = word[0] 
+                        newinfo = info[:i] + [shiftstrand(strand, -2) for strand in info[i+2:]] #remove strand i, i+1, shifts everything after
+                        newWord = [newinfo, ["cup", i]] + word[1:] #adds cupi to the word
                         nextListofWords.append(newWord)
-            else:
-                for i in range(ends):
-                    newWord = ["cap" + str(i) + "." + word[0], word[1]+1]
-                    nextListofWords.append(newWord)
+            elif remaining_slices == 2: # only crossings
                 for i in range(ends-2):
                     if ValidPos(word, i):
-                        newWord = ["pos" + str(i) + "." + word[0], word[1]]
+                        info = word[0] 
+                        newinfo = info[:i] + [["pos", i], ["pos", i]] + info[i+2:] # changes strand i, i+1 to posi
+                        newWord = [newinfo, ["pos", i]] + word[1:] #adds posi to the word
                         nextListofWords.append(newWord)
                     if ValidNeg(word, i):
-                        newWord = ["neg" + str(i) + "." + word[0], word[1]]
+                        info = word[0] 
+                        newinfo = info[:i] + [["neg", i], ["neg", i]] + info[i+2:] # changes strand i, i+1 to negi
+                        newWord = [newinfo, ["neg", i]] + word[1:] #adds negi to the word
+                        nextListofWords.append(newWord)
+            else: # Anything goes
+                for i in range(ends):
+                    if ValidCap(word, i):
+                        info = word[0]
+                        newinfo = info[:i] + [["cap", i], ["cap", i] ] + [shiftstrand(strand, 2) for strand in info[i:]] #adds cup at strand i, i+1, shifts everything after
+                        newWord = [newinfo, ["cap", i]] + word[1:] #adds capi to the word
+                        nextListofWords.append(newWord)
+                for i in range(ends-2):
+                    if ValidPos(word, i):
+                        info = word[0] 
+                        newinfo = info[:i] + [["pos", i], ["pos", i]] + info[i+2:] # changes strand i, i+1 to posi
+                        newWord = [newinfo, ["pos", i]] + word[1:] #adds posi to the word
+                        nextListofWords.append(newWord)
+                    if ValidNeg(word, i):
+                        info = word[0] 
+                        newinfo = info[:i] + [["neg", i], ["neg", i]] + info[i+2:] # changes strand i, i+1 to negi
+                        newWord = [newinfo, ["neg", i]] + word[1:] #adds negi to the word
                         nextListofWords.append(newWord)
                     if ValidCup(word, i): 
-                        newWord = ["cup" + str(i) + "." + word[0], word[1]-1]
+                        info = word[0]
+                        newinfo = info[:i] + [shiftstrand(strand, -2) for strand in info[i+2:]] #remove strand i, i+1, shifts everything after
+                        newWord = [newinfo, ["cup", i]] + word[1:] #adds cupi to the word
                         nextListofWords.append(newWord)
+
         remaining_slices -= 1
         currentListofWords = nextListofWords[:]
         
-    ListofWords = []
+    ListofWords = [] #CHECK FOR NULL
     for word in currentListofWords:
-        ends = 5 + 2*word[1]
+        ends = len(word[0])
         for i in range(ends-2):
             if ValidCup(word, i): 
-                newWord = "cup" + str(i) + "." + word[0]
+                info = word[0]
+                newinfo = info[:i] + [shiftstrand(strand, -2) for strand in info[i+2:]] #remove strand i, i+1, shifts everything after
+                newWord = [newinfo, ["cup", i]] + word[1:] #adds cupi to the word
                 ListofWords.append(newWord)
-
-    return ListofWords
+    
+    def primeword(word):
+        info = word[0]
+        for index, strand in enumerate(info):
+            if strand[0] == "null":
+                return False
+            elif index == len(info) -1:
+                continue
+            elif strand[0] in ["cap", "pos", "neg"]:
+                if strand == info[index+1]:
+                    return False
+        return True
+        
+    return [ word for word in ListofWords if primeword(word)]
     

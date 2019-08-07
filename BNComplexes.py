@@ -280,6 +280,45 @@ class BNComplex(object):
                     print("!!!!!!!!!!!!!!!!!!")
                     raise Exception('Differential does not square to 0')
         
+    def findIsom(self): 
+        """Returns the location of the first isomorphism it finds
+           If no isomorphism is found, returns None"""
+        for targetindex, row in enumerate(self.diff):
+            for sourceindex, morphism in enumerate(row):
+                if morphism.is_identity():
+                    return [sourceindex, targetindex]
+        return None
+    
+    def eliminateIsom(self, sourceindex, targetindex):
+        """Mutates self by eliminating the isomorphism at the specified location, via the gaussian elimination lemma
+           Note that this does not check that the cobodism specified is actually an isomorphism.
+        """
+        
+        Max=max(targetindex,sourceindex)
+        Min=min(targetindex,sourceindex)
+        
+        del self.gens[Max] # eliminate source and target from list of generators
+        del self.gens[Min] # eliminate source and target from list of generators
+        
+        out_source = np.delete(self.diff[:,sourceindex],[Min,Max],0) #arrows starting at the source, omiting indices targetindex and sourceindex
+        in_target = np.delete(self.diff[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
+        
+        if (self.diff[targetindex,sourceindex]).pairs[0][1]==1: # add minus sign; in the case the coefficient is -1, the signs cancel.
+            in_target=np.array([entry.negative() for entry in in_target])
+        
+        self.diff=np.delete(self.diff,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
+        self.diff=np.delete(self.diff,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
+        
+        self.diff = self.diff+np.transpose(np.tensordot(in_target,out_source, axes=0)) # update differential
+
+    def eliminateAll(self): #mutates self by eliminating isomorphisms as long as it can find one
+        while True:
+            index_to_eliminate = self.findIsom()
+            if index_to_eliminate is None:
+                break
+            else:
+                self.eliminateIsom(index_to_eliminate[0], index_to_eliminate[1])
+       
     def isotopy(self,start,end,alg,switch="safe"):
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
         """
@@ -514,7 +553,9 @@ def CLT2BNObj(clt):
 def CobComplex2BNComplex(complex,field=2):
     gens=[CLT2BNObj(clt) for clt in complex.elements]
     diff=[[CobordismToBNAlg(cob,field) for cob in row] for row in complex.morphisms]
-    return BNComplex(gens,diff,field)
+    BNcx = BNComplex(gens,diff,field)
+    BNcx.eliminateAll()
+    return BNcx
 
 def BNObj2CLT(bnobj):
     arcs = []
