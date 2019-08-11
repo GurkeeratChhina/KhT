@@ -365,7 +365,7 @@ class BNComplex(object):
 def CobordismToBNAlg(cob,field=2):
     """ Convert a cobordism between two (1,3)-tangles into an element of BNAlgebra."""
     
-    if cob.decos==[]:
+    if cob==0:
         return 0# zero algebra element
     
     if cob.front.top !=1 or cob.front.bot !=3:

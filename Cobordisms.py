@@ -16,6 +16,7 @@
 
 from itertools import product
 from itertools import groupby
+from tabulate import tabulate
 import math
 from Tangles import *
 from KhT import *
@@ -60,6 +61,11 @@ class Cobordism(object):
             self.comps = comps
         self.decos = decos
     
+    def __repr__(self):
+        clt1=self.front
+        clt2=self.back
+        return "Cobordism[CLT[{},{},{},{},{},{}],CLT[{},{},{},{},{},{}],{},{}]".format(clt1.top,clt1.bot,clt1.arcs,clt1.pgr,clt1.qgr,clt1.dgr,clt2.top,clt2.bot,clt2.arcs,clt2.pgr,clt2.qgr,clt2.dgr,self.decos,self.comps)
+    
     def print(self,switch="short"):
         if self.decos==[]:
             return ""
@@ -77,9 +83,7 @@ class Cobordism(object):
                 return len(self.decos)
     
     def __add__(self, other):
-        if self.decos == []: # Adding the zero cobordism
-            return other
-        if other.decos == []: # Adding the zero cobordism
+        if other == 0: # Adding the zero cobordism
             return self
         if self.front!=other.front or self.back!=other.back:# incompatible cobordisms
             raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not compatible, because they do not belong to the same morphism space.')
@@ -91,7 +95,29 @@ class Cobordism(object):
             else:
                 new_order=[indexMemberQ(old_comps,comp[0]) for comp in new_comps]
                 return [[deco[0]]+[deco[index+1] for index in new_order]+[deco[-1]] for deco in decos]
-        return Cobordism(self.front,self.back,simplify_decos(self.decos+reorder_decos(other.comps,self.comps,other.decos)),self.comps)
+        decos=simplify_decos(self.decos+reorder_decos(other.comps,self.comps,other.decos))
+        if decos == []:
+            return 0
+        return Cobordism(self.front,self.back,decos,self.comps)
+    
+    def __radd__(self, other):
+        if other == 0: # Adding the zero cobordism
+            return self
+        if self.front!=other.front or self.back!=other.back:# incompatible cobordisms
+            raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not compatible, because they do not belong to the same morphism space.')
+        def reorder_decos(old_comps,new_comps,decos):
+            """convert decos ordered wrt 'old_comps' into decos ordered wrt 'new_comps'
+            """
+            if old_comps==new_comps:
+                return decos
+            else:
+                new_order=[indexMemberQ(old_comps,comp[0]) for comp in new_comps]
+
+                return [[deco[0]]+[deco[index+1] for index in new_order]+[deco[-1]] for deco in decos]
+        decos=simplify_decos(self.decos+reorder_decos(other.comps,self.comps,other.decos))
+        if decos == []:
+            return 0
+        return Cobordism(self.front,self.back,decos,self.comps)
 
     def __mul__(self, other):
         """The composition of two cobordism is computed by performing neck-cutting along push-offs of all boundary components of the composition and then removing all closed components.
@@ -121,8 +147,8 @@ class Cobordism(object):
                 partition.append(nucleus)
             return partition
         
-        if self.decos == [] or other.decos == []: #Multiplying by the zero cobordism
-            return ZeroCob
+        if other == 0: #Multiplying by the zero cobordism
+            return 0
         if self.back != other.front: # incomposable cobordisms
             raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on',self.back.top, self.back.bot, self.back.arcs, self.back.pgr, self.back.qgr, 'and the second starts on', other.front.top, other.front.bot, other.front.arcs, other.front.pgr, other.front.qgr)
         
@@ -171,8 +197,13 @@ class Cobordism(object):
                 decos+=[combine_decos(l,deco1[0]+deco2[0],deco1[-1]*deco2[-1]) for l in product(*partial_decos)]
         
         Output = Cobordism(self.front,other.back,simplify_decos(decos),[new_comps[index] for index in flatten(old_comps_x)])
-        Output.ReduceDecorations() # This kills any cobordism in the linear combination that has a dot on the same component as the basepoint
-        return Output
+        
+        return Output.ReduceDecorations()# This kills any cobordism in the linear combination that has a dot on the same component as the basepoint
+    
+    def __rmul__(self, other):
+        if other == 0: #Multiplying by the zero cobordism
+            return 0
+        raise Exception('This case should not occur.')
     
     def deg(self): #no parameter self.dots
         degrees = [sum(deco[:-1]) for deco in self.decos]
@@ -195,9 +226,13 @@ class Cobordism(object):
     
     def ReduceDecorations(self):
         """delete all decorations in a cobordism ('self') that have a dot in the component containing the basepoint (the TEI 0)."""
+        r=self
         ReducedDecorations = [deco for deco in self.decos if deco[find_first_index(self.comps,contains_0)+1] == 0]
-        self.decos = ReducedDecorations
-        return ReducedDecorations
+        if ReducedDecorations == []:
+            return 0
+        else:
+            self.decos = ReducedDecorations
+            return self
     
     def isIsom(self):
         """checks if self is the identity cobordism or the negative identity cobordism"""
@@ -226,6 +261,4 @@ def simplify_decos(decos):
         [decos_without_coeff+[add_coeffs(list(grouped))] \
         for decos_without_coeff,grouped in groupby(sorted(decos),droplast)] \
         if x[-1]!=0]
-        
-CLTA = CLT(1,1, [1,0], 0, 0, 0)
-ZeroCob = Cobordism(CLTA,CLTA,[])
+
