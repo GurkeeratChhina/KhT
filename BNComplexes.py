@@ -30,7 +30,7 @@ from fractions import Fraction
 def ToExponent(exponent):
     return str(exponent).translate(str.maketrans("-0123456789.", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹·"))
 
-def inverse(num,field): #this only works over a field;could replace this by a suitable function for positive characteristic
+def inverse(num,field): #this only works over a field
     if field == 0:
         return Fraction(1)/num
     elif field == 1:
@@ -53,7 +53,6 @@ def inverse(num,field): #this only works over a field;could replace this by a su
 class BNobj(object):
     """A BNobject is a pair [idempotent,q,h,delta(optional)], where idempotent is either 0 (b=solid dot) or 1 (c=hollow dot). 
     """
-    # gr is a list of [qu, hom] of the bigradings, where qu is the quantum grading, hom is the homological grading
     __slots__ = 'idem','q','h','delta'
     
     def __init__(self,idempotent,q,h,delta="default"):
@@ -287,6 +286,66 @@ class BNComplex(object):
         self.field = field
         self.diff = np.array([[mor.simplify_BNmor(field) for mor in row] for row in self.diff])
     
+    def __str__(self):
+        """string representation of a BNcomplex; 
+        usage:
+        >>> print(BNcomplex)
+        """
+        string=("The generators:\n")
+        string+=str(pd.DataFrame({\
+            " ": [gen.idem2dot() for gen in self.gens],\
+            "q": [gen.q for gen in self.gens],\
+            "h": [gen.h for gen in self.gens],\
+            "δ": [gen.delta for gen in self.gens]
+            },columns=[" ","q","h","δ"]))
+        string+="\nThe differential:\n"
+        string+=str(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in self.diff]),range(len(self.diff)),tablefmt="fancy_grid"))
+        return string
+    
+    def draw(self, filename,vertex_switch="index_qhdelta"):
+        "draw a graph of for the BNcomplex"
+        g = Graph()
+        size = len(self.gens)
+        g.add_vertex(size)
+        canvas_size = (800*math.sqrt(size), 600*math.sqrt(size))
+        
+        Vertex_colour = g.new_vertex_property("string") # "black" is the horizontal CLT (b) and "white" is the vertical CLT (c)
+        Vertex_labelling = g.new_vertex_property("string")
+        Position = g.new_vertex_property("vector<float>")
+        for i, gen in enumerate(self.gens):
+            if gen.idem == 0:
+                Vertex_colour[g.vertex(i)] = "black"
+            else:
+                Vertex_colour[g.vertex(i)] = "white"
+            Vertex_labelling[g.vertex(i)]=gen.BNobj2String(vertex_switch,i)
+        vprops =  {'text' : Vertex_labelling,\
+                   'color' : "black",\
+                   'fill_color' : Vertex_colour,\
+                   'font_size' : 20,\
+                   'size' : 20}
+        
+        Edge_labeling = g.new_edge_property("string")
+        for i in range(size):
+            for j in range(size):
+                edge_mor=self.diff[j][i]
+                if edge_mor.pairs != []:
+                    g.add_edge(g.vertex(i), g.vertex(j))
+                    Edge_labeling[g.edge(i,j)] = edge_mor.BNAlg2String()
+        eprops =   {'color' : "black",\
+                    'pen_width' : 4.0,\
+                    'text' : Edge_labeling,\
+                    'text_color' : "black",\
+                    'text_distance' : 10,\
+                    'font_weight' : cairo.FONT_WEIGHT_BOLD,\
+                    'marker_size' : 20,\
+                    'font_size' : 22}   
+                    
+        #position = arf_layout(g, max_iter=0)
+        position = sfdp_layout(g, max_iter=0)
+        #Position[g.vertex(i)] = [50*(2*i+1), 200]
+        
+        graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
+    
     def ValidMorphism(self):
         # return True
         length = len(self.gens)
@@ -297,7 +356,6 @@ class BNComplex(object):
                 raise Exception('Differential does not have n columns (where n is the number of elements in chain complex)')
         for i in range(length):
             if len(self.diff[i][i].pairs)!=0:
-                
                 raise Exception('Differential has self loops')
         
         squared = np.tensordot(self.diff,self.diff, axes=(-2,-1))
@@ -500,7 +558,7 @@ class BNComplex(object):
             new_diff = [[alg.negative(self.field) for alg in row] for row in self.diff]
         else:
             raise Exception('Why are you trying to shift homological grading by something other than an integer? I cannot do that!')
-        return BNComplex(new_gens,new_diff)
+        return BNComplex(new_gens,new_diff,self.field)
     
     def shift_q(self,shift): # modify the complex
         self.gens = [gen.shift_q(shift) for gen in self.gens]
@@ -524,7 +582,7 @@ class BNComplex(object):
                 (np.concatenate((self.diff,zero_matrix),axis=1),\
                 np.concatenate((Hdiagonal,shifted_complex.diff),axis=1)),axis=0)
         
-        return BNComplex(self.gens+shifted_complex.gens,new_diff)
+        return BNComplex(self.gens+shifted_complex.gens,new_diff,self.field)
 
 ZeroMor=BNmor([],2)# note that this morphism is has field=2 by default, but this information gets never used.
 #ZeroMor=BNmor([],[],0)
@@ -602,173 +660,15 @@ def BNAlg2Cob(morphism, sourceCLT, targetCLT):
     return Cob
     
 def BNComplex2CobComplex(BNcomplex):
-    # PrettyPrintBNComplex(BNcomplex)
+    # BNcomplex.print()
     elements = [BNObj2CLT(bnobj) for bnobj in BNcomplex.gens]
     morphisms = [[BNAlg2Cob(morphism, elements[source], elements[target]) \
                  for source, morphism in enumerate(row)] for target, row in enumerate(BNcomplex.diff)]
-    complex = ChainComplex(elements, morphisms)
-    # PrettyPrintComplex(complex, "old long")
+    complex = CobComplex(elements, morphisms)
+    # complex.print("old long")
     return complex
     
 
-def DrawBNComplex(complex, filename,vertex_switch="index_qhdelta"):
-    "draw a graph of for the BNcomplex"
-    g = Graph()
-    size = len(complex.gens)
-    g.add_vertex(size)
-    canvas_size = (800*math.sqrt(size), 600*math.sqrt(size))
-    
-    Vertex_colour = g.new_vertex_property("string") # "black" is the horizontal CLT (b) and "white" is the vertical CLT (c)
-    Vertex_labelling = g.new_vertex_property("string")
-    Position = g.new_vertex_property("vector<float>")
-    for i, gen in enumerate(complex.gens):
-        if gen.idem == 0:
-            Vertex_colour[g.vertex(i)] = "black"
-        else:
-            Vertex_colour[g.vertex(i)] = "white"
-        Vertex_labelling[g.vertex(i)]=gen.BNobj2String(vertex_switch,i)
-    vprops =  {'text' : Vertex_labelling,\
-               'color' : "black",\
-               'fill_color' : Vertex_colour,\
-               'font_size' : 20,\
-               'size' : 20}
-    
-    Edge_labeling = g.new_edge_property("string")
-    for i in range(size):
-        for j in range(size):
-            edge_mor=complex.diff[j][i]
-            if edge_mor.pairs != []:
-                g.add_edge(g.vertex(i), g.vertex(j))
-                Edge_labeling[g.edge(i,j)] = edge_mor.BNAlg2String()
-    eprops =   {'color' : "black",\
-                'pen_width' : 4.0,\
-                'text' : Edge_labeling,\
-                'text_color' : "black",\
-                'text_distance' : 10,\
-                'font_weight' : cairo.FONT_WEIGHT_BOLD,\
-                'marker_size' : 20,\
-                'font_size' : 22}   
-                
-    #position = arf_layout(g, max_iter=0)
-    position = sfdp_layout(g, max_iter=0)
-    #Position[g.vertex(i)] = [50*(2*i+1), 200]
-    
-    graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
-
-def PrettyPrintBNComplex(complex):
-    """Print a complex in human readable form.
-    """
-    print("The generators:")
-    print(pd.DataFrame({\
-        " ": [gen.idem2dot() for gen in complex.gens],\
-        "q": [gen.q for gen in complex.gens],\
-        "h": [gen.h for gen in complex.gens],\
-        "δ": [gen.delta for gen in complex.gens]
-        },columns=[" ","q","h","δ"]))
-    print("The differential:")
-    print(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in complex.diff]),range(len(complex.diff)),tablefmt="fancy_grid"))
-
-
-# Claudius: I'll keep working on this list... 
 #todo: implement recognition of local systems (optional)
-#todo: add a way to convert BNComplexes into Complexes (optional; could be useful for twisting)
 #todo: implement pairing theorem (just for fun!)
-
-#####################
-####### TESTS #######
-#####################
-
-def Test_TwoTwistTangle():
-    b=CLT(1,3,[1,0,3,2],[2,3])
-    c=CLT(1,3,[3,2,1,0],[1,0])
-
-    complex1 = ChainComplex([b,c,c,b,c,c], \
-                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, ZeroCob],\
-                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, Cobordism(c, c, [[0,0,1,-1]]), ZeroCob]])
-    BNComplex1 = CobComplex2BNComplex(complex1)
-    DrawBNComplex(BNComplex1, "TwoTwistTangle_before_cleanup.svg","index_h")
-    PrettyPrintBNComplex(BNComplex1)
-
-    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
-    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
-    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
-    #BNComplex1.clean_up_once(-1)
-    BNComplex1.clean_up()
-    DrawBNComplex(BNComplex1, "TwoTwistTangle_after_cleanup.svg","index_h")
-    PrettyPrintBNComplex(BNComplex1)
-    
-def Test_SplittingCurve():
-    b=CLT(1,3,[1,0,3,2],[2,3])
-    c=CLT(1,3,[3,2,1,0],[1,0])
-    
-    complex1 = ChainComplex([b,c,c,b,c,c], \
-                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob, ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, Cobordism(c, c, [[0,0,1,-1]])],\
-                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, ZeroCob, ZeroCob]])
-    BNComplex1 = CobComplex2BNComplex(complex1)
-    DrawBNComplex(BNComplex1, "SplittingCurve_before_cleanup.svg","index_h")
-    PrettyPrintBNComplex(BNComplex1)
-
-    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
-    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
-    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
-    #BNComplex1.clean_up_once(-1)
-    BNComplex1.clean_up()
-    DrawBNComplex(BNComplex1, "SplittingCurve_after_cleanup.svg","index_h")
-    PrettyPrintBNComplex(BNComplex1)
-    
-def Test_2m3pt():# (2,-3)-pretzel tangle
-    
-    BNComplex1 = BNComplex(\
-        [BNobj(1,-12,-5), BNobj(1,-10,-4),\
-         BNobj(0,-11,-4), BNobj(0,-9,-3), BNobj(0,-7,-2),\
-         BNobj(0,-9,-3),  BNobj(0,-7,-2), BNobj(0,-5,-1), BNobj(1,-4,0)],\
-         [[ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [BNmor([[1,1],[-2,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [BNmor([[-1,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,BNmor([[-1,-1]]),BNmor([[-2,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,BNmor([[1,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,-1]]),ZeroMor,BNmor([[-2,1]]),ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]]),ZeroMor,BNmor([[1,1]]),ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[-1,1]]),ZeroMor]])
-    DrawBNComplex(BNComplex1, "2m3pt_redBN_before_cleanup.svg","index_qh")
-    PrettyPrintBNComplex(BNComplex1)
-
-    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
-    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
-    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
-    #BNComplex1.clean_up_once(-1)
-    BNComplex1.clean_up()
-    DrawBNComplex(BNComplex1, "2m3pt_redBN_after_cleanup.svg","index_qh")
-    PrettyPrintBNComplex(BNComplex1)
-    # This is the arc invariant = reduced Bar-Natan homology of the (2,-3)-pretzel tangle
-    
-    BNComplex2 = BNComplex1.cone(1)
-    PrettyPrintBNComplex(BNComplex2)
-    DrawBNComplex(BNComplex2, "2m3pt_redKh_before_cleanup.svg","index_qh")
-    
-    BNComplex2.clean_up()
-    DrawBNComplex(BNComplex2, "2m3pt_redKh_after_cleanup.svg","index_qh")
-    # This is the figure-8 invariant = reduced Khovanov homology of the (2,-3)-pretzel tangle
-    
-    BNComplex3 = BNComplex1.cone(2)
-    PrettyPrintBNComplex(BNComplex3)
-    DrawBNComplex(BNComplex3, "2m3pt_Kh_before_cleanup.svg","index_qh")
-    
-    BNComplex3.clean_up()
-    DrawBNComplex(BNComplex3, "2m3pt_Kh_after_cleanup.svg","index_qh")
-    # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
-
-#Test_2m3pt()
-#Test_2m3pt()
-#Test_TwoTwistTangle()
-#Test_SplittingCurve()
 

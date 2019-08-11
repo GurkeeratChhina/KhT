@@ -83,7 +83,7 @@ def newCob(cob, i):
 #drawcob(newCob(cob2, 1), "NewCob")
 
 def TestSet0():
-    BasicComplex = ChainComplex([CLT(1,1, [1,0], 0,0,0)], [[ZeroCob]])
+    BasicComplex = CobComplex([CLT(1,1, [1,0], 0,0,0)], [[ZeroCob]])
     BasicCap = AddCap(BasicComplex, 0)
 
     drawclt(BasicCap.elements[0], "basiccap")
@@ -94,30 +94,30 @@ def TestSet0():
 
 def TestSet1():
     tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0), [[0, 0, 1, 1]])
-    tempcomplex = ChainComplex([CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0)], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
+    tempcomplex = CobComplex([CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0)], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
     tempcomplexwithcup = AddCup(tempcomplex, 1)
     return 0
 
 def TestSet2():
-    complex5 = ChainComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+    complex5 = CobComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
                                         [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
                                         [ZeroCob, Cobordism(b,b, [[0,0,1,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
                                         [Cobordism(c, c, [[1,0,0,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
                                         [ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob, Scb, ZeroCob, ZeroCob],\
                                         [ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]]), ZeroCob, Cobordism(b,b,[[0,0,1,1]]), ZeroCob]])
-    DrawFourEndedChainComplex(complex5, "complex5.png")
+    DrawFourEndedCobComplex(complex5, "complex5.png")
     # complex5.ValidMorphism() #gradings
 
     complex5cap = AddCap(complex5, 1)
     # PrintComplexMorphismIntMatrix(complex5cap)
     # PrintComplexMorphismDecoCompMatrix(complex5cap)
     complex5again1 = AddCup(complex5cap, 0)
-    DrawFourEndedChainComplex(complex5again1, "complex5again1.png")
+    DrawFourEndedCobComplex(complex5again1, "complex5again1.png")
     complex5again2 = AddCup(AddCap(complex5, 0), 1)
-    DrawFourEndedChainComplex(complex5again2, "complex5again2.png")
+    DrawFourEndedCobComplex(complex5again2, "complex5again2.png")
     
     complex5double = AddCup(AddCap(complex5, 0),0)
-    DrawFourEndedChainComplex(complex5double, "complex5double.png")
+    DrawFourEndedCobComplex(complex5double, "complex5double.png")
     
     complex5cup = AddCup(complex5, 0)
     print("complex5cup")
@@ -127,7 +127,7 @@ def TestSet3():
     CLT01 = CLT(1,3,[1,0,3,2],0,0,0)
     CLT03 = CLT(1,3,[3,2,1,0],1,1,0.5)
     BasicSaddle = Cobordism(CLT01, CLT03, [[0,0,1]])
-    BasicSaddleComplex = ChainComplex([CLT01, CLT03], [[ZeroCob, ZeroCob], [BasicSaddle, ZeroCob]])
+    BasicSaddleComplex = CobComplex([CLT01, CLT03], [[ZeroCob, ZeroCob], [BasicSaddle, ZeroCob]])
     BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
     # PrintComplexMorphismIntMatrix(BasicSaddleCup)
     # PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
@@ -167,31 +167,31 @@ def TestSet4():
     drawcob(cob6,"cob6")
  
 def TestSet5():
-    complex1 = ChainComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
+    complex1 = CobComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
     # complex1.ValidMorphism() #gradings
    
     complex1cap0 = AddCap(complex1, 0)
     print("complex1cap0")
     complex1cap0.print("old long")
     
-    DrawFourEndedChainComplex(complex1, "complex1.png")
+    DrawFourEndedCobComplex(complex1, "complex1.png")
     
     complex1again = AddCup(complex1cap0, 1)
-    DrawFourEndedChainComplex(complex1again, "complex1again.png")
+    DrawFourEndedCobComplex(complex1again, "complex1again.png")
     
     complex1double = AddCup(complex1cap0, 0)
-    DrawFourEndedChainComplex(complex1double, "complex1double.png")
+    DrawFourEndedCobComplex(complex1double, "complex1double.png")
     
     AddPosCrossing(complex1, 0)
     
 def TestSet6():
     RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
-    complex3 = ChainComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
-    DrawFourEndedChainComplex(complex3, "complex3.png")
+    complex3 = CobComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
+    DrawFourEndedCobComplex(complex3, "complex3.png")
     # complex3.ValidMorphism() #gradings
 
-    complex4 = ChainComplex([c,b,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob], [MinusScb, ZeroCob, ZeroCob, ZeroCob], [RightDc,ZeroCob, ZeroCob, ZeroCob], [ZeroCob, Sbc, Cobordism(c,c,[[0,0,0,1]]), ZeroCob]])
-    DrawFourEndedChainComplex(complex4, "complex4.png")
+    complex4 = CobComplex([c,b,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob], [MinusScb, ZeroCob, ZeroCob, ZeroCob], [RightDc,ZeroCob, ZeroCob, ZeroCob], [ZeroCob, Sbc, Cobordism(c,c,[[0,0,0,1]]), ZeroCob]])
+    DrawFourEndedCobComplex(complex4, "complex4.png")
     # This should fail:
     # complex4.ValidMorphism()
     
@@ -203,21 +203,21 @@ def TestSet6():
     complex3again1 = AddCup(complex3cap0, 1)
     complex3again2 = AddCup(AddCap(complex3, 1), 0)
     complex3again3 = AddCup(AddCap(complex3, 1), 2)
-    DrawFourEndedChainComplex(complex3again1, "complex3again1.png")
-    DrawFourEndedChainComplex(complex3again2, "complex3again2.png")
-    DrawFourEndedChainComplex(complex3again3, "complex3again3.png")
+    DrawFourEndedCobComplex(complex3again1, "complex3again1.png")
+    DrawFourEndedCobComplex(complex3again2, "complex3again2.png")
+    DrawFourEndedCobComplex(complex3again3, "complex3again3.png")
     
     complex3double1 = AddCup(AddCap(complex3, 0), 0)
     complex3double2 = AddCup(AddCap(complex3, 1), 1)
-    DrawFourEndedChainComplex(complex3double1, "complex3double1.png")
-    DrawFourEndedChainComplex(complex3double2, "complex3double2.png")
+    DrawFourEndedCobComplex(complex3double1, "complex3double1.png")
+    DrawFourEndedCobComplex(complex3double2, "complex3double2.png")
     
     complex4again1 = AddCup(AddCap(complex4, 0), 1)
     complex4again2 = AddCup(AddCap(complex4, 1), 0)
-    DrawFourEndedChainComplex(complex4again1, "complex4again1.png")
-    DrawFourEndedChainComplex(complex4again2, "complex4again2.png")
+    DrawFourEndedCobComplex(complex4again1, "complex4again1.png")
+    DrawFourEndedCobComplex(complex4again2, "complex4again2.png")
     
-    complex6 = ChainComplex([c,b], [[ZeroCob, ZeroCob],[Scb, ZeroCob]])
+    complex6 = CobComplex([c,b], [[ZeroCob, ZeroCob],[Scb, ZeroCob]])
     complex6cup = AddCup(complex6, 0)
     print("complex6cup")
     complex6cup.print("old long")
@@ -226,33 +226,33 @@ def TestSet7():
     CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
     # drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
-    complex2 = ChainComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
+    complex2 = CobComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
     # complex2.ValidMorphism() # gradings
     # drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
     # drawcob(Sbc*RightDc, "DottedSaddle")
     
-    DrawFourEndedChainComplex(complex2, "complex2.png")
+    DrawFourEndedCobComplex(complex2, "complex2.png")
     
     complex2cap1 = AddCap(complex2, 1)
     print("complex2cap1")
     complex2cap1.print("old long")
     complex2again = AddCup(complex2cap1, 0)
-    DrawFourEndedChainComplex(complex2again, "complex2again.png")
+    DrawFourEndedCobComplex(complex2again, "complex2again.png")
     complex2cap0 = AddCap(complex2, 0)
     print("complex2cap0")
     complex2cap0.print()
     complex2again2 = AddCup(complex2cap0, 1)
     print("complex2again2")
     complex2again2.print("old long")
-    DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
+    DrawFourEndedCobComplex(complex2again2, "complex2again2.png")
     
     complex2cap0.print("old long")
     complex2double = AddCup(complex2cap0, 0)
     complex2double.print("old long")
-    DrawFourEndedChainComplex(complex2double, "complex2double.png")
+    DrawFourEndedCobComplex(complex2double, "complex2double.png")
     
     complex2double2 = AddCup(AddCap(complex2, 1), 1)
-    DrawFourEndedChainComplex(complex2double2, "complex2double2.png")
+    DrawFourEndedCobComplex(complex2double2, "complex2double2.png")
     print("complex2cap")
     AddCap(complex2, 1).print("old long")
     print("complex2double")
@@ -269,23 +269,23 @@ def TestSet7():
 def TestSet8():
     TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
     TangleB = CLT(2,2, [1,0,3,2], 0,0,0)
-    BasicComplex1 = ChainComplex([TangleC], [[ZeroCob]])
-    BasicComplex2 = ChainComplex([TangleB], [[ZeroCob]])
+    BasicComplex1 = CobComplex([TangleC], [[ZeroCob]])
+    BasicComplex2 = CobComplex([TangleB], [[ZeroCob]])
     
     temp1 = AddCap(BasicComplex1,1)
     temp2 = AddNegCrossing(temp1,0)
     temp3 = AddNegCrossing(temp2,2)
     TwoNegCrossing = AddCup(temp3,1)
-    DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossing.png")
+    DrawFourEndedCobComplex(TwoNegCrossing, "TwoNegCrossing.png")
     print("TwoNegCrossing")
     TwoNegCrossing.print("old long")
     TwoNegCrossing.eliminateAll()
-    DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossingReduced.png")
+    DrawFourEndedCobComplex(TwoNegCrossing, "TwoNegCrossingReduced.png")
     print("TwoNegCrossingReduced")
     TwoNegCrossing.print("old long")
     
     ClosedOpenNeg = AddNegCrossing(BasicComplex2, 0)
-    DrawFourEndedChainComplex(ClosedOpenNeg, "ClosedOpenNeg.png")
+    DrawFourEndedCobComplex(ClosedOpenNeg, "ClosedOpenNeg.png")
     print("ClosedOpenNeg")
     ClosedOpenNeg.print("old long")
     
@@ -293,18 +293,18 @@ def TestSet8():
     temp5 = AddPosCrossing(temp4,0)
     temp6 = AddPosCrossing(temp5,2)
     TwoPosCrossing = AddCup(temp6,1)
-    DrawFourEndedChainComplex(TwoPosCrossing, "TwoPosCrossing.png")
+    DrawFourEndedCobComplex(TwoPosCrossing, "TwoPosCrossing.png")
     print("TwoPosCrossing")
     TwoPosCrossing.print("old long")
     
     ClosedOpenPos = AddPosCrossing(BasicComplex2, 0)
-    DrawFourEndedChainComplex(ClosedOpenPos, "ClosedOpenPos.png")
+    DrawFourEndedCobComplex(ClosedOpenPos, "ClosedOpenPos.png")
     print("ClosedOpenPos")
     ClosedOpenPos.print("old long")
     
 def TestSet9():
     TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
-    BasicComplex = ChainComplex([TangleC], [[ZeroCob]])
+    BasicComplex = CobComplex([TangleC], [[ZeroCob]])
     temp1 = AddCap(BasicComplex, 1)
     temp2 = AddNegCrossing(temp1, 0)
     temp2.eliminateAll()
@@ -328,11 +328,11 @@ def TestSet9():
     temp6.eliminateAll()
     temp7 = AddCup(temp6, 1)
     temp7.eliminateAll()
-    DrawFourEndedChainComplex(temp7, "-2_3_pretzel.png")
+    DrawFourEndedCobComplex(temp7, "-2_3_pretzel.png")
 
 def TestSet10():
     cx=BNbracket("cup1.pos2.pos2.neg0.neg0.neg0.cap1",2,3,2)
-    DrawFourEndedChainComplex(cx, "-2_3_pretzel.png")
+    DrawFourEndedCobComplex(cx, "-2_3_pretzel.png")
     
 def TestSet11():
     tangle="cup1.neg2.neg2.neg2.cap3.pos0.pos0.cap1"
@@ -342,17 +342,17 @@ def TestSet11():
     #cx=BNbracket("cup1.pos2.pos2.pos2.cap3.neg0.neg0.cap1") #mirror
     #cx.print()
     BNcx=CobComplex2BNComplex(cx)
-    DrawBNComplex(BNcx, "2m3pt_redBN_before_cleanupX.svg","delta_h")
-    #PrettyPrintBNComplex(BNcx)
+    BNcx.draw("2m3pt_redBN_before_cleanupX.svg","delta_h")
+    #print(BNcx)
     BNcx.clean_up()
-    DrawBNComplex(BNcx, "2m3pt_redBN_after_cleanupX.svg","delta_h")
-    #PrettyPrintBNComplex(BNcx)
+    BNcx.draw("2m3pt_redBN_after_cleanupX.svg","delta_h")
+    #print(BNcx)
 
 def TestSet12():
     complex_4m5pt = BNbracket("cup1.neg2.neg2.neg2.neg2.neg2.cap3.pos0.pos0.pos0.pos0.cap1")
     BN_complex_4m5pt = CobComplex2BNComplex(complex_4m5pt)
     BN_complex_4m5pt.clean_up()
-    DrawBNComplex(BN_complex_4m5pt, "4m5pt_redBN_after_cleanup.svg","index_qh")
+    BN_complex_4m5pt.draw("4m5pt_redBN_after_cleanup.svg","index_qh")
     
 def TestSet13(n):
     pretzeltangle_n = "cup1."
@@ -367,9 +367,9 @@ def TestSet13(n):
     complex_ptn = BNbracket(pretzeltangle_n, 2*n, 2*n+1)
     complex_ptn.ValidMorphism()
     BN_complex_ptn = CobComplex2BNComplex(complex_ptn)
-    DrawBNComplex(BN_complex_ptn,str(2*n)+"m"+str(2*n+1)+"pt_redBN_before_cleanup.svg","qh")
+    BN_complex_ptn.draw(str(2*n)+"m"+str(2*n+1)+"pt_redBN_before_cleanup.svg","qh")
     BN_complex_ptn.clean_up(1000)
-    DrawBNComplex(BN_complex_ptn,str(2*n)+"m"+str(2*n+1)+"pt_redBN_after_cleanup.svg","qh")
+    BN_complex_ptn.draw(str(2*n)+"m"+str(2*n+1)+"pt_redBN_after_cleanup.svg","qh")
 
 def TestSet14(n):
     pretzeltangle_n = "cup1."
@@ -384,7 +384,7 @@ def TestSet14(n):
     complex_ptn = BNbracket(pretzeltangle_n,2*n,2*n+1,2)
     complex_ptn.ValidMorphism()
     
-    DrawFourEndedChainComplex(complex_ptn, "pretzeltangle_n.png")
+    DrawFourEndedCobComplex(complex_ptn, "pretzeltangle_n.png")
     
 def TestSet15():
     trivial_closure_tangle = "cup1.pos2.neg0.neg0.neg1.neg1.pos2.cap3.neg0.neg0.neg0.cap1"
@@ -394,7 +394,7 @@ def TestSet15():
     complex_tct.ValidMorphism()
     BN_complex_tct = CobComplex2BNComplex(complex_tct)
     BN_complex_tct.clean_up(500)
-    DrawBNComplex(BN_complex_tct, "tct_BN_after_cleanup.svg", "index_qh")
+    BN_complex_tct.draw("tct_BN_after_cleanup.svg", "index_qh")
 
 def TestSet16(n):
     tangle_pos_n = "cup1.neg2.pos0.pos0.neg1."
@@ -405,7 +405,7 @@ def TestSet16(n):
     complex_pos_n = BNbracket(tangle_pos_n)
     BN_complex_pos_n = CobComplex2BNComplex(complex_pos_n)
     BN_complex_pos_n.clean_up(1000)
-    DrawBNComplex(BN_complex_pos_n, "tangle_BN_" + str(n)+ "_after_cleanup.svg", "index_qh")
+    BN_complex_pos_n.draw("tangle_BN_" + str(n)+ "_after_cleanup.svg", "index_qh")
 
 def TestSet17(n):
     tangle_neg_n = "cup1.neg2.pos0.pos0.neg1."
@@ -418,7 +418,7 @@ def TestSet17(n):
     BN_complex_neg_n = CobComplex2BNComplex(complex_neg_n,2)
     BN_complex_neg_n.ValidMorphism()
     BN_complex_neg_n.clean_up(1000)
-    DrawBNComplex(BN_complex_neg_n, "tangle_BN_neg_" + str(n)+ "_after_cleanup.svg", "index_qh")
+    BN_complex_neg_n.draw("tangle_BN_neg_" + str(n)+ "_after_cleanup.svg", "index_qh")
 
 def TestDSquare():
     tangle = "neg1.pos2.cap3.neg0.neg0.neg0.cap1" # this works fine, check gradings on tangles?
@@ -506,12 +506,12 @@ def TestSet20():
    complex_test_tangle2 = BNbracket(tangle2, 0, 0, 1)
    BN_complex_1 = CobComplex2BNComplex(complex_test_tangle1)
    BN_complex_2 = CobComplex2BNComplex(complex_test_tangle2)
-   DrawBNComplex(BN_complex_1, "BN_complex_1.svg", "qh")
-   DrawBNComplex(BN_complex_2, "BN_complex_2.svg", "qh")
+   BN_complex_1.draw("BN_complex_1.svg", "qh")
+   BN_complex_2.draw("BN_complex_2.svg", "qh")
    BN_complex_1.clean_up(1000)
    BN_complex_2.clean_up(1000)
-   DrawBNComplex(BN_complex_1, "BN_complex_1_after_cleanup.svg", "qh")
-   DrawBNComplex(BN_complex_2, "BN_complex_2_after_cleanup.svg", "qh")
+   BN_complex_1.draw("BN_complex_1_after_cleanup.svg", "qh")
+   BN_complex_2.draw("BN_complex_2_after_cleanup.svg", "qh")
 
 def TestSet21(N, Twists):
     """N is a positive integer, Twists is an list of integers of length N 
@@ -530,9 +530,9 @@ def TestSet21(N, Twists):
     drawtangle(tangle,"testn","plain",1)
     complex= BNbracket(tangle,0,0,1)
     BN_complex = CobComplex2BNComplex(complex)
-    DrawBNComplex(BN_complex, "BN_complex_" + str(N) + "_" + str(Twists) + ".svg", "qh")
+    BN_complex.draw("BN_complex_" + str(N) + "_" + str(Twists) + ".svg", "qh")
     BN_complex.clean_up(1000)
-    DrawBNComplex(BN_complex, "BN_complex_" + str(N) + "_" + str(Twists) + "_after_cleanup" + ".svg", "qh")
+    BN_complex.draw("BN_complex_" + str(N) + "_" + str(Twists) + "_after_cleanup" + ".svg", "qh")
 
 def TestSet22(N, M):
     """makes prime tangles with N twists on the left and M twists on the right"""
@@ -552,29 +552,29 @@ def TestSet22(N, M):
     complex= BNbracket(tangle,0,0,1)
     complex.ValidMorphism()
     BN_complex = CobComplex2BNComplex(complex,3)
-    #PrettyPrintBNComplex(BN_complex)
-    DrawBNComplex(BN_complex, "BN_complex_pt_" + str(N) + "_" + str(M) + ".svg", "qh")
+    #BN_complex.print()
+    BN_complex.draw("BN_complex_pt_" + str(N) + "_" + str(M) + ".svg", "qh")
     BN_complex.ValidMorphism()
     BN_complex.clean_up(1000)
-    DrawBNComplex(BN_complex, "BN_complex_pt" + str(N) + "_" + str(M) + "_after_cleanup" + ".svg", "qh")
+    BN_complex.draw("BN_complex_pt" + str(N) + "_" + str(M) + "_after_cleanup" + ".svg", "qh")
     
 def TestSet23():
     tangle = "cup1.pos2.pos0.pos0.neg1.pos2.cap3.pos0.cap1"
     drawtangle(tangle,"tangle_6","plain",1)
     complex= BNbracket(tangle,0,0,1)
     BN_complex = CobComplex2BNComplex(complex)
-    DrawBNComplex(BN_complex, "BN_complex_tangle_6.svg", "qh")
+    BN_complex.draw("BN_complex_tangle_6.svg", "qh")
     BN_complex.clean_up(1000)
-    DrawBNComplex(BN_complex, "BN_complex_tangle_6_after_cleanup.svg", "qh")
+    BN_complex.draw("BN_complex_tangle_6_after_cleanup.svg", "qh")
 
 def TestSet24():
     tangle = "cup1.pos2.pos0.pos0.neg1.pos2.cap3.neg1.pos0.cap1"
     drawtangle(tangle,"tangle_7","plain",1)
     complex= BNbracket(tangle,0,0,1)
     BN_complex = CobComplex2BNComplex(complex)
-    DrawBNComplex(BN_complex, "BN_complex_tangle_7.svg", "qh")
+    BN_complex.draw("BN_complex_tangle_7.svg", "qh")
     BN_complex.clean_up(10)
-    DrawBNComplex(BN_complex, "BN_complex_tangle_7_after_cleanup.svg", "qh")
+    BN_complex.draw("BN_complex_tangle_7_after_cleanup.svg", "qh")
     
 def TestSet25():
     tangle1= Tangle("cup1.pos2.pos0.pos0.neg1.pos2.cap3.pos0.cap1")
@@ -586,10 +586,10 @@ def TestSet25():
     drawtangle(tangle4.slices,"tangle6_vert_sum_tangle7","plain",1)
     
     # BN_complex_1 = tangle3.toReduced_BNComplex()
-    # DrawBNComplex(BN_complex_1, "BN_complex_tangle6_hori_sum_tangle7_after_cleanup.svg", "qh")
+    # BN_complex_1.draw("BN_complex_tangle6_hori_sum_tangle7_after_cleanup.svg", "qh")
     
     BN_complex_2 = tangle4.toReduced_BNComplex()
-    DrawBNComplex(BN_complex_2, "BN_complex_tangle6_vert_sum_tangle7_after_cleanup.svg", "qh")
+    BN_complex_2.draw("BN_complex_tangle6_vert_sum_tangle7_after_cleanup.svg", "qh")
     
 def TestSet26():
     N = 2
@@ -628,7 +628,7 @@ def TestSet26():
     drawtangle(Tangle3.slices, "2m2_pt_vert_sum_2m3_pt.svg", "plain", 1)
     BN_complex = Tangle3.toReduced_BNComplex(200)
     BN_complex.clean_up(200)
-    DrawBNComplex(BN_complex, "BN_complex_2m2_pt_vert_sum_2p3_pt_aftercleanup.svg", "qh")
+    BN_complex.draw("BN_complex_2m2_pt_vert_sum_2p3_pt_aftercleanup.svg", "qh")
 
 def TestSet27():
     print("length 3:", GenerateTangleWords(3))
@@ -639,14 +639,104 @@ def TestSet28(): # tangle_8
     tangle ="cup2.cup4.pos3.pos4.neg1.neg2.neg0.neg1.pos3.pos4.pos2.pos3.neg1.neg0.pos3.pos4.neg3.neg2.cap5.cap3.cap1"
     drawtangle(tangle,"tangle_8","slices",1)
     complex= BNbracket(tangle,0,0,1)
-    complex.print()
+    # complex.print()
     BN_complex = CobComplex2BNComplex(complex, 7) # doing mod 7 as if over Q
-    DrawBNComplex(BN_complex, "BN_complex_tangle_8.svg", "qh")
+    BN_complex.draw("BN_complex_tangle_8.svg", "qh")
     BN_complex.eliminateAll()
     BN_complex.clean_up()
-    DrawBNComplex(BN_complex, "BN_complex_tangle_8_after_cleanup.svg", "qh")
+    BN_complex.draw("BN_complex_tangle_8_after_cleanup.svg", "qh")
+    # print(BN_complex)
     
     
+def Test_TwoTwistTangle():
+    b=CLT(1,3,[1,0,3,2],2,3,0)
+    c=CLT(1,3,[3,2,1,0],1,0,0)
+
+    complex1 = CobComplex([b,c,c,b,c,c], \
+                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, ZeroCob],\
+                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, Cobordism(c, c, [[0,0,1,-1]]), ZeroCob]])
+    BNComplex1 = CobComplex2BNComplex(complex1)
+    BNComplex1.draw("TwoTwistTangle_before_cleanup.svg","index_h")
+    print(BNComplex1)
+
+    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
+    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
+    #BNComplex1.clean_up_once(-1)
+    BNComplex1.clean_up()
+    BNComplex1.draw("TwoTwistTangle_after_cleanup.svg","index_h")
+    print(BNComplex1)
+    
+def Test_SplittingCurve():
+    b=CLT(1,3,[1,0,3,2],2,3,0)
+    c=CLT(1,3,[3,2,1,0],1,0,0)
+    
+    complex1 = CobComplex([b,c,c,b,c,c], \
+                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob, ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
+                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, Cobordism(c, c, [[0,0,1,-1]])],\
+                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, ZeroCob, ZeroCob]])
+    BNComplex1 = CobComplex2BNComplex(complex1)
+    BNComplex1.draw("SplittingCurve_before_cleanup.svg","index_h")
+    print(BNComplex1)
+
+    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
+    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
+    #BNComplex1.clean_up_once(-1)
+    BNComplex1.clean_up()
+    BNComplex1.draw("SplittingCurve_after_cleanup.svg","index_h")
+    print(BNComplex1)
+    
+def Test_2m3pt():# (2,-3)-pretzel tangle
+    
+    BNComplex1 = BNComplex(\
+        [BNobj(1,-12,-5), BNobj(1,-10,-4),\
+         BNobj(0,-11,-4), BNobj(0,-9,-3), BNobj(0,-7,-2),\
+         BNobj(0,-9,-3),  BNobj(0,-7,-2), BNobj(0,-5,-1), BNobj(1,-4,0)],\
+         [[ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [BNmor([[1,1],[-2,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [BNmor([[-1,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,BNmor([[-1,-1]],2),BNmor([[-2,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,BNmor([[1,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,-1]],2),ZeroMor,BNmor([[-2,1]],2),ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]],2),ZeroMor,BNmor([[1,1]],2),ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[-1,1]],2),ZeroMor]],2)
+    BNComplex1.draw("2m3pt_redBN_before_cleanup.svg","index_qh")
+    print(BNComplex1)
+
+    #BNComplex1.isolate_arrow(0,2,BNmor([[-7,-1]]))
+    #BNComplex1.isolate_arrow(1,2,BNmor([[-5,-1]]))
+    #BNComplex1.isotopy(1,2,BNmor([[0,1]]))
+    #BNComplex1.clean_up_once(-1)
+    BNComplex1.clean_up()
+    BNComplex1.draw("2m3pt_redBN_after_cleanup.svg","index_qh")
+    print(BNComplex1)
+    # This is the arc invariant = reduced Bar-Natan homology of the (2,-3)-pretzel tangle
+    
+    BNComplex2 = BNComplex1.cone(1)
+    print(BNComplex2)
+    BNComplex2.draw("2m3pt_redKh_before_cleanup.svg","index_qh")
+    
+    BNComplex2.clean_up()
+    BNComplex2.draw("2m3pt_redKh_after_cleanup.svg","index_qh")
+    # This is the figure-8 invariant = reduced Khovanov homology of the (2,-3)-pretzel tangle
+    
+    BNComplex3 = BNComplex1.cone(2)
+    print(BNComplex3)
+    BNComplex3.draw("2m3pt_Kh_before_cleanup.svg","index_qh")
+    
+    BNComplex3.clean_up()
+    BNComplex3.draw("2m3pt_Kh_after_cleanup.svg","index_qh")
+    # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
+
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -693,6 +783,10 @@ def TestSet28(): # tangle_8
 # TestSet26()
 # TestSet27()
 TestSet28()
+# Test_2m3pt()
+# Test_2m3pt()
+# Test_TwoTwistTangle()
+# Test_SplittingCurve()
 
 
 ## comparing efficiency of two functions

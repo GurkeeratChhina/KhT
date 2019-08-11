@@ -25,7 +25,7 @@ from time import time
 from tabulate import tabulate
 
 
-class ChainComplex(object):
+class CobComplex(object):
     """ A chain complex is a directed graph, consisting of 
         - A list of CLTS as labels on the vertices
         - A a matrix of cobordisms as the adjacency matrix.
@@ -207,7 +207,7 @@ def AddCap(Complex, i, grshift = "false"):
                 NewCob.ReduceDecorations()
                 NewRow.append(NewCob)
         NewMorphisms.append(NewRow)
-    return ChainComplex(NewElements, NewMorphisms)
+    return CobComplex(NewElements, NewMorphisms)
 
 def AddCupToCLT(clt, i):
     """ Adds a cup to the clt at index i, where 0 <= i <= clt.bot -2
@@ -431,7 +431,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
         NewMorphisms.append(newRow)
         if Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # target is closed
             NewMorphisms.append(nextRow)
-    return ChainComplex(newElements, NewMorphisms)
+    return CobComplex(newElements, NewMorphisms)
   
 def AddPosCrossing(Complex, i):
     CapCup = AddCap(AddCup(Complex, i), i, "true")
@@ -482,7 +482,7 @@ def AddPosCrossing(Complex, i):
             BottomLeft.append(newRow)
     NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
                                    np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
-    NewComplex = ChainComplex(NewElements, NewMorphisms)
+    NewComplex = CobComplex(NewElements, NewMorphisms)
     return NewComplex
 
 def grshiftclt(clt):
@@ -538,7 +538,7 @@ def AddNegCrossing(Complex, i):
         BottomLeft.append(newRow)
     NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
                                    np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
-    NewComplex = ChainComplex(NewElements, NewMorphisms)
+    NewComplex = CobComplex(NewElements, NewMorphisms)
     return NewComplex
 
 def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
@@ -556,7 +556,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     """
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
     stringlist.reverse()
-    cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
+    cx=CobComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings, "+str(neg)+" negative crossings and "+str(len(stringlist))+" slices in total.")
           

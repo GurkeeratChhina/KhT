@@ -33,7 +33,7 @@ class Tangle(object):
         neg = 0
         stringlist=[[word[0:3],int(word[3:])] for word in self.slices.split('.')]
         stringlist.reverse()
-        cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
+        cx=CobComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
         print("Computing the Bar-Natan bracket for the tangle\n\n"+self.slices+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
               " positive crossings and "+str(neg)+" negative crossings.")
         ends = start
