@@ -186,8 +186,6 @@ class BNmor(object):
     
     def simplify_BNmor(self,field):
         """simplify algebra elements by adding all coeffients of the same power of D or S, omitting those with coefficient 0. This is very similar to simplify_decos"""
-        if self.pairs == []:
-            self.pairs=[]
         def droplast(l):
             return l[:-1]
         def add_coeffs(iterable):
@@ -197,18 +195,28 @@ class BNmor(object):
             return coeff_simplify(coeff,field)
         self.pairs = [power+[add_coeffs(grouped)] for power,grouped in groupby(sorted(self.pairs),droplast)]
         self.pairs = [x for x in self.pairs if x[-1]!=0]
+        if self.pairs == []:
+            return 0
         return self
     
     def __add__(self, other):
-        if self.pairs == []:
-            return other
-        if other.pairs == []:
+        if other is 0:
+            return self
+        return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
+    
+    def __radd__(self, other):
+        if other is 0:
             return self
         return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
 
     def __mul__(self, other):
-        if (self.pairs == []) or (other.pairs == []):
-            return ZeroMor
+        if (self is 0) or (other is 0):
+            return 0
+        return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
+        
+    def __rmul__(self, other):
+        if (self is 0) or (other is 0):
+            return 0
         return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
     
     def is_identity(self):

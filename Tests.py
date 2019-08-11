@@ -772,7 +772,7 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
         # TestSet21(2, [k, l])
 # TestSet21(3, [0,0,0])
 # TestSet21(4, [0,0,0,0])
-# TestSet22(10,-11)
+TestSet22(10,-11)
 # TestSet22(2,-2)
 # TestSet22(2,-5)
 # TestSet22(3,-3)
@@ -783,12 +783,24 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
 # TestSet25()
 # TestSet26()
 # TestSet27()
-TestSet28()
+# TestSet28()
 # Test_2m3pt()
 # Test_2m3pt()
 # Test_TwoTwistTangle()
 # Test_SplittingCurve()
 
+#X=BNmor([[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1]],2)
+#A=[ZeroMor,ZeroMor,X,0,4,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor]
+#import sys
+#print(sys.getsizeof(X))
+#print(sys.getsizeof(A))
+#B=[0,0,0,0,0,0,0,0,0,0]
+#print(sys.getsizeof(B))
+
+#import timeit
+#print(timeit.timeit('a is 0',setup="from BNComplexes import ZeroMor, BNmor \nimport numpy as np \nzero=np.int8(0)\na=BNmor([],3)", number=1000000))
+#print(timeit.timeit('ZeroMor.pairs==[]', setup="from BNComplexes import ZeroMor", number=1000000))
+#print(timeit.timeit('Z is ZeroMor', setup="from BNComplexes import ZeroMor, BNmor \nZ=BNmor([],3)", number=1000000))
 
 ## comparing efficiency of two functions
 #import timeit
