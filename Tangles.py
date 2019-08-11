@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from KhT import *
 
 class CLT(object):
     """A crossingless tangle (CLT) is a matching of n+m ends (m=top,n=bot=bottom). 

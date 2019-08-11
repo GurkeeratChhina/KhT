@@ -14,17 +14,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import itertools as itertools
+from itertools import groupby
 import numpy as np
 import math
+import cairo
 from graph_tool.all import *
 from random import choice
-from KhT import *
-from Tangles import *
-from Complex import *
-from Drawing import *
-from Cobordisms import *
 from time import time
+from KhT import *
 from fractions import Fraction
 
 def ToExponent(exponent):
@@ -266,7 +263,7 @@ class BNmor(object):
                 if pair[0] == 0:
                     string += coeff + "id"
         return string
-        
+
 class BNComplex(object):
     """ A chain complex is a directed graph, consisting of 
         - A list of BNobj as labels on the vertices.

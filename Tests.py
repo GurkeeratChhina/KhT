@@ -15,16 +15,17 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import math
-from KhT import *
-from Tangles import *
-from Cobordisms import *
-from Complex import *
-from Drawing import *
-from BNComplexes import *
-from CrossingTangle import *
 from fractions import Fraction
 import timeit
 from time import time
+from KhT import *
+from Tangles import *
+from Cobordisms import *
+from CobComplexes import *
+from BNComplexes import *
+from Drawing import *
+from BNAlgebra import *
+from CrossingTangle import *
 
 # create basic crossingless tangles
 def cup_alt(n,i):

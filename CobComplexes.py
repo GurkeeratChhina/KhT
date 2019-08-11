@@ -17,13 +17,10 @@
 import numpy as np
 import pandas as pd
 import math
-from KhT import *
-from Tangles import *
-from Cobordisms import *
-from Drawing import *
 from time import time
 from tabulate import tabulate
-
+from Tangles import *
+from Cobordisms import *
 
 class CobComplex(object):
     """ A chain complex is a directed graph, consisting of 

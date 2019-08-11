@@ -17,11 +17,9 @@
 
 # load libraries
 import math
-
-#TO DO: 
-#4. Implement gaussian elimination
-#5. Implement crossings
-#6. Test all of the above features
+import timeit
+from time import time
+from fractions import Fraction # for rational numbers as field of coefficients, not fully supported yet
 
 # useful general functions that have nothing to do with this project
 def find_first_index(mylist,function):
@@ -63,10 +61,3 @@ def prod(iterable):
         prod *= x
     return prod
 
-
-#
-# dictionary
-#
-# CLT= crossingless tangle
-# TEI= tangle end index
-# DS = alternate way of representing cobordisms of 4 ended tangles, using powers of D and powers of S

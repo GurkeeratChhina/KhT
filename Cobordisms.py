@@ -17,8 +17,8 @@
 from itertools import product
 from itertools import groupby
 import math
-from KhT import *
 from Tangles import *
+from KhT import *
 
 def clt_front_pairs(components):
     """the tangle at the front, in TEI pair notation, of a cobordism with components 'components'."""
