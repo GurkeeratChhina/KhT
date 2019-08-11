@@ -159,7 +159,12 @@ class BNComplex(object):
         out_source = np.delete(self.diff[:,sourceindex],[Min,Max],0) #arrows starting at the source, omiting indices targetindex and sourceindex
         in_target = np.delete(self.diff[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
         
-        in_target=np.array([entry.negative(self.field,inverse(coeff.pairs[0][1],self.field)) for entry in in_target])
+        def neg(entry):
+            if entry is 0:
+                return 0
+            return entry.negative(self.field,inverse(coeff.pairs[0][1],self.field))
+        
+        in_target=np.array([neg(entry) for entry in in_target])
         
         self.diff=np.delete(self.diff,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
         self.diff=np.delete(self.diff,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
@@ -188,7 +193,12 @@ class BNComplex(object):
     def isotopy_via_vector_end(self,end,vector): # unused function: this is actually *much* slower
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
         """
-        self.diff+=np.outer([x.negative(self.field) for x in vector],self.diff[end,:]) # subtract all precompositions with the differential (rows of diff)
+        def neg(x):
+            if x is 0:
+                return 0
+            return x.negative(self.field)
+        
+        self.diff+=np.outer([neg(x) for x in vector],self.diff[end,:]) # subtract all precompositions with the differential (rows of diff)
         self.diff[:,end]+=np.dot(self.diff,vector) # add all postcompositions with the differential (columns of diff)
     
     def isolate_arrow(self,start, end, alg):
@@ -313,16 +323,17 @@ class BNComplex(object):
             #time.sleep(1)
         else:
             print("Clean-up: Terminated as a result of reaching maximum iteration value of", max_iter)
-            
-    #def negative(self): #create new morphism
-    #    return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
-    
+        
     def shift_h(self,shift): # create new complex
         new_gens = [gen.shift_h(shift) for gen in self.gens]
         if shift % 2 == 0:
             new_diff = self.diff
         elif shift % 2 == 1:
-            new_diff = [[alg.negative(self.field) for alg in row] for row in self.diff]
+            def neg(alg):
+                if alg is 0:
+                    return 0
+                return alg.negative(self.field)
+            new_diff = [[neg(alg) for alg in row] for row in self.diff]
         else:
             raise Exception('Why are you trying to shift homological grading by something other than an integer? I cannot do that!')
         return BNComplex(new_gens,new_diff,self.field)
