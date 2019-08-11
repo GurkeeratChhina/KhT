@@ -15,12 +15,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
+import pandas as pd
 import math
 from KhT import *
 from Tangles import *
 from Cobordisms import *
 from Drawing import *
 from time import time
+from tabulate import tabulate
+
 
 class ChainComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -33,6 +36,22 @@ class ChainComplex(object):
     def __init__(self,listofclt,morphisms):
         self.elements = listofclt
         self.morphisms = np.array(morphisms)
+    
+    def print(self,switch="short"):
+        """Print a complex in human readable form. The optional parameter should be one of the following strings: 
+        - 'short' (default) prints only the length of cobordisms.
+        - 'long' prints all cobordism data in a nice table.
+        - 'old long' prints all cobordism data, but as a list of lists.
+        """
+        print("The generators:")
+        print(pd.DataFrame({\
+            "clt.pairs": [clt.pairs for clt in self.elements],\
+            "q": [clt.qgr for clt in self.elements],\
+            "h": [clt.pgr for clt in self.elements]
+            },columns=["clt.pairs","q","h"]))
+        print("The differential: ("+switch+" form)")
+        #print(pd.DataFrame([[print(entry,switch)  for entry in row] for row in self.morphisms]))
+        print(tabulate(pd.DataFrame([[entry.print(switch)  for entry in row] for row in self.morphisms]),range(len(self.morphisms)),tablefmt="fancy_grid"))
     
     def ValidMorphism(self): #checks that the differential squares to 0, has no self loops, and is a matrix of the correct size
         length = len(self.elements)
@@ -51,20 +70,20 @@ class ChainComplex(object):
                 if cob.homogeneousQ() == False:
                     print("!!!!!!!!!!!!!!!!!!")
                     print("ERROR: The component of the differential in row "+str(i)+" and column "+str(j)+" is not homoegenous:")
-                    print(printdecos(cob,"long"))
+                    print(cob.print("long"))
                     print("!!!!!!!!!!!!!!!!!!")
                     raise Exception('Non-homogeneous morphism in differential!')
                 if cob.ReduceDecorations() !=[]:
                     if (self.elements[i]).pgr-(self.elements[j]).pgr!=1:
                         print("!!!!!!!!!!!!!!!!!!")
                         print("ERROR: The homological grading along the component of the differential in row "+str(i)+" and column "+str(j)+" does not increase by 1:")
-                        print(printdecos(cob,"long"))
+                        print(cob.print("long"))
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Something is wrong with the homological grading!')
                     if (self.elements[i]).qgr-(self.elements[j]).qgr+cob.deg()!=0:
                         print("!!!!!!!!!!!!!!!!!!")
                         print("ERROR: The quantum grading is not preserved along the component of the differential in row "+str(i)+"(q:"+str((self.elements[i]).qgr)+") and column "+str(j)+"(q:"+str((self.elements[j]).qgr)+"):")
-                        print(printdecos(cob,"long"), " degree:", cob.deg())
+                        print(cob.print("long"), " degree:", cob.deg())
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Something is wrong with the quantum grading!')
         
@@ -83,7 +102,7 @@ class ChainComplex(object):
         #                drawcob(cobord, "cobord"+str(k))
         #            print("!!!!!!!!!!!!!!!!!!")
         #            print("ERROR: Found non-zero term in d² in row "+str(x)+" and column "+str(y)+":")
-        #            print(printdecos(cob,"long"))
+        #            print(cob.print("long"))
         #            print("!!!!!!!!!!!!!!!!!!")
         #            raise Exception('Differential does not square to 0')
         ###Original morphisms squared:
@@ -93,7 +112,7 @@ class ChainComplex(object):
                 if cob.ReduceDecorations() != []:
                     print("!!!!!!!!!!!!!!!!!!")
                     print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
-                    print(printdecos(cob,"long"))
+                    print(cob.print("long"))
                     print("!!!!!!!!!!!!!!!!!!")
                     raise Exception('Differential does not square to 0')
     
@@ -553,29 +572,29 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
             #print("before eliminateAll")
-            #PrettyPrintComplex(cx, "old long")
+            #cx.print, "old long")
             if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
             # print("after eliminateAll")
-            # PrettyPrintComplex(cx, "old long")
+            # cx.print, "old long")
         
         if word[0]=="neg":
             cx=AddNegCrossing(cx, word[1])
             #print("before eliminateAll")
-            #PrettyPrintComplex(cx, "old long")
+            #cx.print, "old long")
             if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
             # print("after eliminateAll")
-            # PrettyPrintComplex(cx, "old long")
+            # cx.print, "old long")
         
         if word[0]=="cup":
             cx=AddCup(cx, word[1])
             #print("before eliminateAll")
-            #PrettyPrintComplex(cx, "old long")
+            #cx.print, "old long")
             if options=="safe": cx.ValidMorphism()
             cx.eliminateAll()
             #print("after eliminateAll")
-            #PrettyPrintComplex(cx, "old long")
+            #cx.print, "old long")
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])

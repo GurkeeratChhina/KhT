@@ -121,7 +121,7 @@ def TestSet2():
     
     complex5cup = AddCup(complex5, 0)
     print("complex5cup")
-    PrettyPrintComplex(complex5cup, "old long")
+    complex5cup.print("old long")
 
 def TestSet3():
     CLT01 = CLT(1,3,[1,0,3,2],0,0,0)
@@ -131,9 +131,9 @@ def TestSet3():
     BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
     # PrintComplexMorphismIntMatrix(BasicSaddleCup)
     # PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
-    # PrettyPrintComplex(BasicSaddleCup)
+    # BasicSaddleCup.print
     print("Basic Saddle with Cup")
-    PrettyPrintComplex(BasicSaddleCup,"old long")
+    BasicSaddleCup.print("old long")
     return 0
 
 def TestSet4():
@@ -172,7 +172,7 @@ def TestSet5():
    
     complex1cap0 = AddCap(complex1, 0)
     print("complex1cap0")
-    PrettyPrintComplex(complex1cap0,"old long")
+    complex1cap0.print("old long")
     
     DrawFourEndedChainComplex(complex1, "complex1.png")
     
@@ -196,10 +196,10 @@ def TestSet6():
     # complex4.ValidMorphism()
     
     print("complex3")
-    PrettyPrintComplex(complex3, "old long")
+    complex3.print("old long")
     complex3cap0 = AddCap(complex3, 0)
     print("complex3cap")
-    PrettyPrintComplex(complex3cap0, "old long")
+    complex3cap0.print("old long")
     complex3again1 = AddCup(complex3cap0, 1)
     complex3again2 = AddCup(AddCap(complex3, 1), 0)
     complex3again3 = AddCup(AddCap(complex3, 1), 2)
@@ -220,7 +220,7 @@ def TestSet6():
     complex6 = ChainComplex([c,b], [[ZeroCob, ZeroCob],[Scb, ZeroCob]])
     complex6cup = AddCup(complex6, 0)
     print("complex6cup")
-    PrettyPrintComplex(complex6cup, "old long")
+    complex6cup.print("old long")
     
 def TestSet7():
     CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
@@ -235,36 +235,36 @@ def TestSet7():
     
     complex2cap1 = AddCap(complex2, 1)
     print("complex2cap1")
-    PrettyPrintComplex(complex2cap1,"old long")
+    complex2cap1.print("old long")
     complex2again = AddCup(complex2cap1, 0)
     DrawFourEndedChainComplex(complex2again, "complex2again.png")
     complex2cap0 = AddCap(complex2, 0)
     print("complex2cap0")
-    PrettyPrintComplex(complex2cap0)
+    complex2cap0.print()
     complex2again2 = AddCup(complex2cap0, 1)
     print("complex2again2")
-    PrettyPrintComplex(complex2again2, "old long")
+    complex2again2.print("old long")
     DrawFourEndedChainComplex(complex2again2, "complex2again2.png")
     
-    PrettyPrintComplex(complex2cap0, "old long")
+    complex2cap0.print("old long")
     complex2double = AddCup(complex2cap0, 0)
-    PrettyPrintComplex(complex2double, "old long")
+    complex2double.print("old long")
     DrawFourEndedChainComplex(complex2double, "complex2double.png")
     
     complex2double2 = AddCup(AddCap(complex2, 1), 1)
     DrawFourEndedChainComplex(complex2double2, "complex2double2.png")
     print("complex2cap")
-    PrettyPrintComplex(AddCap(complex2, 1), "old long")
+    AddCap(complex2, 1).print("old long")
     print("complex2double")
-    PrettyPrintComplex(complex2double2, "old long")
+    complex2double2.print("old long")
     
     print("complex2")
-    PrettyPrintComplex(complex2, "old long")
+    complex2.print("old long")
     complex2cup = AddCup(complex2, 0)
     print("complex2cup")
-    PrettyPrintComplex(complex2cup, "old long")
+    complex2cup.print("old long")
     print("complex2again")
-    PrettyPrintComplex(complex2, "old long")
+    complex2.print("old long")
 
 def TestSet8():
     TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
@@ -278,16 +278,16 @@ def TestSet8():
     TwoNegCrossing = AddCup(temp3,1)
     DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossing.png")
     print("TwoNegCrossing")
-    PrettyPrintComplex(TwoNegCrossing, "old long")
+    TwoNegCrossing.print("old long")
     TwoNegCrossing.eliminateAll()
     DrawFourEndedChainComplex(TwoNegCrossing, "TwoNegCrossingReduced.png")
     print("TwoNegCrossingReduced")
-    PrettyPrintComplex(TwoNegCrossing, "old long")
+    TwoNegCrossing.print("old long")
     
     ClosedOpenNeg = AddNegCrossing(BasicComplex2, 0)
     DrawFourEndedChainComplex(ClosedOpenNeg, "ClosedOpenNeg.png")
     print("ClosedOpenNeg")
-    PrettyPrintComplex(ClosedOpenNeg, "old long")
+    ClosedOpenNeg.print("old long")
     
     temp4 = AddCap(BasicComplex1,1)
     temp5 = AddPosCrossing(temp4,0)
@@ -295,12 +295,12 @@ def TestSet8():
     TwoPosCrossing = AddCup(temp6,1)
     DrawFourEndedChainComplex(TwoPosCrossing, "TwoPosCrossing.png")
     print("TwoPosCrossing")
-    PrettyPrintComplex(TwoPosCrossing, "old long")
+    TwoPosCrossing.print("old long")
     
     ClosedOpenPos = AddPosCrossing(BasicComplex2, 0)
     DrawFourEndedChainComplex(ClosedOpenPos, "ClosedOpenPos.png")
     print("ClosedOpenPos")
-    PrettyPrintComplex(ClosedOpenPos, "old long")
+    ClosedOpenPos.print("old long")
     
 def TestSet9():
     TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
@@ -309,19 +309,19 @@ def TestSet9():
     temp2 = AddNegCrossing(temp1, 0)
     temp2.eliminateAll()
     print("temp2")
-    PrettyPrintComplex(temp2, "old long")
+    temp2.print("old long")
     temp3 = AddNegCrossing(temp2, 0)
     print("temp3")
-    PrettyPrintComplex(temp3, "old long")
+    temp3.print("old long")
     temp3.eliminateAll()
     print("temp3eliminated")
-    PrettyPrintComplex(temp3, "old long")
+    temp3.print("old long")
     temp4 = AddNegCrossing(temp3, 0)
     print("temp4")
-    PrettyPrintComplex(temp4, "old long")
+    temp4.print("old long")
     temp4.eliminateAll()
     print("temp4eliminate")
-    PrettyPrintComplex(temp4, "old long")
+    temp4.print("old long")
     temp5 = AddPosCrossing(temp4, 2)
     temp5.eliminateAll()
     temp6 = AddPosCrossing(temp5, 2)
@@ -340,7 +340,7 @@ def TestSet11():
     drawtangle(tangle,"2m3pt_diagram_plain","plain")
     cx=BNbracket(tangle,0,5)# 0 positive twists, 5 negative twists. 
     #cx=BNbracket("cup1.pos2.pos2.pos2.cap3.neg0.neg0.cap1") #mirror
-    #PrettyPrintComplex(cx)
+    #cx.print()
     BNcx=CobComplex2BNComplex(cx)
     DrawBNComplex(BNcx, "2m3pt_redBN_before_cleanupX.svg","delta_h")
     #PrettyPrintBNComplex(BNcx)
@@ -390,7 +390,7 @@ def TestSet15():
     trivial_closure_tangle = "cup1.pos2.neg0.neg0.neg1.neg1.pos2.cap3.neg0.neg0.neg0.cap1"
     drawtangle(trivial_closure_tangle, "trivial_closure_tangle", "plain", 1)
     complex_tct = BNbracket(trivial_closure_tangle)
-    PrettyPrintComplex(complex_tct, "old long")
+    complex_tct.print("old long")
     complex_tct.ValidMorphism()
     BN_complex_tct = CobComplex2BNComplex(complex_tct)
     BN_complex_tct.clean_up(500)
@@ -434,7 +434,7 @@ def TestDSquare():
     drawtangle(tangle,"test","slices",2)
     complex_test_tangle = BNbracket(tangle,0,0,2)
     complex_test_tangle.ValidMorphism()
-    PrettyPrintComplex(complex_test_tangle,"old long")
+    complex_test_tangle.print("old long")
 
 def TestSet18():
     x0 = CLT(2,4,[2,5,0,4,3,1],0,0,0)
@@ -444,28 +444,28 @@ def TestSet18():
     cob26 = Cobordism(x0,x0,[[0, 0, 0, 0, 1]])
 
     print("1:")
-    print(printdecos(cob02,"long"))
-    print(printdecos(cob26,"long"))
-    print(printdecos(cob02*cob26,"long"))
+    print(cob02.print("long"))
+    print(cob26.print("long"))
+    print((cob02*cob26).print("long"))
 
     cob03 = Cobordism(x0,x0,[[0, 0, 0, 0, 1]])
     cob36 = Cobordism(x0,x0,[[0, 0, 0, 1, 1]])
 
     print("2:")
-    print(printdecos(cob03,"long"))
-    print(printdecos(cob36,"long"))
-    print(printdecos(cob03*cob36,"long"))
+    print(cob03.print("long"))
+    print(cob36.print("long"))
+    print((cob03*cob36).print("long"))
 
     cob05 = Cobordism(x0,x5,[[0, 0, 0, 1]])
     cob56 = Cobordism(x5,x0,[[0, 0, 0, -1]])
 
     print("3:")
-    print(printdecos(cob05,"long"))
-    print(printdecos(cob56,"long"))
-    print(printdecos(cob05*cob56,"long"))
+    print(cob05.print("long"))
+    print(cob56.print("long"))
+    print((cob05*cob56).print("long"))
 
     print("sum:")
-    print(printdecos(cob02*cob26+cob03*cob36+cob05*cob56,"long"))
+    print((cob02*cob26+cob03*cob36+cob05*cob56).print("long"))
     
     cob = Cobordism(x0,x0,[[1, 0, 0, 0, -1],[0,0,1,0,3]])
     print(cob.homogeneousQ())
@@ -639,11 +639,13 @@ def TestSet28(): # tangle_8
     tangle ="cup2.cup4.pos3.pos4.neg1.neg2.neg0.neg1.pos3.pos4.pos2.pos3.neg1.neg0.pos3.pos4.neg3.neg2.cap5.cap3.cap1"
     drawtangle(tangle,"tangle_8","slices",1)
     complex= BNbracket(tangle,0,0,1)
+    complex.print()
     BN_complex = CobComplex2BNComplex(complex, 7) # doing mod 7 as if over Q
     DrawBNComplex(BN_complex, "BN_complex_tangle_8.svg", "qh")
     BN_complex.eliminateAll()
     BN_complex.clean_up()
     DrawBNComplex(BN_complex, "BN_complex_tangle_8_after_cleanup.svg", "qh")
+    
     
 # TestSet0()
 # TestSet1()

@@ -60,6 +60,22 @@ class Cobordism(object):
             self.comps = comps
         self.decos = decos
     
+    def print(self,switch="short"):
+        if self.decos==[]:
+            return ""
+        else:
+            if switch == "old long":
+                return [self.comps,self.decos]
+            if switch == "long":
+                table=[["H:"]+[deco[0] for deco in self.decos]]+\
+                      [[comp]+[deco[i+1] for deco in self.decos] \
+                              for i,comp in enumerate(self.comps)]+\
+                      [["coeff:"]+[deco[-1] for deco in self.decos]]
+                tablealt=[["H:",0,1],[[1,2],0,1],["coeff:",3,4]]
+                return tabulate(table,tablefmt="plain")
+            else:
+                return len(self.decos)
+    
     def __add__(self, other):
         if self.decos == []: # Adding the zero cobordism
             return other

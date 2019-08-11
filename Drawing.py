@@ -14,116 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import pandas as pd
-from graph_tool.all import *
-import math
 import cairo
 from IPython.display import IFrame
-from KhT import *
-from Tangles import *
-from Cobordisms import *
-from Complex import *
-from tabulate import tabulate
-from math import sqrt
-
-def printdecos(cob,switch="short"):
-    if cob.decos==[]:
-        return ""
-    else:
-        if switch == "old long":
-            return [cob.comps,cob.decos]
-        if switch == "long":
-            table=[["H:"]+[deco[0] for deco in cob.decos]]+\
-                  [[comp]+[deco[i+1] for deco in cob.decos] \
-                          for i,comp in enumerate(cob.comps)]+\
-                  [["coeff:"]+[deco[-1] for deco in cob.decos]]
-            tablealt=[["H:",0,1],[[1,2],0,1],["coeff:",3,4]]
-            return tabulate(table,tablefmt="plain")
-        else:
-            return len(cob.decos)
     
-def PrettyPrintComplex(Complex,switch="short"):
-    """Print a complex in human readable form. 
-    The second argument is an optional parameter which should be one of the following strings: 
-    - 'simple' (default) prints only the length of cobordisms.
-    - 'long' prints all cobordism data in a nice table.
-    - 'old long' prints all cobordism data, but as a list of lists.
-    """
-    print("The generators:")
-    print(pd.DataFrame({\
-        "clt.pairs": [clt.pairs for clt in Complex.elements],\
-        "q": [clt.qgr for clt in Complex.elements],\
-        "h": [clt.pgr for clt in Complex.elements]
-        },columns=["clt.pairs","q","h"]))
-    print("The differential: ("+switch+" form)")
-    #print(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]))
-    print(tabulate(pd.DataFrame([[printdecos(entry,switch)  for entry in row] for row in Complex.morphisms]),range(len(Complex.morphisms)),tablefmt="fancy_grid"))
-    
-def PrintComplexMorphismIntMatrix(Complex): #This is obsolete, use PrettyPrintComplex instead
-    for i in Complex.morphisms:
-        Row = []
-        for j in i:
-            Row.append(len(j.decos))
-        print(Row)
-
-def PrintComplexMorphismDecoCompMatrix(Complex): #This is obsolete, use PrettyPrintComplex instead
-    for i in Complex.morphisms:
-        Row = []
-        for j in i:
-            if j.decos == []:
-                Row.append(0)
-            else:
-                Row.append([j.comps, j.decos])
-        print(Row)
-
-def CobordismToDS(Cob): #more pythonic implementation # This is obsolete, done by CobordismToBNAlg
-    """ DS is a linear combination of morphisms that are powers of D or powers of S, represented as a list of lists
-        an element of DS will be refered to a ds, which is a 3 element list
-        the first element is D if the morphism is a power of D, and S if it is a power of S
-        the second element is the power of the corresponding morphism
-        the third element is the coefficient of the morphism
-        Requires Cob to be a cobordism between 4 ended tangles """
-    
-    if Cob.front.total !=2 or Cob.back.total !=2:
-        raise Exception("Cobordism to convert to DS is not between 4-ended tangles")
-    DS = [] 
-    for elem in Cob.decos:
-        if len(elem) == 3: # elem is H^k S
-            for ds in DS:
-                if ds[0] == "S" and ds[1] == 2*elem[0] +1: #check if saddle is already there
-                    ds[2] += elem[2]
-                    break
-            else:
-                DS.append(["S", 2*elem[0]+1, elem[2]]) #otherwise add saddle
-        elif len(elem) == 4 and elem[find_first_index(Cob.comps,notcontains_0)+1] == 1: # elem is H^k D
-            for ds in DS:
-                if ds[0] == "D" and ds[1] == elem[0] +1: #check if dot is already there
-                    ds[2] += elem[3]
-                    break
-            else:
-                DS.append(["D", elem[0]+1, elem[3]]) #otherwise add dot
-        elif len(elem) == 4 and elem[0] != 0: # elem is H^k times id
-            for ds in DS:
-                if ds[0] == "S" and ds[1] == 2*elem[0]: #check if saddle part is already there
-                    ds[2] += elem[3]
-                    break
-            else:
-                DS.append(["S", 2*elem[0], ((-1)**elem[0])*elem[3]]) #otherwise add saddle part
-            for ds in DS:
-                if ds[0] == "D" and ds[1] == elem[0]: #check if dot part is already there
-                    ds[2] += elem[3]
-                    break
-            else:
-                DS.append(["D", elem[0], elem[3]]) #otherwise add dot part
-        else: #elem is id, elem should be [0, 0, 0, n]
-            for ds in DS:
-                if ds[0] == "S" and ds[1] == 0: #check if id is already there
-                    ds[2] += elem[3]
-                    break
-            else:
-                DS.append(["S", 0, elem[3]]) #otherwise add id
-    return DS
-
 def draw_tangle_ends(posx,posy,clt,h,ctx):
     ctx.set_font_size(0.40)
     ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
@@ -372,8 +265,14 @@ def drawtangle(string,name,style="plain",start=1):
             
     #return IFrame("Output/"+ name+'.svg', width='100%', height='300')
 
+################
+# Obsolete code:
+################
 
 def drawclt(clt,name):
+    """Create a pdf file 'name'.pdf in the subfolder 'Output' with a pictographic representation of the CLT 'clt'.
+    This function is not used anywhere in the code and kept for debugging purposes only.
+    """
     scale = 100
     w = max(clt.top,clt.bot)
     h = max([1]+[abs(i[1]-i[0]) for i in clt.arcs_top()]+\
@@ -393,6 +292,9 @@ def drawclt(clt,name):
     return IFrame("Output/"+ name+'.pdf', width='100%', height='300')
 
 def drawcob(cob,name):
+    """Create a pdf file 'name'.pdf in the subfolder 'Output' with a pictographic representation of the cobordism 'cob'.
+    This function is not used anywhere in the code and kept for debugging purposes only.
+    """
     clt1=cob.front
     clt2=cob.back
     scale = 100

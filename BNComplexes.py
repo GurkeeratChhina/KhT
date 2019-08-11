@@ -17,6 +17,7 @@
 import itertools as itertools
 import numpy as np
 import math
+from graph_tool.all import *
 from random import choice
 from KhT import *
 from Tangles import *
