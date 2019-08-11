@@ -64,7 +64,7 @@ class Cobordism(object):
     def __repr__(self):
         clt1=self.front
         clt2=self.back
-        return "Cobordism[CLT[{},{},{},{},{},{}],CLT[{},{},{},{},{},{}],{},{}]".format(clt1.top,clt1.bot,clt1.arcs,clt1.pgr,clt1.qgr,clt1.dgr,clt2.top,clt2.bot,clt2.arcs,clt2.pgr,clt2.qgr,clt2.dgr,self.decos,self.comps)
+        return "Cobordism[CLT[{},{},{},{},{},{}],CLT[{},{},{},{},{},{}],{},{}]".format(clt1.top,clt1.bot,clt1.arcs,clt1.h,clt1.q,clt1.delta,clt2.top,clt2.bot,clt2.arcs,clt2.h,clt2.q,clt2.delta,self.decos,self.comps)
     
     def print(self,switch="short"):
         if self.decos==[]:
@@ -150,7 +150,7 @@ class Cobordism(object):
         if other == 0: #Multiplying by the zero cobordism
             return 0
         if self.back != other.front: # incomposable cobordisms
-            raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on',self.back.top, self.back.bot, self.back.arcs, self.back.pgr, self.back.qgr, 'and the second starts on', other.front.top, other.front.bot, other.front.arcs, other.front.pgr, other.front.qgr)
+            raise Exception('The cobordisms {}'.format(self)+' and {}'.format(other)+' are not composable; the first ends on',self.back.top, self.back.bot, self.back.arcs, self.back.h, self.back.q, 'and the second starts on', other.front.top, other.front.bot, other.front.arcs, other.front.h, other.front.q)
         
         comps1=self.comps
         comps2=other.comps

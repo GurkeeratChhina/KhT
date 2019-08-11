@@ -28,13 +28,13 @@ class CobComplex(object):
         - A a matrix of cobordisms as the adjacency matrix.
         These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
         Note that the matrix's rows and columns depend on the order the CLTS are given in the list 
-        We assume that all entries of 'morphisms' are reduced in the sense that 'ReduceDecorations()' does not change them.
+        We assume that all entries of 'diff' are reduced in the sense that 'ReduceDecorations()' does not change them.
         """
-    __slots__ = 'elements','morphisms'
+    __slots__ = 'gens','diff'
     
-    def __init__(self,listofclt,morphisms):
-        self.elements = listofclt
-        self.morphisms = np.array(morphisms)
+    def __init__(self,gens,diff):
+        self.gens = gens
+        self.diff = np.array(diff)
     
     def print(self,switch="short"):
         """Print a complex in human readable form. The optional parameter should be one of the following strings: 
@@ -44,31 +44,31 @@ class CobComplex(object):
         """
         print("The generators:")
         print(pd.DataFrame({\
-            "clt.pairs": [clt.pairs for clt in self.elements],\
-            "q": [clt.qgr for clt in self.elements],\
-            "h": [clt.pgr for clt in self.elements]
+            "clt.pairs": [clt.pairs for clt in self.gens],\
+            "q": [clt.q for clt in self.gens],\
+            "h": [clt.h for clt in self.gens]
             },columns=["clt.pairs","q","h"]))
         print("The differential: ("+switch+" form)")
-        #print(pd.DataFrame([[print(entry,switch)  for entry in row] for row in self.morphisms]))
+        #print(pd.DataFrame([[print(entry,switch)  for entry in row] for row in self.diff]))
         def prt(entry):
             if entry ==0:
                 return ""
             return entry.print(switch)
-        print(tabulate(pd.DataFrame([[prt(entry)  for entry in row] for row in self.morphisms]),range(len(self.morphisms)),tablefmt="fancy_grid"))
+        print(tabulate(pd.DataFrame([[prt(entry)  for entry in row] for row in self.diff]),range(len(self.diff)),tablefmt="fancy_grid"))
     
     def ValidMorphism(self): #checks that the differential squares to 0, has no self loops, and is a matrix of the correct size
-        length = len(self.elements)
-        if len(self.morphisms) != length:
-            raise Exception('Differential does not have n rows (where n is the number of elements in chain complex)')
+        length = len(self.gens)
+        if len(self.diff) != length:
+            raise Exception('Differential does not have n rows (where n is the number of gens in chain complex)')
                 
-        for i in self.morphisms:
+        for i in self.diff:
             if len(i) != length:
-                raise Exception('Differential does not have n columns (where n is the number of elements in chain complex)')
+                raise Exception('Differential does not have n columns (where n is the number of gens in chain complex)')
         for i in range(length):
-            if self.morphisms[i][i] is not 0:
+            if self.diff[i][i] is not 0:
                 raise Exception('Differential has self loops')
         
-        for i,row in enumerate(self.morphisms):
+        for i,row in enumerate(self.diff):
             for j,cob in enumerate(row):   
                 if cob is not 0:
                     if cob.homogeneousQ() == False:
@@ -77,21 +77,21 @@ class CobComplex(object):
                         print(cob.print("long"))
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Non-homogeneous morphism in differential!')
-                    if (self.elements[i]).pgr-(self.elements[j]).pgr!=1:
+                    if (self.gens[i]).h-(self.gens[j]).h!=1:
                         print("!!!!!!!!!!!!!!!!!!")
                         print("ERROR: The homological grading along the component of the differential in row "+str(i)+" and column "+str(j)+" does not increase by 1:")
                         print(cob.print("long"))
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Something is wrong with the homological grading!')
-                    if (self.elements[i]).qgr-(self.elements[j]).qgr+cob.deg()!=0:
+                    if (self.gens[i]).q-(self.gens[j]).q+cob.deg()!=0:
                         print("!!!!!!!!!!!!!!!!!!")
-                        print("ERROR: The quantum grading is not preserved along the component of the differential in row "+str(i)+"(q:"+str((self.elements[i]).qgr)+") and column "+str(j)+"(q:"+str((self.elements[j]).qgr)+"):")
+                        print("ERROR: The quantum grading is not preserved along the component of the differential in row "+str(i)+"(q:"+str((self.gens[i]).q)+") and column "+str(j)+"(q:"+str((self.gens[j]).q)+"):")
                         print(cob.print("long"), " degree:", cob.deg())
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Something is wrong with the quantum grading!')
         
-        # Computing morphisms squared:
-        squared = np.tensordot(self.morphisms,self.morphisms, axes=(-2,-1))
+        # Computing diff squared:
+        squared = np.tensordot(self.diff,self.diff, axes=(-2,-1))
         for i,row in enumerate(squared):
             for j,cob in enumerate(row):
                 if (cob is not 0) and (cob.ReduceDecorations() is not []):
@@ -104,7 +104,7 @@ class CobComplex(object):
     def findIsom(self): 
         """Returns the location of the first isomorphism it finds
            If no isomorphism is found, returns None"""
-        for targetindex, row in enumerate(self.morphisms):
+        for targetindex, row in enumerate(self.diff):
             for sourceindex, cob in enumerate(row):
                 if (cob != 0) and (cob.isIsom()):
                     return [sourceindex, targetindex]
@@ -118,22 +118,22 @@ class CobComplex(object):
         Max=max(targetindex,sourceindex)
         Min=min(targetindex,sourceindex)
         
-        del self.elements[Max] # eliminate source and target from list of generators
-        del self.elements[Min] # eliminate source and target from list of generators
+        del self.gens[Max] # eliminate source and target from list of generators
+        del self.gens[Min] # eliminate source and target from list of generators
         
-        out_source = np.delete(self.morphisms[:,sourceindex],[Min,Max],0) #arrows starting at the source, omiting indices targetindex and sourceindex
-        in_target = np.delete(self.morphisms[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
+        out_source = np.delete(self.diff[:,sourceindex],[Min,Max],0) #arrows starting at the source, omiting indices targetindex and sourceindex
+        in_target = np.delete(self.diff[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
         
-        if (self.morphisms[targetindex,sourceindex]).decos[0][-1]==1: # add minus sign; in the case the coefficient is -1, the signs cancel.
+        if (self.diff[targetindex,sourceindex]).decos[0][-1]==1: # add minus sign; in the case the coefficient is -1, the signs cancel.
             def neg(entry):
                 if entry == 0:
                     return 0
                 return entry.negative()
             in_target=np.array([neg(entry) for entry in in_target])
         
-        self.morphisms=np.delete(self.morphisms,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
-        self.morphisms=np.delete(self.morphisms,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
-        self.morphisms = self.morphisms+np.transpose(np.tensordot(in_target,out_source, axes=0)) # update differential
+        self.diff=np.delete(self.diff,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
+        self.diff=np.delete(self.diff,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
+        self.diff = self.diff+np.transpose(np.tensordot(in_target,out_source, axes=0)) # update differential
 
     def eliminateAll(self): #mutates self by eliminating isomorphisms as long as it can find one
         while True:
@@ -144,7 +144,7 @@ class CobComplex(object):
                 self.eliminateIsom(index_to_eliminate[0], index_to_eliminate[1])
     
     def shift_qhd(self,q,h,delta):
-        self.elements=[clt.shift_qhd(q,h,delta) for clt in self.elements]
+        self.gens=[clt.shift_qhd(q,h,delta) for clt in self.gens]
 
 def AddCapToCLT(clt, i, grshift = "false"): 
     """creates a new CLT which is clt with a cap added to it at index i
@@ -158,24 +158,24 @@ def AddCapToCLT(clt, i, grshift = "false"):
             return j
     newarcs = [incrementby2(x) for x in clt.arcs[:clt.top+i]] + [clt.top+i +1, clt.top+i] + [incrementby2(x) for x in clt.arcs[clt.top+i:]]
     if grshift == "true": # shift grading
-        newpgr = clt.pgr +1
-        newqgr = clt.qgr +1
-        newdgr = clt.dgr -0.5
+        newh = clt.h +1
+        newq = clt.q +1
+        newdelta = clt.delta -0.5
     else: # dont shift grading
-        newpgr = clt.pgr
-        newqgr = clt.qgr
-        newdgr = clt.dgr
-    return CLT(clt.top, clt.bot+2, newarcs, newpgr, newqgr, newdgr)
+        newh = clt.h
+        newq = clt.q
+        newdelta = clt.delta
+    return CLT(clt.top, clt.bot+2, newarcs, newh, newq, newdelta)
 
 def AddCap(Complex, i, grshift = "false"):
     """ Creates a new complex by adding a cap to every tangle and every cobordism in Complex, at index i
         Here 0 <= i <= tangle.bot
         If grshift is set to "true", then it applies a grading shift to every tangle (as above)
         Furthermore, it will flip the sign on every cobordism, which is the convention used so that the differential will square to 0 when adding a crossing"""
-    NewElements = [AddCapToCLT(clt, i, grshift) for clt in Complex.elements]
-    length = len(Complex.elements)
-    NewMorphisms = []
-    for target ,row in enumerate(Complex.morphisms):
+    Newgens = [AddCapToCLT(clt, i, grshift) for clt in Complex.gens]
+    length = len(Complex.gens)
+    Newdiff = []
+    for target ,row in enumerate(Complex.diff):
         NewRow=[]
         for source, cob in enumerate(row):
             if cob == 0: #adding a cap to the zero cobordism does nothing
@@ -191,16 +191,16 @@ def AddCap(Complex, i, grshift = "false"):
                     newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos] #adds the new component without a dot and flips the sign on the coefficient
                 else: 
                     newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos] #adds the new component without a dot
-                NewCob = Cobordism(NewElements[source], NewElements[target], simplify_decos(newDecos), newcomps)
+                NewCob = Cobordism(Newgens[source], Newgens[target], simplify_decos(newDecos), newcomps)
                 NewRow.append(NewCob.ReduceDecorations())
-        NewMorphisms.append(NewRow)
-    return CobComplex(NewElements, NewMorphisms)
+        Newdiff.append(NewRow)
+    return CobComplex(Newgens, Newdiff)
 
 def AddCupToCLT(clt, i):
     """ Adds a cup to the clt at index i, where 0 <= i <= clt.bot -2
         Returns a list of 2 clt if there is a closed component, obtained by neckcutting
         Otherwise returns a list of 1 clt """
-    newElements = []
+    newgens = []
     def decrementby2(j):#decrement TEI by 2 if greater than where cup is to be inserted
             if j >= clt.top +i:
                 return j-2
@@ -208,8 +208,8 @@ def AddCupToCLT(clt, i):
                 return j
     if clt.arcs[clt.top +i] == clt.top+i+1: # adding the cup makes a closed component
         newarcs = [decrementby2(x) for x in clt.arcs if x != clt.top+i and x!= clt.top+i+1] #removes the closed component from the arcs, shifts remaining TEI
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr+1, clt.dgr+0.5)) #neckcutting
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs, clt.pgr, clt.qgr-1, clt.dgr-0.5)) #neckcutting
+        newgens.append(CLT(clt.top, clt.bot -2, newarcs, clt.h, clt.q+1, clt.delta+0.5)) #neckcutting
+        newgens.append(CLT(clt.top, clt.bot -2, newarcs, clt.h, clt.q-1, clt.delta-0.5)) #neckcutting
     else: # adding the cup doesnt make closed components
         leftend = clt.arcs[clt.top + i] #the endpoint of the arc which connects at i
         rightend = clt.arcs[clt.top+i+1] #the endpoint of the arc which connects at i+1
@@ -217,16 +217,16 @@ def AddCupToCLT(clt, i):
         newarcs[leftend] = rightend # connecting the two arcs via the cup
         newarcs[rightend] = leftend
         newarcs1 = [decrementby2(entry) for x, entry in enumerate(newarcs) if x != clt.top+i and x != clt.top+i+1] #removes the ends which don't exist anymore and shifts remaining TEI
-        newElements.append(CLT(clt.top, clt.bot -2, newarcs1, clt.pgr, clt.qgr, clt.dgr))
-    return newElements
+        newgens.append(CLT(clt.top, clt.bot -2, newarcs1, clt.h, clt.q, clt.delta))
+    return newgens
 
 def AddCup(Complex, i): # TODO: reduce decorations
     """ Here 0 <= i <= tangle.bot -2"""
-    newElements = []
-    for clt in Complex.elements:
-        newElements.extend(AddCupToCLT(clt, i))
-    NewMorphisms = []
-    for target, row in enumerate(Complex.morphisms):
+    newgens = []
+    for clt in Complex.gens:
+        newgens.extend(AddCupToCLT(clt, i))
+    Newdiff = []
+    for target, row in enumerate(Complex.diff):
         newRow = []
         nextRow = []
         for source, cob in enumerate(row):
@@ -245,8 +245,8 @@ def AddCup(Complex, i): # TODO: reduce decorations
             def adddotonindex(decoration, index_to_add): # adds dot to the component labeled by index_to_add if there is no dot already, otherwise does nothing
                 return decoration[:index_to_add+1] + [1] + decoration[index_to_add+2:]
             
-            if Complex.elements[source].arcs[Complex.elements[source].top +i] == Complex.elements[source].top+i+1 \
-                and Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # source and target are both closed, add 2 cobordisms to newRow and nextRow
+            if Complex.gens[source].arcs[Complex.gens[source].top +i] == Complex.gens[source].top+i+1 \
+                and Complex.gens[target].arcs[Complex.gens[target].top +i] == Complex.gens[target].top+i+1: # source and target are both closed, add 2 cobordisms to newRow and nextRow
                 if cob == 0:
                     newRow.append(0)
                     newRow.append(0)
@@ -285,7 +285,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     newRow.append(Cobordism2)
                     nextRow.append(Cobordism3.ReduceDecorations())
                     nextRow.append(Cobordism4.ReduceDecorations())
-            elif Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # source is open but target is closed, add 1 cobordism to each
+            elif Complex.gens[target].arcs[Complex.gens[target].top +i] == Complex.gens[target].top+i+1: # source is open but target is closed, add 1 cobordism to each
                 if cob == 0:
                     newRow.append(0)
                     nextRow.append(0)
@@ -309,7 +309,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     Cobordism2 = Cobordism(newsourceclt, newtargetclts[1], simplify_decos(newDecos2), newcomps)
                     newRow.append(Cobordism1.ReduceDecorations())
                     nextRow.append(Cobordism2.ReduceDecorations())
-            elif Complex.elements[source].arcs[Complex.elements[source].top +i] == Complex.elements[source].top+i+1: # source is closed but target is open, add 2 cobordisms to newRow only
+            elif Complex.gens[source].arcs[Complex.gens[source].top +i] == Complex.gens[source].top+i+1: # source is closed but target is open, add 2 cobordisms to newRow only
                 if cob == 0:
                     newRow.append(0)
                     newRow.append(0)
@@ -407,27 +407,27 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     newtargetclt = AddCupToCLT(cob.back, i)[0]
                     Cobordism1 = Cobordism(newsourceclt, newtargetclt, simplify_decos(newDecos1), newcomps)
                     newRow.append(Cobordism1.ReduceDecorations())
-        NewMorphisms.append(newRow)
-        if Complex.elements[target].arcs[Complex.elements[target].top +i] == Complex.elements[target].top+i+1: # target is closed
-            NewMorphisms.append(nextRow)
-    return CobComplex(newElements, NewMorphisms)
+        Newdiff.append(newRow)
+        if Complex.gens[target].arcs[Complex.gens[target].top +i] == Complex.gens[target].top+i+1: # target is closed
+            Newdiff.append(nextRow)
+    return CobComplex(newgens, Newdiff)
   
 def AddPosCrossing(Complex, i):
     CapCup = AddCap(AddCup(Complex, i), i, "true")
-    sourceelements = Complex.elements
-    targetelements = CapCup.elements
-    NewElements = sourceelements + targetelements
-    TopLeft = Complex.morphisms
-    BottomRight = CapCup.morphisms
-    length1 = len(Complex.elements)
-    length2 = len(CapCup.elements)
+    sourcegens = Complex.gens
+    targetgens = CapCup.gens
+    Newgens = sourcegens + targetgens
+    TopLeft = Complex.diff
+    BottomRight = CapCup.diff
+    length1 = len(Complex.gens)
+    length2 = len(CapCup.gens)
     TopRight = np.full((length1, length2), 0, Cobordism)
     BottomLeft = []
-    for x, targetclt in enumerate(Complex.elements):
+    for x, targetclt in enumerate(Complex.gens):
         if targetclt.arcs[targetclt.top +i] == targetclt.top+i+1: #targetclt is closed
             newRow = []
             nextRow = []
-            for y, sourceclt in enumerate(Complex.elements):
+            for y, sourceclt in enumerate(Complex.gens):
                 if x == y:
                     newTarget1 = AddCapToCLT(AddCupToCLT(targetclt, i)[0], i, "true")
                     newTarget2 = AddCapToCLT(AddCupToCLT(targetclt, i)[1], i, "true")
@@ -450,7 +450,7 @@ def AddPosCrossing(Complex, i):
             BottomLeft.append(nextRow)
         else:
             newRow = []
-            for y, sourceclt in enumerate(Complex.elements):
+            for y, sourceclt in enumerate(Complex.gens):
                 if x == y:
                     newTarget = AddCapToCLT(AddCupToCLT(targetclt, i)[0], i, "true")
                     decos = [[0] + [0 for comp in components(sourceclt, newTarget)] + [1]]
@@ -459,13 +459,13 @@ def AddPosCrossing(Complex, i):
                 else:
                     newRow.append(0)
             BottomLeft.append(newRow)
-    NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
+    Newdiff = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
                                    np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
-    NewComplex = CobComplex(NewElements, NewMorphisms)
+    NewComplex = CobComplex(Newgens, Newdiff)
     return NewComplex
 
 def grshiftclt(clt):
-    return CLT(clt.top, clt.bot, clt.arcs, clt.pgr+1, clt.qgr+1, clt.dgr-0.5)
+    return CLT(clt.top, clt.bot, clt.arcs, clt.h+1, clt.q+1, clt.delta-0.5)
 
 def grshiftcob(cob):
     if cob == 0:
@@ -474,24 +474,24 @@ def grshiftcob(cob):
     return Cobordism(grshiftclt(cob.front), grshiftclt(cob.back), newDecos, cob.comps)
     
 def AddNegCrossing(Complex, i):
-    targetelements = [grshiftclt(clt) for clt in Complex.elements]
+    targetgens = [grshiftclt(clt) for clt in Complex.gens]
     CapCup = AddCap(AddCup(Complex, i), i)
-    sourceelements = CapCup.elements
-    NewElements = sourceelements + targetelements
-    TopLeft = CapCup.morphisms
-    BottomRight = [[grshiftcob(cob) for cob in row] for row in Complex.morphisms]
-    length1 = len(sourceelements)
-    length2 = len(targetelements)
+    sourcegens = CapCup.gens
+    Newgens = sourcegens + targetgens
+    TopLeft = CapCup.diff
+    BottomRight = [[grshiftcob(cob) for cob in row] for row in Complex.diff]
+    length1 = len(sourcegens)
+    length2 = len(targetgens)
     TopRight = np.full((length1, length2), 0, Cobordism)
     BottomLeft = [] 
-    for x, targetclt in enumerate(Complex.elements):
+    for x, targetclt in enumerate(Complex.gens):
         newRow = []
-        for y, sourceclt in enumerate(Complex.elements):
+        for y, sourceclt in enumerate(Complex.gens):
             if sourceclt.arcs[sourceclt.top +i] == sourceclt.top+i+1: #sourceclt is closed
                 if x == y:
                     newSource1 = AddCapToCLT(AddCupToCLT(sourceclt, i)[0], i)
                     newSource2 = AddCapToCLT(AddCupToCLT(sourceclt, i)[1], i)
-                    newTarget = targetelements[x]
+                    newTarget = targetgens[x]
                     newcomps = components(newSource2, newTarget)
                     magic_index = 0
                     for z,comp in enumerate(newcomps):
@@ -510,16 +510,16 @@ def AddNegCrossing(Complex, i):
             else: #sourceclt is open
                 if x == y:
                     newSource = AddCapToCLT(AddCupToCLT(sourceclt, i)[0], i)
-                    newTarget = targetelements[x]
+                    newTarget = targetgens[x]
                     decos = [[0] + [0 for comp in components(newSource, newTarget)] + [1]]
                     newCobordism = Cobordism(newSource, newTarget, decos)
                     newRow.append(newCobordism)
                 else:
                     newRow.append(0)
         BottomLeft.append(newRow)
-    NewMorphisms = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
+    Newdiff = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
                                    np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
-    NewComplex = CobComplex(NewElements, NewMorphisms)
+    NewComplex = CobComplex(Newgens, Newdiff)
     return NewComplex
 
 def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
@@ -547,7 +547,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     for i,word in enumerate(stringlist):
         
         time2=time()
-        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects, "+str(round(time2-time1,1))+" sec)", end='\r')# monitor \n ->\r
+        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects, "+str(round(time2-time1,1))+" sec)", end='\r')# monitor \n ->\r
         time1=time2
         
         if word[0]=="pos":

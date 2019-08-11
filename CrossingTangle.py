@@ -47,7 +47,7 @@ class Tangle(object):
         ends = start
         for i,word in enumerate(stringlist):
             # PrettyPrintComplex(cx, "old long")
-            print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\n')# monitor \n ->\r
+            print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects)", end='\n')# monitor \n ->\r
             #time.sleep(0.1)
             if word[0]=="pos":
                 cx=AddPosCrossing(cx, word[1])

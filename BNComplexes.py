@@ -112,10 +112,10 @@ class BNComplex(object):
         # return True
         length = len(self.gens)
         if len(self.diff) != length:
-            raise Exception('Differential does not have n rows (where n is the number of elements in chain complex)')
+            raise Exception('Differential does not have n rows (where n is the number of gens in chain complex)')
         for i in self.diff:
             if len(i) != length:
-                raise Exception('Differential does not have n columns (where n is the number of elements in chain complex)')
+                raise Exception('Differential does not have n columns (where n is the number of gens in chain complex)')
         for i in range(length):
             if self.diff[i][i] is not 0:
                 raise Exception('Differential has self loops')
@@ -394,13 +394,13 @@ def CLT2BNObj(clt):
         
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     elif clt.arcs[0]==3:
-        return BNobj(0,clt.qgr,clt.pgr) #b
+        return BNobj(0,clt.q,clt.h) #b
     elif clt.arcs[0]==1:
-        return BNobj(1,clt.qgr,clt.pgr) #c
+        return BNobj(1,clt.q,clt.h) #c
 
 def CobComplex2BNComplex(complex,field=2):
-    gens=[CLT2BNObj(clt) for clt in complex.elements]
-    diff=[[CobordismToBNAlg(cob,field) for cob in row] for row in complex.morphisms]
+    gens=[CLT2BNObj(clt) for clt in complex.gens]
+    diff=[[CobordismToBNAlg(cob,field) for cob in row] for row in complex.diff]
     BNcx = BNComplex(gens,diff,field)
     BNcx.eliminateAll()
     return BNcx
@@ -439,10 +439,10 @@ def BNAlg2Cob(morphism, sourceCLT, targetCLT):
     
 def BNComplex2CobComplex(BNcomplex):
     # BNcomplex.print()
-    elements = [BNObj2CLT(bnobj) for bnobj in BNcomplex.gens]
-    morphisms = [[BNAlg2Cob(morphism, elements[source], elements[target]) \
+    gens = [BNObj2CLT(bnobj) for bnobj in BNcomplex.gens]
+    diff = [[BNAlg2Cob(morphism, gens[source], gens[target]) \
                  for source, morphism in enumerate(row)] for target, row in enumerate(BNcomplex.diff)]
-    complex = CobComplex(elements, morphisms)
+    complex = CobComplex(gens, diff)
     # complex.print("old long")
     return complex
     

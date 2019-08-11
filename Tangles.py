@@ -19,22 +19,22 @@ import math
 class CLT(object):
     """A crossingless tangle (CLT) is a matching of n+m ends (m=top,n=bot=bottom). 
     arcs is a list whose ith entry gives the value of the involution at the ith tangle end."""
-    __slots__ = 'top','bot', 'total', 'arcs', 'pgr', 'qgr', 'dgr', 'pairs'
+    __slots__ = 'top','bot', 'total', 'arcs', 'h', 'q', 'delta', 'pairs'
     
-    def __init__(self,top,bot,arcs,pgr,qgr,dgr):
+    def __init__(self,top,bot,arcs,h,q,delta):
         self.top = top
         self.bot = bot
         self.total = int((top+bot)/2)# total number of arcs
         self.arcs = arcs
-        self.pgr = pgr
-        self.qgr = qgr
-        self.dgr = dgr
+        self.h = h
+        self.q = q
+        self.delta = delta
         self.pairs = [pair for pair in [[i,arcs[i]] for i in range(top+bot)] if pair[0] < pair[1]] # testing alternative format for CLTs
     
     def shift_qhd(self,q,h,delta):
-        self.pgr += h
-        self.qgr += q
-        self.dgr += delta
+        self.h += h
+        self.q += q
+        self.delta += delta
         return self
     
     def check(self):
@@ -101,7 +101,7 @@ class CLT(object):
                 else:
                     return self.top+self.bot+index
             return [aux1(m1[i]) for i in range(self.top)]+[aux2(m2[i]) for i in range(other.top)]+[aux1(m1[self.top+i]) for i in range(self.bot)]+[aux2(m2[other.top+i]) for i in range(other.bot)]
-        return CLT(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr+other.dgr) #TODO: check grading computations
+        return CLT(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.h+other.h, self.q + other.q, self.delta+other.delta) #TODO: check grading computations
     
     def __mul__(self, other): #not currently used
         def mul(m1,m2):
@@ -129,16 +129,16 @@ class CLT(object):
                 return middle+self.top-other.top 
             
             return [aux1(i) for i in range(self.top)]+[aux2(i+other.top) for i in range(other.bot)]
-        return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.pgr+other.pgr, self.qgr + other.qgr, self.dgr+other.dgr) #TODO: check grading computations
+        return CLT(self.top,other.bot,mul(self.arcs,other.arcs),self.h+other.h, self.q + other.q, self.delta+other.delta) #TODO: check grading computations
 
     def __eq__(self, other): # redefining eq so that the tangles don't have to be literally the same when composing cobordisms, but only need to have the same values
         """Check if two tangles are the same up to gradings.
         """
         #if self.top == other.top and self.bot == other.bot and self.arcs == other.arcs:
-        #    if self.pgr == other.pgr and self.qgr == other.qgr and self.dgr == other.dgr:
+        #    if self.h == other.h and self.q == other.q and self.delta == other.delta:
         #        return True
         #    else:
-        #        #print("tangles have different gradings, the first tangle has p,q,d:", self.pgr, self.qgr, self.dgr, "while the second has p,q,d:", other.pgr, other.qgr, other.dgr)
+        #        #print("tangles have different gradings, the first tangle has p,q,d:", self.h, self.q, self.delta, "while the second has p,q,d:", other.h, other.q, other.delta)
         #        return True
         #else:
         #    return False
