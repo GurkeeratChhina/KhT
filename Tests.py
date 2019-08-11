@@ -635,6 +635,16 @@ def TestSet27():
     print("length 4:", GenerateTangleWords(4))
     print("length 5:", GenerateTangleWords(5))
     
+def TestSet28(): # tangle_8
+    tangle ="cup2.cup4.pos3.pos4.neg1.neg2.neg0.neg1.pos3.pos4.pos2.pos3.neg1.neg0.pos3.pos4.neg3.neg2.cap5.cap3.cap1"
+    drawtangle(tangle,"tangle_8","slices",1)
+    complex= BNbracket(tangle,0,0,1)
+    BN_complex = CobComplex2BNComplex(complex, 7) # doing mod 7 as if over Q
+    DrawBNComplex(BN_complex, "BN_complex_tangle_8.svg", "qh")
+    BN_complex.eliminateAll()
+    BN_complex.clean_up()
+    DrawBNComplex(BN_complex, "BN_complex_tangle_8_after_cleanup.svg", "qh")
+    
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -675,12 +685,12 @@ def TestSet27():
 # TestSet22(3,-3)
 # TestSet22(3,3)
 # TestSet22(15,15)
-#TestSet23()
-TestSet24()
+# TestSet23()
+# TestSet24()
 # TestSet25()
-TestSet26()
-TestSet27()
-
+# TestSet26()
+# TestSet27()
+TestSet28()
 
 
 ## comparing efficiency of two functions

@@ -29,6 +29,26 @@ from fractions import Fraction
 def ToExponent(exponent):
     return str(exponent).translate(str.maketrans("-0123456789.", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹·"))
 
+def inverse(num,field): #this only works over a field;could replace this by a suitable function for positive characteristic
+    if field == 0:
+        return Fraction(1)/num
+    elif field == 1:
+        if num in [1, -1]:
+            return num
+        else: 
+            raise Exception("Can't invert over Z")
+    else: #taken from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Pseudocode
+        s = 0
+        S = 1
+        r = field
+        R = num
+        while r != 0:
+            q = R // r
+            R, r = r, R - q * r
+            S, s = s, S - q * s
+        #print((S*num)%self.field) # should be 1 if computed correctly
+        return S
+
 class BNobj(object):
     """A BNobject is a pair [idempotent,q,h,delta(optional)], where idempotent is either 0 (b=solid dot) or 1 (c=hollow dot). 
     """
@@ -92,7 +112,7 @@ class BNobj(object):
     def shift_h(self,shift): #shift h, keep q fixed; create new object
         return BNobj(self.idem,self.q,self.h+shift,self.delta-shift)
 
-def coeff_simplify(num,field=2):
+def coeff_simplify(num,field):
     if field > 1:
         return num % field
     else: # This probably needs to be fixed for field=0
@@ -110,7 +130,7 @@ class BNmor_alt(object):# work in progress
         self.D = np.array(D) # list of coefficients
         self.I = I #coefficient
     
-    def simplify_BNmor(self,field=2):
+    def simplify_BNmor(self,field):
         """simplify algebra elements by omitting superflous zeros."""
         self.S=[coeff_simplify(i) for i in self.S]
         self.D=[coeff_simplify(i) for i in self.D]
@@ -157,11 +177,11 @@ class BNmor(object):
     """
     __slots__ = 'pairs','field'
     
-    def __init__(self,pairs,field=2):
+    def __init__(self,pairs,field):
         self.pairs = pairs
         self.field = field
     
-    def simplify_BNmor(self,field=2):
+    def simplify_BNmor(self,field):
         """simplify algebra elements by adding all coeffients of the same power of D or S, omitting those with coefficient 0. This is very similar to simplify_decos"""
         if self.pairs == []:
             self.pairs=[]
@@ -197,6 +217,15 @@ class BNmor(object):
             return True
         else:
             return False
+            
+    def is_isomorphism(self):
+        if len(self.pairs)!=1:
+            return False
+        elif self.pairs[0][0]!=0:
+            return False
+        elif self.pairs[0][1]==0:
+            return False
+        return True
     
     def contains_D(self):
         return all([pair[0]<=0 for pair in self.pairs])==False
@@ -204,8 +233,8 @@ class BNmor(object):
     def contains_S(self):
         return all([pair[0]>=0 for pair in self.pairs])==False
     
-    def negative(self): #create new morphism
-        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
+    def negative(self,field,coeff=1): #create new morphism
+        return BNmor([[pair[0],(-1)*pair[1]*coeff] for pair in self.pairs],self.field)
     
     def BNAlg2String(self):
         string=""
@@ -285,7 +314,7 @@ class BNComplex(object):
            If no isomorphism is found, returns None"""
         for targetindex, row in enumerate(self.diff):
             for sourceindex, morphism in enumerate(row):
-                if morphism.is_identity():
+                if morphism.is_isomorphism():
                     return [sourceindex, targetindex]
         return None
     
@@ -296,6 +325,11 @@ class BNComplex(object):
         
         Max=max(targetindex,sourceindex)
         Min=min(targetindex,sourceindex)
+        coeff = self.diff[targetindex,sourceindex] # coefficient of the cancelling arrow
+        
+        if (len(coeff.pairs)!=1) or (coeff.pairs[0][0]!=0):
+            raise Exception('You cannot cancel this arrow!')
+        
         
         del self.gens[Max] # eliminate source and target from list of generators
         del self.gens[Min] # eliminate source and target from list of generators
@@ -303,8 +337,7 @@ class BNComplex(object):
         out_source = np.delete(self.diff[:,sourceindex],[Min,Max],0) #arrows starting at the source, omiting indices targetindex and sourceindex
         in_target = np.delete(self.diff[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
         
-        if (self.diff[targetindex,sourceindex]).pairs[0][1]==1: # add minus sign; in the case the coefficient is -1, the signs cancel.
-            in_target=np.array([entry.negative() for entry in in_target])
+        in_target=np.array([entry.negative(self.field,inverse(coeff.pairs[0][1],self.field)) for entry in in_target])
         
         self.diff=np.delete(self.diff,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
         self.diff=np.delete(self.diff,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
@@ -325,7 +358,7 @@ class BNComplex(object):
         
         if (switch=="safe") & ((self.diff)[start,end].pairs != []):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
-        self.diff[end,:]+=[alg.negative()*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
+        self.diff[end,:]+=[alg.negative(self.field)*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
         #self.ValidMorphism()
             
@@ -333,7 +366,7 @@ class BNComplex(object):
     def isotopy_via_vector_end(self,end,vector): # unused function: this is actually *much* slower
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
         """
-        self.diff+=np.outer([x.negative() for x in vector],self.diff[end,:]) # subtract all precompositions with the differential (rows of diff)
+        self.diff+=np.outer([x.negative(self.field) for x in vector],self.diff[end,:]) # subtract all precompositions with the differential (rows of diff)
         self.diff[:,end]+=np.dot(self.diff,vector) # add all postcompositions with the differential (columns of diff)
     
     def isolate_arrow(self,start, end, alg):
@@ -341,28 +374,9 @@ class BNComplex(object):
         'arrow' is a list [start, end, alg], where 'alg' is a BNmor with a single entry.
 
         """
-        def inverse(num): #this only works over a field;could replace this by a suitable function for positive characteristic
-            if self.field == 0:
-                return Fraction(1)/num
-            elif self.field == 1:
-                if num in [1, -1]:
-                    return num
-                else: 
-                    raise Exception("Can't invert over Z")
-            else: #taken from https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Pseudocode
-                s = 0
-                S = 1
-                r = self.field
-                R = num
-                while r != 0:
-                    q = R // r
-                    R, r = r, R - q * r
-                    S, s = s, S - q * s
-                #print((S*num)%self.field) # should be 1 if computed correctly
-                return S
                 
         face=alg.pairs[0][0]
-        inverse_coeff=inverse(alg.pairs[0][1])
+        inverse_coeff=inverse(alg.pairs[0][1],self.field)
         
         def find_isotopy(index,entry):# Note: We are assuming here that there is at most one label to remove. 
             for pair in entry.pairs:
@@ -468,21 +482,21 @@ class BNComplex(object):
             self.clean_up_once(-1)# faces S
             self.clean_up_once(1) # faces D
             time2=time()
-            print("iteration: "+str(iter)+" ("+str(round(time2-time1,1))+" sec)", end='\n')# testing how to monitor a process
+            print("iteration: "+str(iter)+" ("+str(round(time2-time1,1))+" sec)", end='\r')# testing how to monitor a process
             time1=time2
             #time.sleep(1)
         else:
             print("Clean-up: Terminated as a result of reaching maximum iteration value of", max_iter)
             
-    def negative(self): #create new morphism
-        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
+    #def negative(self): #create new morphism
+    #    return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
     
     def shift_h(self,shift): # create new complex
         new_gens = [gen.shift_h(shift) for gen in self.gens]
         if shift % 2 == 0:
             new_diff = self.diff
         elif shift % 2 == 1:
-            new_diff = [[alg.negative() for alg in row] for row in self.diff]
+            new_diff = [[alg.negative(self.field) for alg in row] for row in self.diff]
         else:
             raise Exception('Why are you trying to shift homological grading by something other than an integer? I cannot do that!')
         return BNComplex(new_gens,new_diff)
@@ -511,7 +525,7 @@ class BNComplex(object):
         
         return BNComplex(self.gens+shifted_complex.gens,new_diff)
 
-ZeroMor=BNmor([])# note that this morphism is has field=2 by default, but this information gets never used.
+ZeroMor=BNmor([],2)# note that this morphism is has field=2 by default, but this information gets never used.
 #ZeroMor=BNmor([],[],0)
 
 def CobordismToBNAlg(cob,field=2):
@@ -656,12 +670,8 @@ def PrettyPrintBNComplex(complex):
 
 # Claudius: I'll keep working on this list... 
 #todo: implement recognition of local systems (optional)
-#todo: implement Cancellation (optional)
 #todo: add a way to convert BNComplexes into Complexes (optional; could be useful for twisting)
 #todo: implement pairing theorem (just for fun!)
-
-BNmor0 = BNmor([])
-
 
 #####################
 ####### TESTS #######
@@ -719,15 +729,15 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
         [BNobj(1,-12,-5), BNobj(1,-10,-4),\
          BNobj(0,-11,-4), BNobj(0,-9,-3), BNobj(0,-7,-2),\
          BNobj(0,-9,-3),  BNobj(0,-7,-2), BNobj(0,-5,-1), BNobj(1,-4,0)],\
-         [[BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
-          [BNmor([[1,1],[-2,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
-          [BNmor([[-1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
-          [BNmor0,BNmor([[-1,-1]]),BNmor([[-2,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
-          [BNmor0,BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
-          [BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0],\
-          [BNmor0,BNmor0,BNmor0,BNmor([[1,-1]]),BNmor0,BNmor([[-2,1]]),BNmor0,BNmor0,BNmor0],\
-          [BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[1,1]]),BNmor0,BNmor([[1,1]]),BNmor0,BNmor0],\
-          [BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor0,BNmor([[-1,1]]),BNmor0]])
+         [[ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [BNmor([[1,1],[-2,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [BNmor([[-1,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,BNmor([[-1,-1]]),BNmor([[-2,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,BNmor([[1,1]]),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,-1]]),ZeroMor,BNmor([[-2,1]]),ZeroMor,ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]]),ZeroMor,BNmor([[1,1]]),ZeroMor,ZeroMor],\
+          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[-1,1]]),ZeroMor]])
     DrawBNComplex(BNComplex1, "2m3pt_redBN_before_cleanup.svg","index_qh")
     PrettyPrintBNComplex(BNComplex1)
 
