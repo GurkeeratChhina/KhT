@@ -638,14 +638,15 @@ def TestSet27():
     
 def TestSet28(): # tangle_8
     tangle ="cup2.cup4.pos3.pos4.neg1.neg2.neg0.neg1.pos3.pos4.pos2.pos3.neg1.neg0.pos3.pos4.neg3.neg2.cap5.cap3.cap1"
-    drawtangle(tangle,"tangle_8","slices",1)
+    #drawtangle(tangle,"tangle_8","slices",1)
     complex= BNbracket(tangle,0,0,1)
     # complex.print()
     BN_complex = CobComplex2BNComplex(complex, 7) # doing mod 7 as if over Q
-    BN_complex.draw("BN_complex_tangle_8.svg", "qh")
+    #BN_complex.draw("BN_complex_tangle_8.pdf", "qh")
     BN_complex.eliminateAll()
     BN_complex.clean_up()
-    BN_complex.draw("BN_complex_tangle_8_after_cleanup.svg", "qh")
+    multicurve=BN_complex.to_multicurve()
+    multicurve.draw("bla","hdelta",tangle)
     # print(BN_complex)
     
     

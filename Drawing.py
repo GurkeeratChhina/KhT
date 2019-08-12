@@ -221,7 +221,7 @@ def drawtangle(string,name,style="plain",start=1):
     h = len(stringlist)
     dotlength=start
     
-    surface = cairo.SVGSurface("Output/"+name+'.svg',w*scale,(h+1)*scale)
+    surface = cairo.PDFSurface("Output/"+name+'.pdf',w*scale,(h+1)*scale)
     ctx = cairo.Context(surface)
     ctx.set_source_rgb(1, 1, 1) #background colour
     ctx.paint()

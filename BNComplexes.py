@@ -24,6 +24,9 @@ from time import time
 from KhT import *
 from fractions import Fraction
 from BNAlgebra import *
+from subprocess import run
+from time import sleep
+
 
 class BNComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -48,6 +51,9 @@ class BNComplex(object):
             return mor.simplify_BNmor(field)
         self.diff = np.array([[simplify(mor) for mor in row] for row in self.diff])
     
+    def __repr__(self):
+        return "BNComplex[{},{},{}]".format(self.gens,self.diff,self.field)
+    
     def __str__(self):
         """string representation of a BNcomplex; 
         usage:
@@ -69,7 +75,18 @@ class BNComplex(object):
         g = Graph()
         size = len(self.gens)
         g.add_vertex(size)
-        canvas_size = (800*math.sqrt(size), 600*math.sqrt(size))
+        
+        scaling_factor=150 #this may need some adjusting
+        if "index" in vertex_switch:
+            scaling_factor+=100
+        if "q" in vertex_switch:
+            scaling_factor+=50
+        if "h" in vertex_switch:
+            scaling_factor+=50
+        if "delta" in vertex_switch:
+            scaling_factor+=50
+            
+        canvas_size = (scaling_factor*math.sqrt(size), scaling_factor*math.sqrt(size))# square canvas
         
         Vertex_colour = g.new_vertex_property("string") # "black" is the horizontal CLT (b) and "white" is the vertical CLT (c)
         Vertex_labelling = g.new_vertex_property("string")
@@ -101,9 +118,9 @@ class BNComplex(object):
                     'font_weight' : cairo.FONT_WEIGHT_BOLD,\
                     'marker_size' : 20,\
                     'font_size' : 22}   
-                    
-        #position = arf_layout(g, max_iter=0)
-        position = sfdp_layout(g, max_iter=0)
+        
+        position = arf_layout(g, max_iter=0)
+        #position = sfdp_layout(g, max_iter=0)
         #Position[g.vertex(i)] = [50*(2*i+1), 200]
         
         graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
@@ -302,6 +319,55 @@ class BNComplex(object):
                 all([list(matrix_S[:,index]).count(True)<2 for index in range(size)]) & \
                 all([list(matrix_S[index,:]).count(True)<2 for index in range(size)])
     
+    def to_multicurve(self):
+        """convert a loop-type BNComplex into multicurve, ie split along differentials
+        """
+        if self.is_looptype == False:
+            raise Exception('I cannot convert this complex into a multicurve, because it is not loop-type!')
+        
+        curves=[]
+        index_remaining = list(range(len(self.gens)))
+        
+        while index_remaining != []:
+            #split off a single curve
+            curve = []
+            current = index_remaining[0]
+            
+            while (current not in curve):
+                index_remaining.remove(current)
+                curve.append(current)
+                try:# try to find an adjacent generator that is not already in 'curve'
+                    # if unsuccessful, exit while loop 
+                    def non_zero(index):
+                        return (self.diff[index,current] is not 0) or (self.diff[current,index] is not 0)
+                    index=find_first(index_remaining,non_zero)
+                    current=index     
+                except: 
+                    pass
+            current = curve[0] # go back to the start of the curve, in case the curve is an arc
+            
+            try:# try to find an adjacent generator that is not already in 'curve'
+                # if unsuccessful, we have found the curve
+                index=find_first(index_remaining,non_zero)
+                current=index 
+                while (current not in curve) or (current == curve[0]):
+                    index_remaining.remove(current)
+                    curve.insert(0,current)
+                    try:# try to find an adjacent generator that is not already in 'curve'
+                        # if unsuccessful, exit while loop, we have found the curve
+                        index=find_first(index_remaining,non_zero)
+                        current=index 
+                    except: 
+                        pass
+            except: 
+                pass
+            curves.append(curve)
+        
+        genss=[[self.gens[index] for index in curve] for curve in curves]
+        diffs=[[[self.diff[j,i] for j in curve] for i in curve] for curve in curves]
+        return multicurve([BNComplex(gens,diff,self.field) for gens,diff in zip(genss,diffs)])
+        
+    
     def clean_up(self,max_iter=200):
         """ Simplify complex alternatingly wrt D and S faces and stop after at most max_iter iterations. The default is 200 iterations. 
         """
@@ -446,6 +512,25 @@ def BNComplex2CobComplex(BNcomplex):
     # complex.print("old long")
     return complex
     
+class multicurve(object):
+    """A multicurve is a collection of loop-type BNcomplexes which are assumed to be connected.
+    """
+    def __init__(self,comps):
+        self.comps=comps
+    
+    def draw(self, filename, vertex_switch="index_qhdelta",tangle=None):
+        """create a pdf file which draws the graph of each component on a separate page; if tangle is specified, the first page is the tangle input.
+        """
+        for i,comp in enumerate(self.comps):
+            comp.draw(filename+str(i)+".pdf",vertex_switch)
+        #sleep(4)
+        if tangle==None:
+            tanglestr=""
+        else:
+            tanglestr="Output/"+filename+"_tangle.pdf "
+            drawtangle(tangle,filename+"_tangle","slices",1)
+        run("pdftk "+tanglestr+"".join(["Output/"+filename+str(i)+".pdf " for i in range(len(self.comps))])+"output Output/"+filename+".pdf", shell=True)
+        run("rm "+tanglestr+"".join(["Output/"+filename+str(i)+".pdf " for i in range(len(self.comps))]), shell=True)
 
 #todo: implement recognition of local systems (optional)
 #todo: implement pairing theorem (just for fun!)
