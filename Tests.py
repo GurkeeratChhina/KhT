@@ -646,9 +646,21 @@ def TestSet28(): # tangle_8
     BN_complex.eliminateAll()
     BN_complex.clean_up()
     multicurve=BN_complex.to_multicurve()
-    multicurve.draw("bla","hdelta",tangle)
+    multicurve.draw("tangle_8","hdelta",tangle)
     # print(BN_complex)
-    
+
+def TestSet29(): # same as tangle_8, but simpler presentation
+    tangle ="cup2.cup3.neg1.neg2.neg0.neg1.pos3.pos4.pos2.pos3.neg1.neg0.neg2.neg1.cap3.cap2.cap1"
+    #drawtangle(tangle,"tangle_8alt","slices",1)
+    complex= BNbracket(tangle,0,0,1)
+    #complex.print()
+    BN_complex = CobComplex2BNComplex(complex, 5) # doing mod 7 as if over Q
+    #BN_complex.draw("BN_complex_tangle_8.pdf", "qh")
+    BN_complex.eliminateAll()
+    BN_complex.clean_up()
+    multicurve=BN_complex.to_multicurve()
+    multicurve.draw("tangle_8alt_mod5","hdelta",tangle)
+    # print(BN_complex)
     
 def Test_TwoTwistTangle():
     b=CLT(1,3,[1,0,3,2],2,3,0)
@@ -784,7 +796,7 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
 # TestSet25()
 # TestSet26()
 # TestSet27()
-TestSet28()
+TestSet29()
 # Test_2m3pt()
 # Test_2m3pt()
 # Test_TwoTwistTangle()
