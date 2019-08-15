@@ -200,22 +200,22 @@ class BNmor(object):
         return self
     
     def __add__(self, other):
-        if other is 0:
+        if other == 0:
             return self
         return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
     
     def __radd__(self, other):
-        if other is 0:
+        if other == 0:
             return self
         return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
 
     def __mul__(self, other):
-        if (self is 0) or (other is 0):
+        if (self == 0) or (other == 0):
             return 0
         return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
         
     def __rmul__(self, other):
-        if (self is 0) or (other is 0):
+        if (self == 0) or (other == 0):
             return 0
         return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
     
