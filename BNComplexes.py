@@ -46,7 +46,7 @@ class BNComplex(object):
     def toField(self,field):
         self.field = field
         def simplify(mor):
-            if mor is 0:
+            if mor == 0:
                 return 0
             return mor.simplify_BNmor(field)
         self.diff = np.array([[simplify(mor) for mor in row] for row in self.diff])
@@ -107,7 +107,7 @@ class BNComplex(object):
         for i in range(size):
             for j in range(size):
                 edge_mor=self.diff[j][i]
-                if edge_mor is not 0:
+                if edge_mor != 0:
                     g.add_edge(g.vertex(i), g.vertex(j))
                     Edge_labeling[g.edge(i,j)] = edge_mor.BNAlg2String()
         eprops =   {'color' : "black",\
@@ -134,15 +134,15 @@ class BNComplex(object):
             if len(i) != length:
                 raise Exception('Differential does not have n columns (where n is the number of gens in chain complex)')
         for i in range(length):
-            if self.diff[i][i] is not 0:
+            if self.diff[i][i] != 0:
                 raise Exception('Differential has self loops')
         
         squared = np.tensordot(self.diff,self.diff, axes=(-2,-1))
         for i,row in enumerate(squared):
             for j,mor in enumerate(row):
-                if mor is not 0:
+                if mor != 0:
                     mor.simplify_BNmor(self.field)
-                    if mor is not 0:
+                    if mor != 0:
                         print("!!!!!!!!!!!!!!!!!!")
                         print("ERROR: Found non-zero term "+mor.BNAlg2String()+" in d² in row "+str(i)+" and column "+str(j)+".")
                         print("!!!!!!!!!!!!!!!!!!")
@@ -153,7 +153,7 @@ class BNComplex(object):
            If no isomorphism is found, returns None"""
         for targetindex, row in enumerate(self.diff):
             for sourceindex, morphism in enumerate(row):
-                if (morphism is not 0) and (morphism.is_isomorphism()):
+                if (morphism != 0) and (morphism.is_isomorphism()):
                     return [sourceindex, targetindex]
         return None
     
@@ -177,7 +177,7 @@ class BNComplex(object):
         in_target = np.delete(self.diff[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
         
         def neg(entry):
-            if entry is 0:
+            if entry == 0:
                 return 0
             return entry.negative(self.field,inverse(coeff.pairs[0][1],self.field))
         
@@ -200,7 +200,7 @@ class BNComplex(object):
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
         """
         
-        if (switch=="safe") and ((self.diff)[start,end] is not 0):
+        if (switch=="safe") and ((self.diff)[start,end] != 0):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
         self.diff[end,:]+=[alg.negative(self.field)*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
@@ -211,7 +211,7 @@ class BNComplex(object):
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
         """
         def neg(x):
-            if x is 0:
+            if x == 0:
                 return 0
             return x.negative(self.field)
         
@@ -230,14 +230,14 @@ class BNComplex(object):
         def find_isotopy(index,entry):# Note: We are assuming here that there is at most one label to remove. 
             for pair in entry.pairs:
                 if (pair[0]*face>0):
-                    if ((self.diff)[index,end] is 0) & (index != end):
+                    if ((self.diff)[index,end] == 0) & (index != end):
                         return BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field)
             return 0 # zeor algebra element
         
         # first remove all other arrows with the same start
         for index in range(len(self.gens)):
-            if ((self.diff)[index,end] is 0) and (index != end): # check that isotopy is valid.
-                if self.diff[index,start] is not 0:
+            if ((self.diff)[index,end] == 0) and (index != end): # check that isotopy is valid.
+                if self.diff[index,start] != 0:
                     for pair in self.diff[index,start].pairs:
                         if pair[0]*face>0:# same face
                             self.isotopy(end,index,BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field),"unsafe")
@@ -247,8 +247,8 @@ class BNComplex(object):
         
         # secondly, remove all remaining arrows with the same end
         for index in range(len(self.gens)):
-            if ((self.diff)[start,index] is 0) & (index != start): # check that isotopy is valid.
-                if self.diff[end,index] is not 0:
+            if ((self.diff)[start,index] == 0) & (index != start): # check that isotopy is valid.
+                if self.diff[end,index] != 0:
                     for pair in self.diff[end,index].pairs:
                         if pair[0]*face>0:# same face
                             self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]],self.field),"unsafe")
@@ -272,7 +272,7 @@ class BNComplex(object):
                 
                 changed=False
                 for end in remaining: # find shortest arrow of the given face starting at start_current
-                    if self.diff[end,start_current] is not 0:
+                    if self.diff[end,start_current] != 0:
                         for index, pair in enumerate(self.diff[end,start_current].pairs):
                             if pair[0]*SD > 0: # same face
                                 if (power_current-pair[0])*SD > 0:
@@ -287,7 +287,7 @@ class BNComplex(object):
                 
                 changed=False
                 for start in remaining: # try to find shorter arrow of the given face ending at end_current
-                    if self.diff[end_current,start] is not 0:
+                    if self.diff[end_current,start] != 0:
                         for index, pair in enumerate(self.diff[end_current,start].pairs):
                             if pair[0]*SD > 0: # same face
                                 if (power_current-pair[0])*SD > 0:
@@ -311,8 +311,8 @@ class BNComplex(object):
     def is_looptype(self):# todo: This could be made much more efficient!!
         """Return 'True' is the complex is loop-type.
         """
-        matrix_D=np.array([[((entry is not 0) and entry.contains_D()) for entry in row] for row in self.diff])
-        matrix_S=np.array([[((entry is not 0) and entry.contains_S()) for entry in row] for row in self.diff])
+        matrix_D=np.array([[((entry != 0) and entry.contains_D()) for entry in row] for row in self.diff])
+        matrix_S=np.array([[((entry != 0) and entry.contains_S()) for entry in row] for row in self.diff])
         size=len(matrix_D)
         return  all([list(matrix_D[:,index]).count(True)<2 for index in range(size)]) & \
                 all([list(matrix_D[index,:]).count(True)<2 for index in range(size)]) & \
@@ -339,7 +339,7 @@ class BNComplex(object):
                 try:# try to find an adjacent generator that is not already in 'curve'
                     # if unsuccessful, exit while loop 
                     def non_zero(index):
-                        return (self.diff[index,current] is not 0) or (self.diff[current,index] is not 0)
+                        return (self.diff[index,current] != 0) or (self.diff[current,index] != 0)
                     index=find_first(index_remaining,non_zero)
                     current=index     
                 except: 
@@ -396,7 +396,7 @@ class BNComplex(object):
             new_diff = self.diff
         elif shift % 2 == 1:
             def neg(alg):
-                if alg is 0:
+                if alg == 0:
                     return 0
                 return alg.negative(self.field)
             new_diff = [[neg(alg) for alg in row] for row in self.diff]
@@ -481,7 +481,7 @@ def BNObj2CLT(bnobj):
 
 def BNAlg2Cob(morphism, sourceCLT, targetCLT):
     decos = []
-    if morphism is 0:
+    if morphism == 0:
         return ZeroCob
     
     for pair in morphism.pairs:

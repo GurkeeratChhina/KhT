@@ -661,6 +661,10 @@ def TestSet29(): # same as tangle_8, but simpler presentation
     multicurve=BN_complex.to_multicurve()
     multicurve.draw("tangle_8alt_mod5","hdelta",tangle)
     # print(BN_complex)
+    Khr=BN_complex.cone(1)
+    Khr.clean_up()
+    multicurve_KhT=Khr.to_multicurve()
+    multicurve_KhT.draw("tangle_8alt_mod5Khr","hdelta",tangle)
     
 def Test_TwoTwistTangle():
     b=CLT(1,3,[1,0,3,2],2,3,0)
@@ -751,6 +755,36 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
     BNComplex3.draw("2m3pt_Kh_after_cleanup.svg","index_qh")
     # This is the lovely invariant = unreduced Khovanov homology of the (2,-3)-pretzel tangle
 
+def TestSet31():
+    def pretz_Tangle(N, M):
+        tangle = "cup1."
+        for i in range(abs(N)):
+            if N < 0:
+                tangle += "neg0."
+            if N > 0:
+                tangle += "pos0."
+        for i in range(abs(M)):
+            if M < 0:
+                tangle += "neg2."
+            if M > 0:
+                tangle += "pos2."
+        tangle += "cap3.cap1"
+        return Tangle(tangle)
+    Tangle6= Tangle("cup1.pos2.pos0.pos0.neg1.pos2.cap3.pos0.cap1")
+    Tangle7= Tangle("cup1.pos2.pos0.pos0.neg1.pos2.cap3.neg1.pos0.cap1")
+    Tangle8= Tangle("cup2.cup3.neg1.neg2.neg0.neg1.pos3.pos4.pos2.pos3.neg1.neg0.neg2.neg1.cap3.cap2.cap1")
+    Tangle9= Tangle("cup1.pos0.neg1.pos0.pos0.pos0.neg2.neg2.neg2.cap3.cap1")
+    TangleTrefoil= Tangle("cup1.pos0.pos0.pos0.cap3.cap1")
+    
+    Tangloid = Tangle8.vertical_sum(pretz_Tangle(3,-3))
+    complexo= BNbracket(Tangloid.slices,0,0,1)
+    BN_complex = CobComplex2BNComplex(complexo, 7) # doing mod 7 as if over Q
+    BN_complex.eliminateAll()
+    BN_complex.clean_up()
+    multicurve=BN_complex.to_multicurve()
+    multicurve.draw("current_tangle","hdelta",Tangloid.slices)
+
+
 # TestSet0()
 # TestSet1()
 # TestSet2()
@@ -796,7 +830,7 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
 # TestSet25()
 # TestSet26()
 # TestSet27()
-TestSet29()
+TestSet31()
 # Test_2m3pt()
 # Test_2m3pt()
 # Test_TwoTwistTangle()
