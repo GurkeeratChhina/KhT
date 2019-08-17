@@ -20,11 +20,10 @@ from tabulate import tabulate
 from time import time
 
 import Cobordisms as Cob
-import Tangles
 
 class CobComplex(object):
     """ A chain complex is a directed graph, consisting of 
-        - A list of CLTS as labels on the vertices
+        - A list of CLTs (Cob.obj) as labels on the vertices
         - A a matrix of cobordisms as the adjacency matrix.
         These should satisfy the usual rules of a chain complex, ie that the differential squared = 0
         Note that the matrix's rows and columns depend on the order the CLTS are given in the list 
@@ -161,7 +160,7 @@ def AddCapToCLT(clt, i, grshift = "false"):
         newh = clt.h
         newq = clt.q
         newdelta = clt.delta
-    return Tangles.CLT(clt.top, clt.bot+2, newarcs, newh, newq, newdelta)
+    return Cob.obj(clt.top, clt.bot+2, newarcs, newh, newq, newdelta)
 
 def AddCap(Complex, i, grshift = "false"):
     """ Creates a new complex by adding a cap to every tangle and every cobordism in Complex, at index i
@@ -187,7 +186,7 @@ def AddCap(Complex, i, grshift = "false"):
                     newDecos = [ NewDeco[:-1] + [0] + [NewDeco[-1]*-1] for NewDeco in cob.decos] #adds the new component without a dot and flips the sign on the coefficient
                 else: 
                     newDecos = [ NewDeco[:-1] + [0] + NewDeco[-1:] for NewDeco in cob.decos] #adds the new component without a dot
-                NewCob = Cob.Cobordism(Newgens[source], Newgens[target], Cob.simplify_decos(newDecos), newcomps)
+                NewCob = Cob.mor(Newgens[source], Newgens[target], Cob.simplify_decos(newDecos), newcomps)
                 NewRow.append(NewCob.ReduceDecorations())
         Newdiff.append(NewRow)
     return CobComplex(Newgens, Newdiff)
@@ -204,8 +203,8 @@ def AddCupToCLT(clt, i):
                 return j
     if clt.arcs[clt.top +i] == clt.top+i+1: # adding the cup makes a closed component
         newarcs = [decrementby2(x) for x in clt.arcs if x != clt.top+i and x!= clt.top+i+1] #removes the closed component from the arcs, shifts remaining TEI
-        newgens.append(Tangles.CLT(clt.top, clt.bot -2, newarcs, clt.h, clt.q+1, clt.delta+0.5)) #neckcutting
-        newgens.append(Tangles.CLT(clt.top, clt.bot -2, newarcs, clt.h, clt.q-1, clt.delta-0.5)) #neckcutting
+        newgens.append(Cob.obj(clt.top, clt.bot -2, newarcs, clt.h, clt.q+1, clt.delta+0.5)) #neckcutting
+        newgens.append(Cob.obj(clt.top, clt.bot -2, newarcs, clt.h, clt.q-1, clt.delta-0.5)) #neckcutting
     else: # adding the cup doesnt make closed components
         leftend = clt.arcs[clt.top + i] #the endpoint of the arc which connects at i
         rightend = clt.arcs[clt.top+i+1] #the endpoint of the arc which connects at i+1
@@ -213,7 +212,7 @@ def AddCupToCLT(clt, i):
         newarcs[leftend] = rightend # connecting the two arcs via the cup
         newarcs[rightend] = leftend
         newarcs1 = [decrementby2(entry) for x, entry in enumerate(newarcs) if x != clt.top+i and x != clt.top+i+1] #removes the ends which don't exist anymore and shifts remaining TEI
-        newgens.append(Tangles.CLT(clt.top, clt.bot -2, newarcs1, clt.h, clt.q, clt.delta))
+        newgens.append(Cob.obj(clt.top, clt.bot -2, newarcs1, clt.h, clt.q, clt.delta))
     return newgens
 
 def AddCup(Complex, i): # TODO: reduce decorations
@@ -273,10 +272,10 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     newDecos4 = [computedeco4(deco) for deco in cob.decos] # see computedeco4()
                     newsourceclts = AddCupToCLT(cob.front, i)
                     newtargetclts = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cob.Cobordism(newsourceclts[0], newtargetclts[0], Cob.simplify_decos(newDecos1), newcomps)
+                    Cobordism1 = Cob.mor(newsourceclts[0], newtargetclts[0], Cob.simplify_decos(newDecos1), newcomps)
                     Cobordism2 = 0 # The neckcutting/delooping isomorphism will give us 0 for Cobordism 2
-                    Cobordism3 = Cob.Cobordism(newsourceclts[0], newtargetclts[1], Cob.simplify_decos(newDecos3), newcomps)
-                    Cobordism4 = Cob.Cobordism(newsourceclts[1], newtargetclts[1], Cob.simplify_decos(newDecos4), newcomps)
+                    Cobordism3 = Cob.mor(newsourceclts[0], newtargetclts[1], Cob.simplify_decos(newDecos3), newcomps)
+                    Cobordism4 = Cob.mor(newsourceclts[1], newtargetclts[1], Cob.simplify_decos(newDecos4), newcomps)
                     newRow.append(Cobordism1.ReduceDecorations())
                     newRow.append(Cobordism2)
                     nextRow.append(Cobordism3.ReduceDecorations())
@@ -301,8 +300,8 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     newDecos2 = [deco for deco in cob.decos] # is identity regardless of dot or not
                     newsourceclt = AddCupToCLT(cob.front, i)[0]
                     newtargetclts = AddCupToCLT(cob.back, i)
-                    Cobordism1 = Cob.Cobordism(newsourceclt, newtargetclts[0], Cob.simplify_decos(newDecos1), newcomps)
-                    Cobordism2 = Cob.Cobordism(newsourceclt, newtargetclts[1], Cob.simplify_decos(newDecos2), newcomps)
+                    Cobordism1 = Cob.mor(newsourceclt, newtargetclts[0], Cob.simplify_decos(newDecos1), newcomps)
+                    Cobordism2 = Cob.mor(newsourceclt, newtargetclts[1], Cob.simplify_decos(newDecos2), newcomps)
                     newRow.append(Cobordism1.ReduceDecorations())
                     nextRow.append(Cobordism2.ReduceDecorations())
             elif Complex.gens[source].arcs[Complex.gens[source].top +i] == Complex.gens[source].top+i+1: # source is closed but target is open, add 2 cobordisms to newRow only
@@ -327,8 +326,8 @@ def AddCup(Complex, i): # TODO: reduce decorations
                     newDecos2 = [computedeco2(deco) for deco in cob.decos]
                     newsourceclts = AddCupToCLT(cob.front, i)
                     newtargetclt = AddCupToCLT(cob.back, i)[0]
-                    Cobordism1 = Cob.Cobordism(newsourceclts[0], newtargetclt, Cob.simplify_decos(newDecos1), newcomps)
-                    Cobordism2 = Cob.Cobordism(newsourceclts[1], newtargetclt, Cob.simplify_decos(newDecos2), newcomps)
+                    Cobordism1 = Cob.mor(newsourceclts[0], newtargetclt, Cob.simplify_decos(newDecos1), newcomps)
+                    Cobordism2 = Cob.mor(newsourceclts[1], newtargetclt, Cob.simplify_decos(newDecos2), newcomps)
                     newRow.append(Cobordism1.ReduceDecorations())
                     newRow.append(Cobordism2.ReduceDecorations())
             else: # source and target are both open, add 1 cobordism to newRow only
@@ -401,7 +400,7 @@ def AddCup(Complex, i): # TODO: reduce decorations
                         newDecos1 = [computedeco2comps(deco) for deco in cob.decos]
                     newsourceclt = AddCupToCLT(cob.front, i)[0]
                     newtargetclt = AddCupToCLT(cob.back, i)[0]
-                    Cobordism1 = Cob.Cobordism(newsourceclt, newtargetclt, Cob.simplify_decos(newDecos1), newcomps)
+                    Cobordism1 = Cob.mor(newsourceclt, newtargetclt, Cob.simplify_decos(newDecos1), newcomps)
                     newRow.append(Cobordism1.ReduceDecorations())
         Newdiff.append(newRow)
         if Complex.gens[target].arcs[Complex.gens[target].top +i] == Complex.gens[target].top+i+1: # target is closed
@@ -417,7 +416,7 @@ def AddPosCrossing(Complex, i):
     BottomRight = CapCup.diff
     length1 = len(Complex.gens)
     length2 = len(CapCup.gens)
-    TopRight = np.full((length1, length2), 0, Cob.Cobordism)
+    TopRight = np.full((length1, length2), 0, Cob.mor)
     BottomLeft = []
     for x, targetclt in enumerate(Complex.gens):
         if targetclt.arcs[targetclt.top +i] == targetclt.top+i+1: #targetclt is closed
@@ -427,7 +426,7 @@ def AddPosCrossing(Complex, i):
                 if x == y:
                     newTarget1 = AddCapToCLT(AddCupToCLT(targetclt, i)[0], i, "true")
                     newTarget2 = AddCapToCLT(AddCupToCLT(targetclt, i)[1], i, "true")
-                    newcomps = Tangles.components(sourceclt, newTarget1)
+                    newcomps = Cob.components(sourceclt, newTarget1)
                     magic_index = 0
                     for z,comp in enumerate(newcomps):
                         if sourceclt.top +i in comp:
@@ -435,8 +434,8 @@ def AddPosCrossing(Complex, i):
                             break
                     decos1 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1], [1] + [0 for comp in newcomps] + [-1]] #Compute new decos via neckcutting
                     decos2 = [[0] + [0 for comp in newcomps] + [1]]
-                    NewCobordism1 = Cob.Cobordism(sourceclt, newTarget1, decos1, newcomps)
-                    NewCobordism2 = Cob.Cobordism(sourceclt, newTarget2, decos2, newcomps)
+                    NewCobordism1 = Cob.mor(sourceclt, newTarget1, decos1, newcomps)
+                    NewCobordism2 = Cob.mor(sourceclt, newTarget2, decos2, newcomps)
                     newRow.append(NewCobordism1)
                     nextRow.append(NewCobordism2)
                 else:
@@ -449,8 +448,8 @@ def AddPosCrossing(Complex, i):
             for y, sourceclt in enumerate(Complex.gens):
                 if x == y:
                     newTarget = AddCapToCLT(AddCupToCLT(targetclt, i)[0], i, "true")
-                    decos = [[0] + [0 for comp in Tangles.components(sourceclt, newTarget)] + [1]]
-                    NewCobordism = Cob.Cobordism(sourceclt, newTarget, decos)
+                    decos = [[0] + [0 for comp in Cob.components(sourceclt, newTarget)] + [1]]
+                    NewCobordism = Cob.mor(sourceclt, newTarget, decos)
                     newRow.append(NewCobordism)
                 else:
                     newRow.append(0)
@@ -461,13 +460,13 @@ def AddPosCrossing(Complex, i):
     return NewComplex
 
 def grshiftclt(clt):
-    return Tangles.CLT(clt.top, clt.bot, clt.arcs, clt.h+1, clt.q+1, clt.delta-0.5)
+    return Cob.obj(clt.top, clt.bot, clt.arcs, clt.h+1, clt.q+1, clt.delta-0.5)
 
 def grshiftcob(cob):
     if cob == 0:
         return 0
     newDecos = [deco[:-1] + [deco[-1]*-1] for deco in cob.decos]
-    return Cob.Cobordism(grshiftclt(cob.front), grshiftclt(cob.back), newDecos, cob.comps)
+    return Cob.mor(grshiftclt(cob.front), grshiftclt(cob.back), newDecos, cob.comps)
     
 def AddNegCrossing(Complex, i):
     targetgens = [grshiftclt(clt) for clt in Complex.gens]
@@ -478,7 +477,7 @@ def AddNegCrossing(Complex, i):
     BottomRight = [[grshiftcob(cob) for cob in row] for row in Complex.diff]
     length1 = len(sourcegens)
     length2 = len(targetgens)
-    TopRight = np.full((length1, length2), 0, Cob.Cobordism)
+    TopRight = np.full((length1, length2), 0, Cob.mor)
     BottomLeft = [] 
     for x, targetclt in enumerate(Complex.gens):
         newRow = []
@@ -488,7 +487,7 @@ def AddNegCrossing(Complex, i):
                     newSource1 = AddCapToCLT(AddCupToCLT(sourceclt, i)[0], i)
                     newSource2 = AddCapToCLT(AddCupToCLT(sourceclt, i)[1], i)
                     newTarget = targetgens[x]
-                    newcomps = Tangles.components(newSource2, newTarget)
+                    newcomps = Cob.components(newSource2, newTarget)
                     magic_index = 0
                     for z,comp in enumerate(newcomps):
                         if sourceclt.top +i in comp:
@@ -496,8 +495,8 @@ def AddNegCrossing(Complex, i):
                             break
                     decos1 = [[0] + [0 for comp in newcomps] + [1]]
                     decos2 = [[0] + [0 for comp in newcomps[:magic_index]] + [1] + [0 for comp in newcomps[magic_index+1:]] + [1]]
-                    newCobordism1 = Cob.Cobordism(newSource1, newTarget, decos1, newcomps)
-                    newCobordism2 = Cob.Cobordism(newSource2, newTarget, decos2, newcomps)
+                    newCobordism1 = Cob.mor(newSource1, newTarget, decos1, newcomps)
+                    newCobordism2 = Cob.mor(newSource2, newTarget, decos2, newcomps)
                     newRow.append(newCobordism1)
                     newRow.append(newCobordism2)
                 else:
@@ -507,8 +506,8 @@ def AddNegCrossing(Complex, i):
                 if x == y:
                     newSource = AddCapToCLT(AddCupToCLT(sourceclt, i)[0], i)
                     newTarget = targetgens[x]
-                    decos = [[0] + [0 for comp in Tangles.components(newSource, newTarget)] + [1]]
-                    newCobordism = Cob.Cobordism(newSource, newTarget, decos)
+                    decos = [[0] + [0 for comp in Cob.components(newSource, newTarget)] + [1]]
+                    newCobordism = Cob.mor(newSource, newTarget, decos)
                     newRow.append(newCobordism)
                 else:
                     newRow.append(0)
@@ -533,7 +532,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     """
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
     stringlist.reverse()
-    cx=CobComplex([Tangles.CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[0]])
+    cx=CobComplex([Cob.obj(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[0]])
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings, "+str(neg)+" negative crossings and "+str(len(stringlist))+" slices in total.")
           

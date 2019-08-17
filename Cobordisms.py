@@ -17,26 +17,138 @@
 from itertools import product, groupby
 from tabulate import tabulate
 
-import Tangles
 from KhT import *
 
-def clt_front_pairs(components):
-    """the tangle at the front, in TEI pair notation, of a cobordism with components 'components'."""
-    return [component[i:i+2] for component in components for i in range(0,len(component),2)]
+class obj(object):
+    """A crossingless tangle (CLT) is a matching of n+m ends (m=top,n=bot=bottom). 
+    arcs is a list whose ith entry gives the value of the involution at the ith tangle end."""
+    __slots__ = 'top','bot', 'total', 'arcs', 'h', 'q', 'delta', 'pairs'
+    
+    def __init__(self,top,bot,arcs,h,q,delta):
+        self.top = top
+        self.bot = bot
+        self.total = int((top+bot)/2)# total number of arcs
+        self.arcs = arcs
+        self.h = h
+        self.q = q
+        self.delta = delta
+        self.pairs = [pair for pair in [[i,arcs[i]] for i in range(top+bot)] if pair[0] < pair[1]] # testing alternative format for CLTs
+    
+    def shift_qhd(self,q,h,delta):
+        self.h += h
+        self.q += q
+        self.delta += delta
+        return self
+    
+    def check(self):
+        top = self.top
+        bot = self.bot
+        arcs = self.arcs
+        
+        # some test functions to make sure the input is valid
+        def ValidMappingQ(arcs):
+            return all(0<=element<len(arcs) for element in arcs)
+        def FixPointFreeQ(arcs):
+            return all(arcs[i]!=i for i in arcs)
+        def InvolutionQ(arcs):
+            return all(arcs[arcs[i]]==i for i in arcs)
+        def Straighten(top,bot,arcs):
+            """Convert an (n+m)-tangle into a (m+n,0)-tangle by rotating the bottom tangle ends to the right of the top ones."""
+            def aux(index):
+                if index<top:
+                    return index
+                else:
+                    return 2*top+bot-index-1
+            return [aux(element) for element in arcs[0:top]+arcs[top+bot:top-1:-1]]
+        def CrossingFreeQ(arcs):
+            s=Straighten(top,bot,arcs)
+            return all(all(min(i,s[i])<j<max(i,s[i]) for j in s[min(i,s[i])+1:max(i,s[i])]) for i in s)
+        
+        # now apply the tests defined above and, if they succeed, define the arcs 
+        if ValidMappingQ(arcs):
+            if FixPointFreeQ(arcs) and InvolutionQ(arcs) and CrossingFreeQ(arcs):
+                return True
+            else:
+                raise Exception('arcs {} is not, but should be a fix-point free involution of integers between 0 and n, where n is odd.\n'.format(arcs)\
+                                 +'\n- fixpoint free? {}'.format(FixPointFreeQ(arcs))\
+                                 +'\n- involution? {}'.format(InvolutionQ(arcs))\
+                                 +'\n- crossingless? {}'.format(CrossingFreeQ(arcs)))
+        else:
+            raise Exception('arcs {} is not a list l of integers between 0 and length(l)-1, so it cannot be a well-defined fix-point free involution.'.format(arcs))
+    
+    def arcs_all(self):
+        return [[i,self.arcs[i]] for i in range(self.top+self.bot) if i<self.arcs[i]]
+    
+    def arcs_top(self):
+        return [[self.arcs[i],i] for i in range(self.top) if self.arcs[i]<min(i,self.top)]
+    
+    def arcs_bot(self):
+        return [[i,self.arcs[i]] for i in range(self.top,self.top+self.bot) if self.arcs[i]>max(i,self.top)]
+    
+    def arcs_mix(self):
+        return [[i,self.arcs[i]] for i in range(self.top) if self.arcs[i]>=self.top]
+    
+    def arcs_all(self):
+        return [[i,self.arcs[i]] for i in range(self.top+self.bot) if i<self.arcs[i]]
+            
+    def __add__(self, other): #not currently used
+        def add(m1,m2):
+            def aux1(index):
+                if index<self.top:
+                    return index
+                else:
+                    return other.top+index
+            def aux2(index):
+                if index<other.top:
+                    return self.top+index
+                else:
+                    return self.top+self.bot+index
+            return [aux1(m1[i]) for i in range(self.top)]+[aux2(m2[i]) for i in range(other.top)]+[aux1(m1[self.top+i]) for i in range(self.bot)]+[aux2(m2[other.top+i]) for i in range(other.bot)]
+        return obj(self.top+other.top,self.bot+other.bot,add(self.arcs,other.arcs),self.h+other.h, self.q + other.q, self.delta+other.delta) #TODO: check grading computations
+    
+    def __mul__(self, other): #not currently used
+        def mul(m1,m2):
+            # aux1 finds the end of a path through the tangle ending at the top of the first tangle
+            def aux1(index):
+                middle=m1[index]
+                while middle>=self.top: # ie if middle does not lie on the top of the first tangle
+                    middle=m2[middle-self.top]
+                    if middle<other.top: # ie if middle does not lie on the bottom of the second tangle
+                        middle=m1[middle+self.top]
+                    else: # ie if middle lies on the bot of the second tangle
+                        return middle+self.top-other.top
+                # if middle lies on the top of the first tangle
+                return middle  
+            # aux2 finds the end of a path through the tangle starting at the bottom of the second tangle
+            def aux2(index):
+                middle=m2[index]
+                while middle<other.top: # ie if middle does not lie on the bottom of the second tangle
+                    middle=m1[middle+self.top]
+                    if middle>=self.top: # ie if middle does not lie on the top of the first tangle
+                        middle=m2[middle-self.top]
+                    else: # ie if middle lies on the top of the first tangle
+                        return middle
+                # if middle lies on the top of the first tangle
+                return middle+self.top-other.top 
+            
+            return [aux1(i) for i in range(self.top)]+[aux2(i+other.top) for i in range(other.bot)]
+        return obj(self.top,other.bot,mul(self.arcs,other.arcs),self.h+other.h, self.q + other.q, self.delta+other.delta) #TODO: check grading computations
 
-def clt_back_pairs(components):
-    """the tangle at the back, in TEI pair notation, of a cobordism with components 'components'."""
-    return [(component+component[0:1])[i+1:i+3] for component in components for i in range(0,len(component),2)]
-
-def clt_front_arcs(components):
-    """the tangle at the front, in TEI arc notation, of a cobordism with components 'components'."""
-    return arc_to_involution(clt_front_pairs(components))
-
-def clt_back_arcs(components):
-    """the tangle at the back, in TEI arc notation, of a cobordism with components 'components'."""
-    return arc_to_involution(clt_back_pairs(components))
-
-class Cobordism(object):
+    def __eq__(self, other): # redefining eq so that the tangles don't have to be literally the same when composing cobordisms, but only need to have the same values
+        """Check if two tangles are the same up to gradings.
+        """
+        #if self.top == other.top and self.bot == other.bot and self.arcs == other.arcs:
+        #    if self.h == other.h and self.q == other.q and self.delta == other.delta:
+        #        return True
+        #    else:
+        #        #print("tangles have different gradings, the first tangle has p,q,d:", self.h, self.q, self.delta, "while the second has p,q,d:", other.h, other.q, other.delta)
+        #        return True
+        #else:
+        #    return False
+        # Note: The above also checks gradings. However, it produces lots of messages during cancellation, since the homological grading changes. 
+        return self.top == other.top and self.bot == other.bot and self.arcs == other.arcs
+        
+class mor(object):
     """A cobordism from a crossingless tangle clt1=front to another clt2=back consists of 
     - clt1=front, (these may just be pointers?)
     - clt2=back, (these may just be pointers?)
@@ -55,7 +167,7 @@ class Cobordism(object):
         self.front = clt1
         self.back = clt2
         if comps=="default":
-            self.comps = Tangles.components(clt1,clt2)
+            self.comps = components(clt1,clt2)
         else:
             self.comps = comps
         self.decos = decos
@@ -63,7 +175,7 @@ class Cobordism(object):
     def __repr__(self):
         clt1=self.front
         clt2=self.back
-        return "Cobordism[CLT[{},{},{},{},{},{}],CLT[{},{},{},{},{},{}],{},{}]".format(clt1.top,clt1.bot,clt1.arcs,clt1.h,clt1.q,clt1.delta,clt2.top,clt2.bot,clt2.arcs,clt2.h,clt2.q,clt2.delta,self.decos,self.comps)
+        return "mor[obj[{},{},{},{},{},{}],obj[{},{},{},{},{},{}],{},{}]".format(clt1.top,clt1.bot,clt1.arcs,clt1.h,clt1.q,clt1.delta,clt2.top,clt2.bot,clt2.arcs,clt2.h,clt2.q,clt2.delta,self.decos,self.comps)
     
     def print(self,switch="short"):
         if self.decos==[]:
@@ -97,7 +209,7 @@ class Cobordism(object):
         decos=simplify_decos(self.decos+reorder_decos(other.comps,self.comps,other.decos))
         if decos == []:
             return 0
-        return Cobordism(self.front,self.back,decos,self.comps)
+        return mor(self.front,self.back,decos,self.comps)
     
     def __radd__(self, other):
         if other == 0: # Adding the zero cobordism
@@ -116,7 +228,7 @@ class Cobordism(object):
         decos=simplify_decos(self.decos+reorder_decos(other.comps,self.comps,other.decos))
         if decos == []:
             return 0
-        return Cobordism(self.front,self.back,decos,self.comps)
+        return mor(self.front,self.back,decos,self.comps)
 
     def __mul__(self, other):
         """The composition of two cobordism is computed by performing neck-cutting along push-offs of all boundary components of the composition and then removing all closed components.
@@ -155,7 +267,7 @@ class Cobordism(object):
         comps2=other.comps
         
         # list of components (lists of TEIs) of the fully simplified cobordism from self.front to other.back (after neck-cutting), ordered according to their smallest TEI
-        new_comps=Tangles.components(self.front,other.back)
+        new_comps=components(self.front,other.back)
         # list of indices of components of new_comps which belong to the same component before neck-cutting
         old_comps_x=partition_new_comps(new_comps,self.back.arcs)
         # list of lists of TEIs that belong to the same component before neck-cuttting
@@ -195,7 +307,7 @@ class Cobordism(object):
                     partial_decos.append(decos_from_old_comp(gen,r,len(old_comp_x))) 
                 decos+=[combine_decos(l,deco1[0]+deco2[0],deco1[-1]*deco2[-1]) for l in product(*partial_decos)]
         
-        Output = Cobordism(self.front,other.back,simplify_decos(decos),[new_comps[index] for index in flatten(old_comps_x)])
+        Output = mor(self.front,other.back,simplify_decos(decos),[new_comps[index] for index in flatten(old_comps_x)])
         
         return Output.ReduceDecorations()# This kills any cobordism in the linear combination that has a dot on the same component as the basepoint
     
@@ -216,9 +328,9 @@ class Cobordism(object):
     def homogeneousQ(self):
         return len(set([sum(deco[:-1]) for deco in self.decos]))<=1
     
-    def check(self): #no parameter self.dots, and self.comps may have different ordering than generated by Tangles.components()
+    def check(self): #no parameter self.dots, and self.comps may have different ordering than generated by components()
         if self.front.top==self.back.top and self.front.bot==self.back.bot:
-            x=Tangles.components(self.front,self.back)
+            x=components(self.front,self.back)
             return len(x)==len(self.dots) and x==self.comps
         else:
             return False
@@ -249,8 +361,46 @@ class Cobordism(object):
         # return self
         # safer option, just as fast:
         newDecos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
-        return Cobordism(self.front, self.back, newDecos, self.comps)
+        return mor(self.front, self.back, newDecos, self.comps)
         
+def components(clt1,clt2):
+    """components of an elementary cobordism between two tangles (assuming the same clt.top and clt.bot)."""
+    allcomponents=[]
+    done=[]
+    for i in range(2*clt1.total):#find component for ith tangle end
+        if i not in done:#continue if we don't already have a component; otherwise move on
+            cur = i#current position
+            component = []
+            while cur not in done:
+                done.append(cur)
+                component.append(cur)
+                cur=clt1.arcs[cur]
+                done.append(cur)
+                component.append(cur)
+                cur=clt2.arcs[cur]
+            allcomponents.append(component)
+    return allcomponents
+
+def arc_to_involution(pairs):
+    """convert a list of pairs of TEIs into an involution."""
+    return [x[1] for x in sorted(pairs+[pair[::-1] for pair in pairs])]
+
+def clt_front_pairs(components):
+    """the tangle at the front, in TEI pair notation, of a cobordism with components 'components'."""
+    return [component[i:i+2] for component in components for i in range(0,len(component),2)]
+
+def clt_back_pairs(components):
+    """the tangle at the back, in TEI pair notation, of a cobordism with components 'components'."""
+    return [(component+component[0:1])[i+1:i+3] for component in components for i in range(0,len(component),2)]
+
+def clt_front_arcs(components):
+    """the tangle at the front, in TEI arc notation, of a cobordism with components 'components'."""
+    return arc_to_involution(clt_front_pairs(components))
+
+def clt_back_arcs(components):
+    """the tangle at the back, in TEI arc notation, of a cobordism with components 'components'."""
+    return arc_to_involution(clt_back_pairs(components))
+
 def simplify_decos(decos):
     """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""
     if decos == []:

@@ -40,8 +40,8 @@ def inverse(num,field): #this only works over a field
         #print((S*num)%self.field) # should be 1 if computed correctly
         return S
 
-class BNobj(object):
-    """A BNobject is a pair [idempotent,q,h,delta(optional)], where idempotent is either 0 (b=solid dot) or 1 (c=hollow dot). 
+class obj(object):
+    """An object is a pair [idempotent,q,h,delta(optional)], where idempotent is either 0 (b=solid dot) or 1 (c=hollow dot). 
     """
     __slots__ = 'idem','q','h','delta'
     
@@ -60,7 +60,7 @@ class BNobj(object):
         else: 
             return "○"#c (hollow dot)
     
-    def BNobj2String(self,switch="idem",index=-1):        
+    def obj2string(self,switch="idem",index=-1):        
         
         if "idem" in switch:
             idem=self.idem2dot()
@@ -97,10 +97,10 @@ class BNobj(object):
             return index+":"+grading+idem
     
     def shift_q(self,shift): #shift q, keep h fixed; create new object
-        return BNobj(self.idem,self.q+shift,self.h,self.delta+shift/2)
+        return obj(self.idem,self.q+shift,self.h,self.delta+shift/2)
         
     def shift_h(self,shift): #shift h, keep q fixed; create new object
-        return BNobj(self.idem,self.q,self.h+shift,self.delta-shift)
+        return obj(self.idem,self.q,self.h+shift,self.delta-shift)
 
 def coeff_simplify(num,field):
     if field > 1:
@@ -108,7 +108,7 @@ def coeff_simplify(num,field):
     else: # This probably needs to be fixed for field=0
         return num 
 
-class BNmor_alt(object):# work in progress
+class mor_alt(object):# work in progress
     """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
     'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
@@ -121,7 +121,7 @@ class BNmor_alt(object):# work in progress
         self.D = np.array(D) # list of coefficients
         self.I = I #coefficient
     
-    def simplify_BNmor(self,field):
+    def simplify_mor(self,field):
         """simplify algebra elements by omitting superflous zeros."""
         self.S=[coeff_simplify(i,field) for i in self.S]
         self.D=[coeff_simplify(i,field) for i in self.D]
@@ -150,7 +150,7 @@ class BNmor_alt(object):# work in progress
             newD = self.D.copy()
             newD[:len(other.D)] += other.D
         
-        return BNmor(newS,newD,self.I+other.I).simplify_BNmor()
+        return mor(newS,newD,self.I+other.I).simplify_mor()
 
     def __mul__(self, other):
         newSmatrix = np.tensordot(self.S,other.S,axes=0)
@@ -159,9 +159,9 @@ class BNmor_alt(object):# work in progress
         newDmatrix = np.tensordot(self.D,other.D,axes=0)
         newD= [sum(np.diagonal(A[:, ::-1],len(other.D)-index)) for index in range(len(self.D)+len(other.D)-1)]
         
-        return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0]).simplify_BNmor()
+        return mor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0]).simplify_mor()
     
-class BNmor(object):
+class mor(object):
     """An element of Bar-Natan's algebra is a list of pairs [power,coeff]
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
     'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
@@ -172,7 +172,7 @@ class BNmor(object):
         self.pairs = pairs
         self.field = field
     
-    def simplify_BNmor(self,field):
+    def simplify_mor(self,field):
         """simplify algebra elements by adding all coeffients of the same power of D or S, omitting those with coefficient 0. This is very similar to simplify_decos"""
         def droplast(l):
             return l[:-1]
@@ -190,25 +190,25 @@ class BNmor(object):
     def __add__(self, other):
         if other == 0:
             return self
-        return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
+        return mor(self.pairs+other.pairs,self.field).simplify_mor(self.field)
     
     def __radd__(self, other):
         if other == 0:
             return self
-        return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
+        return mor(self.pairs+other.pairs,self.field).simplify_mor(self.field)
 
     def __mul__(self, other):
         if other == 0:
             return 0
-        if isinstance(other,BNmor):
-            return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
+        if isinstance(other,mor):
+            return mor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_mor(self.field)
         # 'other' is assumed to be a non-zero integer
-        return BNmor([[pair[0],other*pair[1]] for pair in self.pairs],self.field).simplify_BNmor(self.field)
+        return mor([[pair[0],other*pair[1]] for pair in self.pairs],self.field).simplify_mor(self.field)
         
     def __rmul__(self, other):
         if other == 0:
             return 0
-        return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
+        return mor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_mor(self.field)
     
     def is_identity(self):
         if len(self.pairs)!=1:
@@ -236,7 +236,7 @@ class BNmor(object):
         return all([pair[0]>=0 for pair in self.pairs])==False
     
     def __neg__(self):
-        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
+        return mor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
     
     def BNAlg2String(self):
         string=""
