@@ -250,9 +250,6 @@ class BNmor(object):
     def __neg__(self):
         return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
     
-    def negative(self,field,coeff=1): #create new morphism
-        return BNmor([[pair[0],(-1)*pair[1]*coeff] for pair in self.pairs],self.field)
-    
     def BNAlg2String(self):
         string=""
         for pair in self.pairs:

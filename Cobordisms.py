@@ -243,11 +243,14 @@ class Cobordism(object):
         # Note that if one of these conditions is not satified, then python does not evaluate the following ones and immediately returns False. 
         return (len(self.decos) == 1) and (len(self.comps) == self.front.total) and (sum(self.decos[0][:-1])==0) and (self.decos[0][-1] in [1, -1]) 
 
-    def negative(self):
+    def __neg__(self):
         """returns a cobordism that is exactly the same as self, but with all the coefficients in the linear combination multiplied by -1"""
-        self.decos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
-        return self
-        #return Cobordism(self.front, self.back, newDecos, self.comps)
+        # mutate the objects:
+        # self.decos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
+        # return self
+        # safer option, just as fast:
+        newDecos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
+        return Cobordism(self.front, self.back, newDecos, self.comps)
         
 def simplify_decos(decos):
     """simplify decos by adding all coeffients of the same decoration, omitting those with coefficient 0."""

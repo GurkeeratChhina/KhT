@@ -125,11 +125,7 @@ class CobComplex(object):
         in_target = np.delete(self.diff[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
         
         if (self.diff[targetindex,sourceindex]).decos[0][-1]==1: # add minus sign; in the case the coefficient is -1, the signs cancel.
-            def neg(entry):
-                if entry == 0:
-                    return 0
-                return entry.negative()
-            in_target=np.array([neg(entry) for entry in in_target])
+            in_target=np.array([-entry for entry in in_target])
         
         self.diff=np.delete(self.diff,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
         self.diff=np.delete(self.diff,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
