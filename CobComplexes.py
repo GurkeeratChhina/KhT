@@ -19,7 +19,7 @@ import pandas as pd
 from tabulate import tabulate
 from time import time
 
-import Cobordisms as Cob
+import Cob
 
 class CobComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -35,7 +35,7 @@ class CobComplex(object):
         self.gens = gens
         self.diff = np.array(diff)
     
-    def print(self,switch="short"):
+    def print(self,switch="long"):
         """Print a complex in human readable form. The optional parameter should be one of the following strings: 
         - 'short' (default) prints only the length of cobordisms.
         - 'long' prints all cobordism data in a nice table.
@@ -64,12 +64,12 @@ class CobComplex(object):
             if len(i) != length:
                 raise Exception('Differential does not have n columns (where n is the number of gens in chain complex)')
         for i in range(length):
-            if self.diff[i][i] is not 0:
+            if self.diff[i][i] != 0:
                 raise Exception('Differential has self loops')
         
         for i,row in enumerate(self.diff):
             for j,cob in enumerate(row):   
-                if cob is not 0:
+                if cob != 0:
                     if cob.homogeneousQ() == False:
                         print("!!!!!!!!!!!!!!!!!!")
                         print("ERROR: The component of the differential in row "+str(i)+" and column "+str(j)+" is not homoegenous:")
@@ -93,7 +93,7 @@ class CobComplex(object):
         squared = np.tensordot(self.diff,self.diff, axes=(-2,-1))
         for i,row in enumerate(squared):
             for j,cob in enumerate(row):
-                if (cob is not 0) and (cob.ReduceDecorations() is not []):
+                if (cob != 0) and (cob.ReduceDecorations() != []):
                     print("!!!!!!!!!!!!!!!!!!")
                     print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
                     print(cob.print("long"))

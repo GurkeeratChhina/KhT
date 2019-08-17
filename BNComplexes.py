@@ -8,7 +8,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -18,9 +18,11 @@ import cairo
 import graph_tool.all as gr
 import math
 import numpy as np
+import pandas as pd
 from fractions import Fraction
 from random import choice
 from subprocess import run
+from tabulate import tabulate
 from time import time
 
 import Drawing
@@ -66,7 +68,11 @@ class BNComplex(object):
             "δ": [gen.delta for gen in self.gens]
             },columns=[" ","q","h","δ"]))
         string+="\nThe differential:\n"
-        string+=str(tabulate(pd.DataFrame([[entry.BNAlg2String() for entry in row] for row in self.diff]),range(len(self.diff)),tablefmt="fancy_grid"))
+        def ToStr(entry):
+            if entry == 0:
+                return ""
+            return str(entry)
+        string+=str(tabulate(pd.DataFrame([[ToStr(entry) for entry in row] for row in self.diff]),range(len(self.diff)),tablefmt="fancy_grid"))
         return string
     
     def draw(self, filename,vertex_switch="index_qhdelta"):
@@ -108,7 +114,7 @@ class BNComplex(object):
                 edge_mor=self.diff[j][i]
                 if edge_mor != 0:
                     g.add_edge(g.vertex(i), g.vertex(j))
-                    Edge_labeling[g.edge(i,j)] = edge_mor.BNAlg2String()
+                    Edge_labeling[g.edge(i,j)] = str(edge_mor)
         eprops =   {'color' : "black",\
                     'pen_width' : 4.0,\
                     'text' : Edge_labeling,\
@@ -143,7 +149,7 @@ class BNComplex(object):
                     mor.simplify_mor(self.field)
                     if mor != 0:
                         print("!!!!!!!!!!!!!!!!!!")
-                        print("ERROR: Found non-zero term "+mor.BNAlg2String()+" in d² in row "+str(i)+" and column "+str(j)+".")
+                        print("ERROR: Found non-zero term "+str(mor)+" in d² in row "+str(i)+" and column "+str(j)+".")
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Differential does not square to 0')
         
@@ -197,7 +203,7 @@ class BNComplex(object):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
         self.diff[end,:]+=[(-alg)*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
-        #self.ValidMorphism()
+        self.ValidMorphism()
             
     
     def isotopy_via_vector_end(self,end,vector): # unused function: this is actually *much* slower
@@ -422,7 +428,7 @@ def CobordismToBNAlg(cob,field=2):
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     
     if len(cob.comps)==1:# saddle
-        return BNAlgebra.mor([[-1-2*deco[0],(-1**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0],field).simplify_mor(field)
+        return BNAlgebra.mor([[-1-2*deco[0],((-1)**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0],field).simplify_mor(field)
         
     if len(cob.comps)==2:# identity/dot cobordism
         i=find_first_index(cob.comps,contains_0)+1 #component with TEI 0
@@ -453,6 +459,7 @@ def CobComplex2BNComplex(complex,field=2):
     diff=[[CobordismToBNAlg(cob,field) for cob in row] for row in complex.diff]
     BNcx = BNComplex(gens,diff,field)
     BNcx.eliminateAll()
+    BNcx.ValidMorphism()
     return BNcx
 
 def BNObj2CLT(bnobj):
@@ -466,7 +473,7 @@ def BNObj2CLT(bnobj):
 def BNAlg2Cob(morphism, sourceCLT, targetCLT):
     decos = []
     if morphism == 0:
-        return ZeroCob
+        return 0
     
     for pair in morphism.pairs:
         if pair[0] > 0 : 

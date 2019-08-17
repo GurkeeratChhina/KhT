@@ -238,7 +238,7 @@ class mor(object):
     def __neg__(self):
         return mor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
     
-    def BNAlg2String(self):
+    def __str__(self):
         string=""
         for pair in self.pairs:
             coeff = pair[1]
