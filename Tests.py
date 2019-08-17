@@ -77,7 +77,7 @@ def newCob(cob, i):
 #drawcob(newCob(cob2, 1), "NewCob")
 
 def TestSet0():
-    BasicComplex = CobComplex([CLT(1,1, [1,0], 0,0,0)], [[ZeroCob]])
+    BasicComplex = CobComplex([CLT(1,1, [1,0], 0,0,0)], [[0]])
     BasicCap = AddCap(BasicComplex, 0)
 
     drawclt(BasicCap.elements[0], "basiccap")
@@ -88,17 +88,17 @@ def TestSet0():
 
 def TestSet1():
     tempcob1 = Cobordism(CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0), [[0, 0, 1, 1]])
-    tempcomplex = CobComplex([CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0)], [[ZeroCob, ZeroCob], [tempcob1, ZeroCob]])
+    tempcomplex = CobComplex([CLT(1,3, [1, 0, 3, 2], 0,0,0), CLT(1,3, [1, 0, 3, 2], 1,2,0)], [[0, 0], [tempcob1, 0]])
     tempcomplexwithcup = AddCup(tempcomplex, 1)
     return 0
 
 def TestSet2():
-    complex5 = CobComplex([c,b,b,c,b,b], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [Scb, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [ZeroCob, Cobordism(b,b, [[0,0,1,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [Cobordism(c, c, [[1,0,0,1]]), ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                                        [ZeroCob, Cobordism(b,b,[[1, 0,0, -1]]), ZeroCob, Scb, ZeroCob, ZeroCob],\
-                                        [ZeroCob, ZeroCob, Cobordism(b,b,[[1, 0,0,1]]), ZeroCob, Cobordism(b,b,[[0,0,1,1]]), ZeroCob]])
+    complex5 = CobComplex([c,b,b,c,b,b], [[0, 0, 0, 0, 0, 0],\
+                                        [Scb, 0, 0, 0, 0, 0],\
+                                        [0, Cobordism(b,b, [[0,0,1,1]]), 0, 0, 0, 0],\
+                                        [Cobordism(c, c, [[1,0,0,1]]), 0, 0, 0, 0, 0],\
+                                        [0, Cobordism(b,b,[[1, 0,0, -1]]), 0, Scb, 0, 0],\
+                                        [0, 0, Cobordism(b,b,[[1, 0,0,1]]), 0, Cobordism(b,b,[[0,0,1,1]]), 0]])
     DrawFourEndedCobComplex(complex5, "complex5.png")
     # complex5.validate() #gradings
 
@@ -121,7 +121,7 @@ def TestSet3():
     CLT01 = CLT(1,3,[1,0,3,2],0,0,0)
     CLT03 = CLT(1,3,[3,2,1,0],1,1,0.5)
     BasicSaddle = Cobordism(CLT01, CLT03, [[0,0,1]])
-    BasicSaddleComplex = CobComplex([CLT01, CLT03], [[ZeroCob, ZeroCob], [BasicSaddle, ZeroCob]])
+    BasicSaddleComplex = CobComplex([CLT01, CLT03], [[0, 0], [BasicSaddle, 0]])
     BasicSaddleCup = AddCup(BasicSaddleComplex, 1)
     # PrintComplexMorphismIntMatrix(BasicSaddleCup)
     # PrintComplexMorphismDecoCompMatrix(BasicSaddleCup)
@@ -161,7 +161,7 @@ def TestSet4():
     drawcob(cob6,"cob6")
  
 def TestSet5():
-    complex1 = CobComplex([b,c], [[ZeroCob, ZeroCob], [Sbc ,ZeroCob]])
+    complex1 = CobComplex([b,c], [[0, 0], [Sbc ,0]])
     # complex1.validate() #gradings
    
     complex1cap0 = AddCap(complex1, 0)
@@ -180,11 +180,11 @@ def TestSet5():
     
 def TestSet6():
     RightDcMinusH = Cobordism(c,c,[[0,0,1,1], [1,0,0,-1]])
-    complex3 = CobComplex([b,c,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob],[Sbc,ZeroCob, ZeroCob, ZeroCob],[ZeroCob, RightDc, ZeroCob, ZeroCob],[ZeroCob, ZeroCob, RightDcMinusH, ZeroCob]])
+    complex3 = CobComplex([b,c,c,c], [[0, 0, 0, 0],[Sbc,0, 0, 0],[0, RightDc, 0, 0],[0, 0, RightDcMinusH, 0]])
     DrawFourEndedCobComplex(complex3, "complex3.png")
     # complex3.validate() #gradings
 
-    complex4 = CobComplex([c,b,c,c], [[ZeroCob, ZeroCob, ZeroCob, ZeroCob], [MinusScb, ZeroCob, ZeroCob, ZeroCob], [RightDc,ZeroCob, ZeroCob, ZeroCob], [ZeroCob, Sbc, Cobordism(c,c,[[0,0,0,1]]), ZeroCob]])
+    complex4 = CobComplex([c,b,c,c], [[0, 0, 0, 0], [MinusScb, 0, 0, 0], [RightDc,0, 0, 0], [0, Sbc, Cobordism(c,c,[[0,0,0,1]]), 0]])
     DrawFourEndedCobComplex(complex4, "complex4.png")
     # This should fail:
     # complex4.validate()
@@ -211,7 +211,7 @@ def TestSet6():
     DrawFourEndedCobComplex(complex4again1, "complex4again1.png")
     DrawFourEndedCobComplex(complex4again2, "complex4again2.png")
     
-    complex6 = CobComplex([c,b], [[ZeroCob, ZeroCob],[Scb, ZeroCob]])
+    complex6 = CobComplex([c,b], [[0, 0],[Scb, 0]])
     complex6cup = AddCup(complex6, 0)
     print("complex6cup")
     complex6cup.print("old long")
@@ -220,7 +220,7 @@ def TestSet7():
     CobRightDotMinusLeftDotVertical = Cobordism(c,c, [[0,0,1,1],[0,1,0,-1]])
     # drawcob(CobRightDotMinusLeftDotVertical, "temporary1")
 
-    complex2 = CobComplex([b,c,c], [[ZeroCob, ZeroCob, ZeroCob],[Sbc, ZeroCob, ZeroCob],[ZeroCob, CobRightDotMinusLeftDotVertical, ZeroCob]])
+    complex2 = CobComplex([b,c,c], [[0, 0, 0],[Sbc, 0, 0],[0, CobRightDotMinusLeftDotVertical, 0]])
     # complex2.validate() # gradings
     # drawcob(Sbc*CobRightDotMinusLeftDotVertical, "temporary2")
     # drawcob(Sbc*RightDc, "DottedSaddle")
@@ -263,8 +263,8 @@ def TestSet7():
 def TestSet8():
     TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
     TangleB = CLT(2,2, [1,0,3,2], 0,0,0)
-    BasicComplex1 = CobComplex([TangleC], [[ZeroCob]])
-    BasicComplex2 = CobComplex([TangleB], [[ZeroCob]])
+    BasicComplex1 = CobComplex([TangleC], [[0]])
+    BasicComplex2 = CobComplex([TangleB], [[0]])
     
     temp1 = AddCap(BasicComplex1,1)
     temp2 = AddNegCrossing(temp1,0)
@@ -298,7 +298,7 @@ def TestSet8():
     
 def TestSet9():
     TangleC = CLT(2,2, [2,3,0,1], 0,0,0)
-    BasicComplex = CobComplex([TangleC], [[ZeroCob]])
+    BasicComplex = CobComplex([TangleC], [[0]])
     temp1 = AddCap(BasicComplex, 1)
     temp2 = AddNegCrossing(temp1, 0)
     temp2.eliminateAll()
@@ -666,12 +666,12 @@ def Test_TwoTwistTangle():
     c=CLT(1,3,[3,2,1,0],1,0,0)
 
     complex1 = CobComplex([b,c,c,b,c,c], \
-                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, ZeroCob],\
-                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, Cobordism(c, c, [[0,0,1,-1]]), ZeroCob]])
+                [[0, 0, 0, 0, 0, 0],\
+                 [Cobordism(c,b, [[0,0,1]]) ,0 ,0 ,0, 0, 0],\
+                 [0 ,Cobordism(c, c, [[0,0,1,1]]) ,0 ,0, 0, 0],\
+                 [Cobordism(b, b, [[1,0,0,1]]) ,0 ,0 ,0, 0, 0],\
+                 [0,Cobordism(c, c, [[1,0,0,1]]) ,0 ,Cobordism(c, b, [[0,0,-1]]) , 0, 0],\
+                 [0,0,Cobordism(c, c, [[1,0,0,1]]) ,0, Cobordism(c, c, [[0,0,1,-1]]), 0]])
     BNComplex1 = complex1.ToBNAlgebra()
     BNComplex1.draw("TwoTwistTangle_before_cleanup.svg","index_h")
     print(BNComplex1)
@@ -689,12 +689,12 @@ def Test_SplittingCurve():
     c=CLT(1,3,[3,2,1,0],1,0,0)
     
     complex1 = CobComplex([b,c,c,b,c,c], \
-                [[ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(c,b, [[0,0,1]]) ,ZeroCob ,Cobordism(c, c, [[0,0,1,1]]) ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob, ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [Cobordism(b, b, [[1,0,0,1]]) ,ZeroCob ,ZeroCob ,ZeroCob, ZeroCob, ZeroCob],\
-                 [ZeroCob,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob ,Cobordism(c, b, [[0,0,-1]]) , ZeroCob, Cobordism(c, c, [[0,0,1,-1]])],\
-                 [ZeroCob ,ZeroCob ,Cobordism(c, c, [[1,0,0,1]]) ,ZeroCob, ZeroCob, ZeroCob]])
+                [[0, 0, 0, 0, 0, 0],\
+                 [Cobordism(c,b, [[0,0,1]]) ,0,Cobordism(c, c, [[0,0,1,1]]) ,0, 0, 0],\
+                 [0, 0,0,0, 0, 0],\
+                 [Cobordism(b, b, [[1,0,0,1]]) ,0,0,0, 0, 0],\
+                 [0,Cobordism(c, c, [[1,0,0,1]]) ,0,Cobordism(c, b, [[0,0,-1]]) , 0, Cobordism(c, c, [[0,0,1,-1]])],\
+                 [0,0,Cobordism(c, c, [[1,0,0,1]]) ,0, 0, 0]])
     BNComplex1 = complex1.ToBNAlgebra()
     BNComplex1.draw("SplittingCurve_before_cleanup.svg","index_h")
     print(BNComplex1)
@@ -713,15 +713,15 @@ def Test_2m3pt():# (2,-3)-pretzel tangle
         [BNobj(1,-12,-5), BNobj(1,-10,-4),\
          BNobj(0,-11,-4), BNobj(0,-9,-3), BNobj(0,-7,-2),\
          BNobj(0,-9,-3),  BNobj(0,-7,-2), BNobj(0,-5,-1), BNobj(1,-4,0)],\
-         [[ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [BNmor([[1,1],[-2,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [BNmor([[-1,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,BNmor([[-1,-1]],2),BNmor([[-2,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,BNmor([[1,1]],2),ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,BNmor([[1,-1]],2),ZeroMor,BNmor([[-2,1]],2),ZeroMor,ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[1,1]],2),ZeroMor,BNmor([[1,1]],2),ZeroMor,ZeroMor],\
-          [ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor,BNmor([[-1,1]],2),ZeroMor]],2)
+         [[0,0,0,0,0,0,0,0,0],\
+          [BNmor([[1,1],[-2,1]],2),0,0,0,0,0,0,0,0],\
+          [BNmor([[-1,1]],2),0,0,0,0,0,0,0,0],\
+          [0,BNmor([[-1,-1]],2),BNmor([[-2,1]],2),0,0,0,0,0,0],\
+          [0,0,0,BNmor([[1,1]],2),0,0,0,0,0],\
+          [0,0,BNmor([[1,1]],2),0,0,0,0,0,0],\
+          [0,0,0,BNmor([[1,-1]],2),0,BNmor([[-2,1]],2),0,0,0],\
+          [0,0,0,0,BNmor([[1,1]],2),0,BNmor([[1,1]],2),0,0],\
+          [0,0,0,0,0,0,0,BNmor([[-1,1]],2),0]],2)
     BNComplex1.draw("2m3pt_redBN_before_cleanup.svg","index_qh")
     print(BNComplex1)
 
@@ -833,7 +833,7 @@ TestSet29()
 # Test_SplittingCurve()
 
 #X=BNmor([[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1]],2)
-#A=[ZeroMor,ZeroMor,X,0,4,ZeroMor,ZeroMor,ZeroMor,ZeroMor,ZeroMor]
+#A=[0,0,X,0,4,0,0,0,0,0]
 #import sys
 #print(sys.getsizeof(X))
 #print(sys.getsizeof(A))
@@ -843,9 +843,8 @@ TestSet29()
 
 
 #import timeit
-#print(timeit.timeit('a is 0',setup="from BNComplexes import ZeroMor, BNmor \nimport numpy as np \nzero=np.int8(0)\na=BNmor([],3)", number=1000000))
-#print(timeit.timeit('ZeroMor.pairs==[]', setup="from BNComplexes import ZeroMor", number=1000000))
-#print(timeit.timeit('Z is ZeroMor', setup="from BNComplexes import ZeroMor, BNmor \nZ=BNmor([],3)", number=1000000))
+#print(timeit.timeit('a is 0',setup="from BNComplexes import BNmor \nimport numpy as np \nzero=np.int8(0)\na=BNmor([],3)", number=1000000))
+#print(timeit.timeit('Z is 0', setup="from BNComplexes import BNmor \nZ=BNmor([],3)", number=1000000))
 
 ## comparing efficiency of two functions
 #import timeit
