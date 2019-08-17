@@ -17,6 +17,7 @@
 from itertools import product, groupby
 from tabulate import tabulate
 
+import BNAlgebra
 from aux import *
 
 class obj(object):
@@ -147,6 +148,16 @@ class obj(object):
         #    return False
         # Note: The above also checks gradings. However, it produces lots of messages during cancellation, since the homological grading changes. 
         return self.top == other.top and self.bot == other.bot and self.arcs == other.arcs
+
+    def ToBNAlgebra(self):
+        """Convert a (1,3)-tangle into one of the two idempotents of BNAlg."""
+        if self.top !=1 or self.bot !=3:
+            
+            raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
+        elif self.arcs[0]==3:
+            return BNAlgebra.obj(0,self.q,self.h) #b
+        elif self.arcs[0]==1:
+            return BNAlgebra.obj(1,self.q,self.h) #c
         
 class mor(object):
     """A cobordism from a crossingless tangle clt1=front to another clt2=back consists of 
@@ -362,6 +373,29 @@ class mor(object):
         # safer option, just as fast:
         newDecos = [ deco[:-1] + [deco[-1]*-1] for deco in self.decos]
         return mor(self.front, self.back, newDecos, self.comps)
+    
+    def ToBNAlgebra(self,field=2):
+        """ Convert a cobordism between two (1,3)-tangles into an element of BNAlgebra."""
+        
+        if self.front.top !=1 or self.front.bot !=3:
+            raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
+        
+        if len(self.comps)==1:# saddle
+            return BNAlgebra.mor([[-1-2*deco[0],((-1)**deco[0])*deco[-1]] for deco in self.decos if deco[1]==0],field).simplify_mor(field)
+            
+        if len(self.comps)==2:# identity/dot cobordism
+            i=find_first_index(self.comps,contains_0)+1 #component with TEI 0
+            j=3-i #component without TEI 0: i=1 => j=2, i=2 => j=1
+            
+            decos_reduced=[deco for deco in self.decos if deco[i]==0]     # ignoore those decos with dots in component with TEI 0
+            decos_no_dots=[deco for deco in decos_reduced if deco[j]==0] #decos without dots
+            
+            decos_DD=[[deco[0]+1,deco[-1]]   for deco in decos_reduced if deco[j]==1] # dot cobordism
+            decos_id=[[0,deco[-1]]           for deco in decos_no_dots if deco[0]==0] # id contribution
+            decos_DH=[[deco[0],deco[-1]]     for deco in decos_no_dots if deco[0]>0 ] # D contribution from H
+            decos_SH=[[-2*deco[0],-deco[-1]] for deco in decos_no_dots if deco[0]>0 ] # SS contribution from H
+            
+            return BNAlgebra.mor(decos_DD+decos_id+decos_DH+decos_SH,field).simplify_mor(field)
         
 def components(clt1,clt2):
     """components of an elementary cobordism between two tangles (assuming the same clt.top and clt.bot)."""

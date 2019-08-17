@@ -20,6 +20,7 @@ from tabulate import tabulate
 from time import time
 
 import Cob
+import BNComplexes
 
 class CobComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -55,7 +56,7 @@ class CobComplex(object):
             return entry.print(switch)
         print(tabulate(pd.DataFrame([[prt(entry)  for entry in row] for row in self.diff]),range(len(self.diff)),tablefmt="fancy_grid"))
     
-    def ValidMorphism(self): #checks that the differential squares to 0, has no self loops, and is a matrix of the correct size
+    def validate(self): #checks that the differential squares to 0, has no self loops, and is a matrix of the correct size
         length = len(self.gens)
         if len(self.diff) != length:
             raise Exception('Differential does not have n rows (where n is the number of gens in chain complex)')
@@ -140,6 +141,18 @@ class CobComplex(object):
     
     def shift_qhd(self,q,h,delta):
         self.gens=[clt.shift_qhd(q,h,delta) for clt in self.gens]
+
+    def ToBNAlgebra(self,field=2):
+        gens=[clt.ToBNAlgebra() for clt in self.gens]
+        def convert(cob):
+            if cob == 0:
+                return 0
+            return cob.ToBNAlgebra(field)
+        diff=[[convert(cob) for cob in row] for row in self.diff]
+        BNcx = BNComplexes.BNComplex(gens,diff,field)
+        BNcx.eliminateAll()
+        BNcx.validate()
+        return BNcx
 
 def AddCapToCLT(clt, i, grshift = "false"): 
     """creates a new CLT which is clt with a cap added to it at index i
@@ -549,7 +562,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
             cx=AddPosCrossing(cx, word[1])
             #print("before eliminateAll")
             #cx.print, "old long")
-            if options=="safe": cx.ValidMorphism()
+            if options=="safe": cx.validate()
             cx.eliminateAll()
             # print("after eliminateAll")
             # cx.print, "old long")
@@ -558,7 +571,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
             cx=AddNegCrossing(cx, word[1])
             #print("before eliminateAll")
             #cx.print, "old long")
-            if options=="safe": cx.ValidMorphism()
+            if options=="safe": cx.validate()
             cx.eliminateAll()
             # print("after eliminateAll")
             # cx.print, "old long")
@@ -567,14 +580,14 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
             cx=AddCup(cx, word[1])
             #print("before eliminateAll")
             #cx.print, "old long")
-            if options=="safe": cx.ValidMorphism()
+            if options=="safe": cx.validate()
             cx.eliminateAll()
             #print("after eliminateAll")
             #cx.print, "old long")
         
         if word[0]=="cap":
             cx=AddCap(cx, word[1])
-            if options=="safe": cx.ValidMorphism()
+            if options=="safe": cx.validate()
         
         
 

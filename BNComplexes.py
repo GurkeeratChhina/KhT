@@ -27,6 +27,7 @@ from time import time
 
 import Drawing
 import BNAlgebra
+import CobComplexes
 from aux import *
 
 class BNComplex(object):
@@ -130,7 +131,7 @@ class BNComplex(object):
         
         gr.graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
     
-    def ValidMorphism(self):
+    def validate(self):
         # return True
         length = len(self.gens)
         if len(self.diff) != length:
@@ -194,6 +195,7 @@ class BNComplex(object):
                 break
             else:
                 self.eliminateIsom(index_to_eliminate[0], index_to_eliminate[1])
+        self.validate()
        
     def isotopy(self,start,end,alg,switch="safe"):
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
@@ -203,8 +205,6 @@ class BNComplex(object):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
         self.diff[end,:]+=[(-alg)*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
-        self.ValidMorphism()
-            
     
     def isotopy_via_vector_end(self,end,vector): # unused function: this is actually *much* slower
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
@@ -417,91 +417,21 @@ class BNComplex(object):
                 np.concatenate((Hdiagonal,shifted_complex.diff),axis=1)),axis=0)
         
         return BNComplex(self.gens+shifted_complex.gens,new_diff,self.field)
-
-def CobordismToBNAlg(cob,field=2):
-    """ Convert a cobordism between two (1,3)-tangles into an element of BNAlgebra."""
     
-    if cob==0:
-        return 0# zero algebra element
-    
-    if cob.front.top !=1 or cob.front.bot !=3:
-        raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
-    
-    if len(cob.comps)==1:# saddle
-        return BNAlgebra.mor([[-1-2*deco[0],((-1)**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0],field).simplify_mor(field)
+    def ToCob(self):# does not work yet, since Z is not implemented over BNAlgebra and Cob is only implemented over Z.
+        if self.field != 1:
+            raise Exception("You are converting a complex over BNalgebra with coefficients in field={} into a complex over Cob. However, the category Cob is only implemented over integers, ie for field=1.".format(field))
         
-    if len(cob.comps)==2:# identity/dot cobordism
-        i=find_first_index(cob.comps,contains_0)+1 #component with TEI 0
-        j=3-i #component without TEI 0: i=1 => j=2, i=2 => j=1
-        
-        decos_reduced=[deco for deco in cob.decos if deco[i]==0]     # ignoore those decos with dots in component with TEI 0
-        decos_no_dots=[deco for deco in decos_reduced if deco[j]==0] #decos without dots
-        
-        decos_DD=[[deco[0]+1,deco[-1]]   for deco in decos_reduced if deco[j]==1] # dot cobordism
-        decos_id=[[0,deco[-1]]           for deco in decos_no_dots if deco[0]==0] # id contribution
-        decos_DH=[[deco[0],deco[-1]]     for deco in decos_no_dots if deco[0]>0 ] # D contribution from H
-        decos_SH=[[-2*deco[0],-deco[-1]] for deco in decos_no_dots if deco[0]>0 ] # SS contribution from H
-        
-        return BNAlgebra.mor(decos_DD+decos_id+decos_DH+decos_SH,field).simplify_mor(field)
-
-def CLT2BNObj(clt):
-    """Convert a (1,3)-tangle into one of the two idempotents of BNAlg."""
-    if clt.top !=1 or clt.bot !=3:
-        
-        raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
-    elif clt.arcs[0]==3:
-        return BNAlgebra.obj(0,clt.q,clt.h) #b
-    elif clt.arcs[0]==1:
-        return BNAlgebra.obj(1,clt.q,clt.h) #c
-
-def CobComplex2BNComplex(complex,field=2):
-    gens=[CLT2BNObj(clt) for clt in complex.gens]
-    diff=[[CobordismToBNAlg(cob,field) for cob in row] for row in complex.diff]
-    BNcx = BNComplex(gens,diff,field)
-    BNcx.eliminateAll()
-    BNcx.ValidMorphism()
-    return BNcx
-
-def BNObj2CLT(bnobj):
-    arcs = []
-    if bnobj.idem == 0:
-        arcs = [3,2,1,0]
-    else:
-        arcs = [1,0,3,2]
-    return CLT(1,3, arcs, bnobj.h, bnobj.q, bnobj.delta)
-
-def BNAlg2Cob(morphism, sourceCLT, targetCLT):
-    decos = []
-    if morphism == 0:
-        return 0
-    
-    for pair in morphism.pairs:
-        if pair[0] > 0 : 
-            decos.append([pair[0]-1, 0, 1, pair[1]])
-        elif pair[0] == 0: 
-            decos.append([0, 0, 0, pair[1]])
-        elif pair[0] %2 == 0:
-            power = int(Fraction(-1*pair[0], 2))
-            decos.append([power, 0, 0, ((-1)** power) *pair[1]]) #(-H)^(n/2)
-            decos.append([power - 1, 0, 1, ((-1)** (power -1)) *pair[1]]) #(-H)^(n/2-1) D
-        elif pair[0] %2== 1: 
-            power = int(Fraction(-1*pair[0] -1, 2))
-            decos.append([power, 0, ((-1)** power)*pair[1] ])#(-H)^((n-1)/2) S
-        else: 
-            raise Exception("pair is not an integer?")
-    Cob = Cobordism(sourceCLT, targetCLT, decos)
-    # print("COB", Cob.front.top, Cob.front.bot)
-    Cob.ReduceDecorations()
-    return Cob
-    
-def BNComplex2CobComplex(BNcomplex):
-    # BNcomplex.print()
-    gens = [BNObj2CLT(bnobj) for bnobj in BNcomplex.gens]
-    diff = [[BNAlg2Cob(morphism, gens[source], gens[target]) \
-                 for source, morphism in enumerate(row)] for target, row in enumerate(BNcomplex.diff)]
-    complex = CobComplex(gens, diff)
-    # complex.print("old long")
-    return complex
+        gens = [obj.ToCob() for obj in BNcomplex.gens]
+        def convert(mor,source,target):
+            if mor == 0:
+                return 0
+            return mor.ToCob(source,target)
+        diff = [[convert(mor, gens[source], gens[target]) for source, mor in enumerate(row)] for target, row in enumerate(BNcomplex.diff)]
+        complex = CobComplexes.CobComplex(gens, diff)
+        # complex.print("old long")
+        complex.validate()
+        return complex
     
 class multicurve(object):
     """A multicurve is a collection of loop-type BNcomplexes which are assumed to be connected.

@@ -17,6 +17,8 @@
 from fractions import Fraction
 from itertools import groupby
 
+import Cob
+
 def ToExponent(exponent):
     return str(exponent).translate(str.maketrans("-0123456789.", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹·"))
 
@@ -101,6 +103,14 @@ class obj(object):
         
     def shift_h(self,shift): #shift h, keep q fixed; create new object
         return obj(self.idem,self.q,self.h+shift,self.delta-shift)
+    
+    def ToCob(self):
+        arcs = []
+        if self.idem == 0:
+            arcs = [3,2,1,0]
+        else:
+            arcs = [1,0,3,2]
+        return Cob.obj(1,3, arcs, self.h, self.q, self.delta)
 
 def coeff_simplify(num,field):
     if field > 1:
@@ -268,4 +278,27 @@ class mor(object):
                 if pair[0] == 0:
                     string += coeff + "id"
         return string
+    
+    def ToCob(self, sourceCLT, targetCLT):# does not work yet, since Z is not implemented over BNAlgebra and Cob is only implemented over Z.
+        if self.field != 1:
+            raise Exception("You are converting a morphism in BNalgebra with coefficients in field={} into a morphism in Cob. However, the category Cob is only implemented over integers, ie for field=1.".format(field))
+        decos = []
+        
+        for pair in self.pairs:
+            if pair[0] > 0 : 
+                decos.append([pair[0]-1, 0, 1, pair[1]])
+            elif pair[0] == 0: 
+                decos.append([0, 0, 0, pair[1]])
+            elif pair[0] %2 == 0:
+                power = int(Fraction(-1*pair[0], 2))
+                decos.append([power, 0, 0, ((-1)** power) *pair[1]]) #(-H)^(n/2)
+                decos.append([power - 1, 0, 1, ((-1)** (power -1)) *pair[1]]) #(-H)^(n/2-1) D
+            elif pair[0] %2== 1: 
+                power = int(Fraction(-1*pair[0] -1, 2))
+                decos.append([power, 0, ((-1)** power)*pair[1] ])#(-H)^((n-1)/2) S
+            else: 
+                raise Exception("pair is not an integer?")
+        mor = Cob.mor(sourceCLT, targetCLT, decos)
+        mor.ReduceDecorations()
+        return mor
 
