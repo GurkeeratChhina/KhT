@@ -14,21 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import itertools as itertools
-import numpy as np
-import math
-from graph_tool.all import *
-from random import choice
-from time import time
 from fractions import Fraction
-
-from Tangles import *
-from Cobordisms import *
-from CobComplexes import *
-from BNComplexes import *
-from Drawing import *
-from BNAlgebra import *
-from CrossingTangle import *
+from itertools import groupby
 
 def ToExponent(exponent):
     return str(exponent).translate(str.maketrans("-0123456789.", "⁻⁰¹²³⁴⁵⁶⁷⁸⁹·"))
@@ -126,6 +113,7 @@ class BNmor_alt(object):# work in progress
     'power' is an integer, which determines the exponent of D (if positive) and the exponent of S (if negative)
     'coeff' is some non-zero integer (= coefficient in the base ring/field) # Alternatively, a Fraction object
     """
+    import numpy as np # move this to the top of the file if used
     #__slots__ = 'pairs'
     
     def __init__(self,S,D,I):

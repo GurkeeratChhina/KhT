@@ -15,7 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cairo
-from IPython.display import IFrame
     
 def draw_tangle_ends(posx,posy,clt,h,ctx):
     ctx.set_font_size(0.40)
@@ -260,10 +259,7 @@ def drawtangle(string,name,style="plain",start=1):
             ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
             s = word[0]+str(word[1])
             ctx.move_to(w-2,level+0.5)
-            ctx.show_text(s)
-        
-            
-    #return IFrame("Output/"+ name+'.svg', width='100%', height='300')
+            ctx.show_text(s)           
 
 ################
 # Obsolete code:
@@ -289,7 +285,6 @@ def drawclt(clt,name):
     draw_tangle_ends(0,0,clt,h,ctx)
     draw_arcs(0,0,clt,h,ctx,(0,0,0))
     
-    return IFrame("Output/"+ name+'.pdf', width='100%', height='300')
 
 def drawcob(cob,name):
     """Create a pdf file 'name'.pdf in the subfolder 'Output' with a pictographic representation of the cobordism 'cob'.
@@ -343,6 +338,4 @@ def drawcob(cob,name):
         ctx.set_source_rgb(0, 0, 0)
         ctx.set_line_width(0.1)
         ctx.stroke()
-    
-    return IFrame('Output/' + name+'.pdf', width='100%', height='300')
 

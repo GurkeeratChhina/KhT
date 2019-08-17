@@ -8,25 +8,24 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from itertools import groupby
-import numpy as np
-import math
 import cairo
-from graph_tool.all import *
-from random import choice
-from time import time
-from KhT import *
+import graph_tool.all as gr
+import math
+import numpy as np
 from fractions import Fraction
-from BNAlgebra import *
+from random import choice
 from subprocess import run
-from time import sleep
+from time import time
 
+import Drawing
+import BNAlgebra
+from KhT import *
 
 class BNComplex(object):
     """ A chain complex is a directed graph, consisting of 
@@ -72,7 +71,7 @@ class BNComplex(object):
     
     def draw(self, filename,vertex_switch="index_qhdelta"):
         "draw a graph of for the BNcomplex"
-        g = Graph()
+        g = gr.Graph()
         size = len(self.gens)
         g.add_vertex(size)
         
@@ -119,11 +118,11 @@ class BNComplex(object):
                     'marker_size' : 20,\
                     'font_size' : 22}   
         
-        position = arf_layout(g, max_iter=0)
+        position = gr.arf_layout(g, max_iter=0)
         #position = sfdp_layout(g, max_iter=0)
         #Position[g.vertex(i)] = [50*(2*i+1), 200]
         
-        graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
+        gr.graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
     
     def ValidMorphism(self):
         # return True
@@ -168,7 +167,7 @@ class BNComplex(object):
         if (len(label.pairs)!=1) or (label.pairs[0][0]!=0):
             raise Exception('You cannot cancel this arrow!')
         
-        coeff_inv=inverse(label.pairs[0][1],self.field) # inverse of the coefficient of the label of the cancelling arrow
+        coeff_inv=BNAlgebra.inverse(label.pairs[0][1],self.field) # inverse of the coefficient of the label of the cancelling arrow
         
         del self.gens[Max] # eliminate source and target from list of generators
         del self.gens[Min] # eliminate source and target from list of generators
@@ -214,13 +213,13 @@ class BNComplex(object):
         """
                 
         face=alg.pairs[0][0]
-        inverse_coeff=inverse(alg.pairs[0][1],self.field)
+        inverse_coeff=BNAlgebra.inverse(alg.pairs[0][1],self.field)
         
         def find_isotopy(index,entry):# Note: We are assuming here that there is at most one label to remove. 
             for pair in entry.pairs:
                 if (pair[0]*face>0):
                     if ((self.diff)[index,end] == 0) & (index != end):
-                        return BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field)
+                        return BNAlgebra.BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field)
             return 0 # zeor algebra element
         
         # first remove all other arrows with the same start
@@ -229,7 +228,7 @@ class BNComplex(object):
                 if self.diff[index,start] != 0:
                     for pair in self.diff[index,start].pairs:
                         if pair[0]*face>0:# same face
-                            self.isotopy(end,index,BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field),"unsafe")
+                            self.isotopy(end,index,BNAlgebra.BNmor([[pair[0]-face,pair[1]*inverse_coeff]],self.field),"unsafe")
         # attempt to speed up , but actually MUCH slower...
         #isotopy_vector=np.array([find_isotopy(index,entry) for index,entry in enumerate(self.diff[:,start])])
         #self.isotopy_via_vector_end(end,isotopy_vector)
@@ -240,7 +239,7 @@ class BNComplex(object):
                 if self.diff[end,index] != 0:
                     for pair in self.diff[end,index].pairs:
                         if pair[0]*face>0:# same face
-                            self.isotopy(index,start,BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]],self.field),"unsafe")
+                            self.isotopy(index,start,BNAlgebra.BNmor([[pair[0]-face,(-1)*pair[1]*inverse_coeff]],self.field),"unsafe")
     
     def clean_up_once(self,SD):
         """ Simplify complex wrt the face D (1) or S (-1).
@@ -292,7 +291,7 @@ class BNComplex(object):
                     remaining.remove(end_current)
                 
             else: # isolate this shortest arrow
-                self.isolate_arrow(start_current, end_current, BNmor([self.diff[end_current,start_current].pairs[index_current]],self.field))
+                self.isolate_arrow(start_current, end_current, BNAlgebra.BNmor([self.diff[end_current,start_current].pairs[index_current]],self.field))
                 #print("start:", start_current,"end:", end_current, "isotopy:",self.diff[end_current,start_current].pairs[index_current])
                 remaining.remove(start_current)
                 remaining.remove(end_current)
@@ -357,7 +356,7 @@ class BNComplex(object):
         return multicurve([BNComplex(gens,diff,self.field) for gens,diff in zip(genss,diffs)])
         
     
-    def clean_up(self,max_iter=200):
+    def clean_up(self,max_iter=1000):
         """ Simplify complex alternatingly wrt D and S faces and stop after at most max_iter iterations. The default is 200 iterations. 
         """
         
@@ -401,7 +400,7 @@ class BNComplex(object):
         
         def fill_diagonal(i,j):
             if i==j:
-                return BNmor([[Hpower,1],[-2*Hpower,(-1)**Hpower]],self.field)
+                return BNAlgebra.BNmor([[Hpower,1],[-2*Hpower,(-1)**Hpower]],self.field)
             else:
                 return 0
         
@@ -423,7 +422,7 @@ def CobordismToBNAlg(cob,field=2):
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     
     if len(cob.comps)==1:# saddle
-        return BNmor([[-1-2*deco[0],(-1**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0],field).simplify_BNmor(field)
+        return BNAlgebra.BNmor([[-1-2*deco[0],(-1**deco[0])*deco[-1]] for deco in cob.decos if deco[1]==0],field).simplify_BNmor(field)
         
     if len(cob.comps)==2:# identity/dot cobordism
         i=find_first_index(cob.comps,contains_0)+1 #component with TEI 0
@@ -437,7 +436,7 @@ def CobordismToBNAlg(cob,field=2):
         decos_DH=[[deco[0],deco[-1]]     for deco in decos_no_dots if deco[0]>0 ] # D contribution from H
         decos_SH=[[-2*deco[0],-deco[-1]] for deco in decos_no_dots if deco[0]>0 ] # SS contribution from H
         
-        return BNmor(decos_DD+decos_id+decos_DH+decos_SH,field).simplify_BNmor(field)
+        return BNAlgebra.BNmor(decos_DD+decos_id+decos_DH+decos_SH,field).simplify_BNmor(field)
 
 def CLT2BNObj(clt):
     """Convert a (1,3)-tangle into one of the two idempotents of BNAlg."""
@@ -445,9 +444,9 @@ def CLT2BNObj(clt):
         
         raise Exception("The cobordism to convert to an element of BNAlgebra is not between (1,3)-tangles.")
     elif clt.arcs[0]==3:
-        return BNobj(0,clt.q,clt.h) #b
+        return BNAlgebra.BNobj(0,clt.q,clt.h) #b
     elif clt.arcs[0]==1:
-        return BNobj(1,clt.q,clt.h) #c
+        return BNAlgebra.BNobj(1,clt.q,clt.h) #c
 
 def CobComplex2BNComplex(complex,field=2):
     gens=[CLT2BNObj(clt) for clt in complex.gens]
@@ -513,7 +512,7 @@ class multicurve(object):
             tanglestr=""
         else:
             tanglestr="Output/"+filename+"_tangle.pdf "
-            drawtangle(tangle,filename+"_tangle","slices",1)
+            Drawing.drawtangle(tangle,filename+"_tangle","slices",1)
         run("pdftk "+tanglestr+"".join(["Output/"+filename+str(i)+".pdf " for i in range(len(self.comps))])+"output Output/"+filename+".pdf", shell=True)
         run("rm "+tanglestr+"".join(["Output/"+filename+str(i)+".pdf " for i in range(len(self.comps))]), shell=True)
 

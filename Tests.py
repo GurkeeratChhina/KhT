@@ -14,10 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import math
-from fractions import Fraction
-import timeit
-from time import time
 from KhT import *
 from Tangles import *
 from Cobordisms import *
