@@ -161,27 +161,21 @@ class BNComplex(object):
         """Mutates self by eliminating the isomorphism at the specified location, via the gaussian elimination lemma
            Note that this does not check that the cobodism specified is actually an isomorphism.
         """
-        
         Max=max(targetindex,sourceindex)
         Min=min(targetindex,sourceindex)
-        coeff = self.diff[targetindex,sourceindex] # coefficient of the cancelling arrow
+        label = self.diff[targetindex,sourceindex] # label of the cancelling arrow
         
-        if (len(coeff.pairs)!=1) or (coeff.pairs[0][0]!=0):
+        if (len(label.pairs)!=1) or (label.pairs[0][0]!=0):
             raise Exception('You cannot cancel this arrow!')
         
+        coeff_inv=inverse(label.pairs[0][1],self.field) # inverse of the coefficient of the label of the cancelling arrow
         
         del self.gens[Max] # eliminate source and target from list of generators
         del self.gens[Min] # eliminate source and target from list of generators
         
         out_source = np.delete(self.diff[:,sourceindex],[Min,Max],0) #arrows starting at the source, omiting indices targetindex and sourceindex
         in_target = np.delete(self.diff[targetindex],[Min,Max],0) #arrows ending at the target, omiting indices targetindex and sourceindex
-        
-        def neg(entry):
-            if entry == 0:
-                return 0
-            return entry.negative(self.field,inverse(coeff.pairs[0][1],self.field))
-        
-        in_target=np.array([neg(entry) for entry in in_target])
+        in_target = np.array([(-entry)*coeff_inv for entry in in_target])
         
         self.diff=np.delete(self.diff,[Min,Max],0) # eliminate rows of indices targetindex and sourceindex
         self.diff=np.delete(self.diff,[Min,Max],1) # eliminate columns of indices targetindex and sourceindex
@@ -202,7 +196,7 @@ class BNComplex(object):
         
         if (switch=="safe") and ((self.diff)[start,end] != 0):
             raise Exception('This isotopy probably does not preserve the chain isomorphism type. There is an arrow going in the opposite direction of the isotopy.')
-        self.diff[end,:]+=[alg.negative(self.field)*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
+        self.diff[end,:]+=[(-alg)*element for element in self.diff[start,:]] # subtract all precompositions with the differential (rows of diff)
         self.diff[:,start]+=[element*alg for element in self.diff[:,end]] # add all postcompositions with the differential (columns of diff)
         #self.ValidMorphism()
             
@@ -210,12 +204,7 @@ class BNComplex(object):
     def isotopy_via_vector_end(self,end,vector): # unused function: this is actually *much* slower
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
         """
-        def neg(x):
-            if x == 0:
-                return 0
-            return x.negative(self.field)
-        
-        self.diff+=np.outer([neg(x) for x in vector],self.diff[end,:]) # subtract all precompositions with the differential (rows of diff)
+        self.diff+=np.outer([-x for x in vector],self.diff[end,:]) # subtract all precompositions with the differential (rows of diff)
         self.diff[:,end]+=np.dot(self.diff,vector) # add all postcompositions with the differential (columns of diff)
     
     def isolate_arrow(self,start, end, alg):
@@ -395,11 +384,7 @@ class BNComplex(object):
         if shift % 2 == 0:
             new_diff = self.diff
         elif shift % 2 == 1:
-            def neg(alg):
-                if alg == 0:
-                    return 0
-                return alg.negative(self.field)
-            new_diff = [[neg(alg) for alg in row] for row in self.diff]
+            new_diff = [[-alg for alg in row] for row in self.diff]
         else:
             raise Exception('Why are you trying to shift homological grading by something other than an integer? I cannot do that!')
         return BNComplex(new_gens,new_diff,self.field)

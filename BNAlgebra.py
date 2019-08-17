@@ -135,9 +135,9 @@ class BNmor_alt(object):# work in progress
     
     def simplify_BNmor(self,field):
         """simplify algebra elements by omitting superflous zeros."""
-        self.S=[coeff_simplify(i) for i in self.S]
-        self.D=[coeff_simplify(i) for i in self.D]
-        self.I=coeff_simplify(self.I)
+        self.S=[coeff_simplify(i,field) for i in self.S]
+        self.D=[coeff_simplify(i,field) for i in self.D]
+        self.I=coeff_simplify(self.I,field)
         while self.S[-1] ==0:
             del self.S[-1]
         while self.D[-1] ==0:
@@ -210,12 +210,15 @@ class BNmor(object):
         return BNmor(self.pairs+other.pairs,self.field).simplify_BNmor(self.field)
 
     def __mul__(self, other):
-        if (self == 0) or (other == 0):
+        if other == 0:
             return 0
-        return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
+        if isinstance(other,BNmor):
+            return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
+        # 'other' is assumed to be a non-zero integer
+        return BNmor([[pair[0],other*pair[1]] for pair in self.pairs],self.field).simplify_BNmor(self.field)
         
     def __rmul__(self, other):
-        if (self == 0) or (other == 0):
+        if other == 0:
             return 0
         return BNmor([[a1[0]+a2[0],a1[1]*a2[1]] for a1 in self.pairs for a2 in other.pairs if a1[0]*a2[0]>=0],self.field).simplify_BNmor(self.field)
     
@@ -243,6 +246,9 @@ class BNmor(object):
     
     def contains_S(self):
         return all([pair[0]>=0 for pair in self.pairs])==False
+    
+    def __neg__(self):
+        return BNmor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
     
     def negative(self,field,coeff=1): #create new morphism
         return BNmor([[pair[0],(-1)*pair[1]*coeff] for pair in self.pairs],self.field)
