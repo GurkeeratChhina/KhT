@@ -24,7 +24,7 @@ If you have comments or questions about this package, [please get in touch](http
 
 [KWZ] Artem Kotelskiy, Liam Watson and Claudius Zibrowius: Immersed curve in Khovanov homology, in preparation. 
 
-### License
+## License ##
 
 This program is licensed under the GNU General Public License, version 3. 
 
