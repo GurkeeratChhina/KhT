@@ -22,7 +22,7 @@ If you have comments or questions about this package, [please get in touch](http
 
 ## References ##
 
-[KWZ] Artem Kotelskiy, Liam Watson and Claudius Zibrowius: Immersed curve in Khovanov homology, in preparation. 
+[KWZ] Artem Kotelskiy, Liam Watson and Claudius Zibrowius, _Immersed curves in Khovanov homology_, in preparation
 
 ## License ##
 
