@@ -1,6 +1,6 @@
 ## Usage ##
 
-The package _KhT_ computes the Khovanov and Bar-Natan homology of arbitrary tangles from a splitting into elementary tangles. For pointed 4-ended tangles, it also computes the immersed curve invariants from [[KWZ]](https://github.com/spinachstealer/KhT#references). An example can be found in `examples/2-cable-trefoil.py`. Simply open the terminal in the root folder and run
+The package _KhT_ computes the Khovanov and Bar-Natan homology of arbitrary tangles from a splitting into elementary tangles. For pointed 4-ended tangles, it also computes the immersed curve invariants from [[KWZ]](https://github.com/spinachstealer/KhT#References). An example can be found in `examples/2-cable-trefoil.py`. Simply open the terminal in the root folder and run
 
     python3 KhT 2-cable-trefoil
 
@@ -20,7 +20,7 @@ and edit the new file appropriately. The computation for the new tangle can be r
 
 If you have comments or questions about this package, [please get in touch](https://cbz20.raspberryip.com/). 
 
-## references ##
+## References ##
 
 [KWZ] Artem Kotelskiy, Liam Watson and Claudius Zibrowius: Immersed curve in Khovanov homology, in preparation. 
 
