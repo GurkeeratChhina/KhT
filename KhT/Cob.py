@@ -35,6 +35,9 @@ class obj(object):
         self.delta = delta
         self.pairs = [pair for pair in [[i,arcs[i]] for i in range(top+bot)] if pair[0] < pair[1]] # testing alternative format for CLTs
     
+    def __repr__(self):
+        return "Cob.obj({},{},{},{},{},{})".format(self.top,self.bot,self.arcs,self.h,self.q,self.delta)
+    
     def shift_qhd(self,q,h,delta):
         self.h += h
         self.q += q
@@ -184,9 +187,7 @@ class mor(object):
         self.decos = decos
     
     def __repr__(self):
-        clt1=self.front
-        clt2=self.back
-        return "mor[obj[{},{},{},{},{},{}],obj[{},{},{},{},{},{}],{},{}]".format(clt1.top,clt1.bot,clt1.arcs,clt1.h,clt1.q,clt1.delta,clt2.top,clt2.bot,clt2.arcs,clt2.h,clt2.q,clt2.delta,self.decos,self.comps)
+        return "Cob.mor({},{},{},{},)".format(self.front,self.back,self.decos,self.comps)
     
     def print(self,switch="short"):
         if self.decos==[]:

@@ -56,6 +56,9 @@ class obj(object):
         else:
             self.delta = delta
     
+    def __repr__(self):
+        return "BNAlgebra.obj({},{},{},{})".format(self.idem,self.q,self.h,self.delta)
+    
     def idem2dot(self):
         if self.idem==0:
             return "●"#b (solid dot)
@@ -181,6 +184,9 @@ class mor(object):
     def __init__(self,pairs,field):
         self.pairs = pairs
         self.field = field
+    
+    def __repr__(self):
+        return "BNAlgebra.mor({},{})".format(self.pairs,self.field)
     
     def simplify_mor(self,field):
         """simplify algebra elements by adding all coeffients of the same power of D or S, omitting those with coefficient 0. This is very similar to simplify_decos"""

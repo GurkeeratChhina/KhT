@@ -30,11 +30,19 @@ class CobComplex(object):
         Note that the matrix's rows and columns depend on the order the CLTS are given in the list 
         We assume that all entries of 'diff' are reduced in the sense that 'ReduceDecorations()' does not change them.
         """
-    __slots__ = 'gens','diff'
+    __slots__ = 'gens','diff','field'
     
-    def __init__(self,gens,diff):
+    def __init__(self,gens,diff,field=1):
         self.gens = gens
         self.diff = np.array(diff)
+        self.field = field # not implemented; assuming integer coefficients throughout
+    
+    def __repr__(self):
+        return "CobComplex({},{},{})".format(self.gens,[list(row) for row in self.diff],self.field)
+    
+    def save(self,filename):
+        with open("examples/data/CobComplexes/"+filename, "w") as text_file:
+            print(repr(self), file=text_file)
     
     def print(self,switch="long"):
         """Print a complex in human readable form. The optional parameter should be one of the following strings: 
@@ -596,4 +604,8 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     print("Completed the computation successfully after "+str(round(time1-time0,1))+" second(s).                        ")
     return cx
 
+def importCobcx(filename):
+    with open("examples/data/CobComplexes/"+filename, "r") as text_file:
+        data = text_file.read()
+        return eval(data)
 

@@ -90,7 +90,7 @@ def draw_dot_on_arc(arc,clt,h,ctx,deco_index):
     ctx.set_source_rgb(255,0,0)
     ctx.stroke()
 
-def drawtangle(string,name,style="plain",start=1):
+def drawtangle(string,name,style="plain",start=1,subtitle=""):
     """draw the tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
     <type> is equal to:
         'pos': positive crossing
@@ -98,10 +98,16 @@ def drawtangle(string,name,style="plain",start=1):
         'cup': cup
         'cap': cap
     <index> is the index at which the crossing, cap or cup sits. 
-    The optional parametrer 'style' is either 'plain' (simple tangle) or 'slices' (shows slices with labels).
-    The optional paramter 'start' is an integer which specifies the number of tangle ends at the top.
+    The optional parameter 'style' is either 'plain' (simple tangle) or 'slices' (shows slices with labels).
+    The optional parameter 'start' is an integer which specifies the number of tangle ends at the top.
+    The optional parameter 'subtitle' is a string which is added to the top.
     """
     stringwidth=0.08
+    
+    if subtitle == "":
+        baselevel = 1
+    else:
+        baselevel = 1.5
     
     # drawing code for elementary slices
     def draw_cup(level,index,dotlength):
@@ -217,10 +223,10 @@ def drawtangle(string,name,style="plain",start=1):
         w = w_max+1.5
     else:
         w = w_max
-    h = len(stringlist)
+    h = len(stringlist)+baselevel
     dotlength=start
     
-    surface = cairo.PDFSurface("Output/"+name+'.pdf',w*scale,(h+1)*scale)
+    surface = cairo.PDFSurface("examples/"+name+'.pdf',w*scale,(h+1)*scale)
     ctx = cairo.Context(surface)
     ctx.set_source_rgb(1, 1, 1) #background colour
     ctx.paint()
@@ -230,7 +236,7 @@ def drawtangle(string,name,style="plain",start=1):
     
     # Drawing code
     for level,word in enumerate(stringlist):
-        
+        level+=baselevel
         if word[0]=="pos":
             draw_pos(level,word[1],dotlength)
         
@@ -245,7 +251,7 @@ def drawtangle(string,name,style="plain",start=1):
             draw_cap(level,word[1],dotlength)
             dotlength+=2
         
-        if (style=="slices") and (level>0):
+        if (style=="slices") and (level>baselevel):
             ctx.move_to(-0.25,level)
             ctx.line_to(w-0.75,level)
         
@@ -259,14 +265,40 @@ def drawtangle(string,name,style="plain",start=1):
             ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
             s = word[0]+str(word[1])
             ctx.move_to(w-2,level+0.5)
-            ctx.show_text(s)           
+            ctx.show_text(s)
+    
+    s = name
+    titlescale = 0.6
+    ctx.set_source_rgb(0,0,0)
+    ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
+    tw = w-1
+    while tw >= w-1:# adapt font size to width of the picture
+        ctx.set_font_size(titlescale)
+        tw = ctx.text_extents(s)[2]
+        titlescale = titlescale*0.95
+    fascent, fdescent, fheight, fxadvance, fyadvance = ctx.font_extents()
+    ctx.move_to(w/2-0.5-tw/2.0,fheight/2)
+    ctx.show_text(s)  
+    
+    s = subtitle
+    titlescale = 0.4
+    ctx.set_source_rgb(0,0,0)
+    ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
+    tw = w-1
+    while tw >= w-1:# adapt font size to width of the picture
+        ctx.set_font_size(titlescale)
+        tw = ctx.text_extents(s)[2]
+        titlescale = titlescale*0.95
+    fascent, fdescent, fheight, fxadvance, fyadvance = ctx.font_extents()
+    ctx.move_to(w/2-0.5-tw/2.0,baselevel-0.75+fheight/2)
+    ctx.show_text(s)
 
 ################
 # Obsolete code:
 ################
 
 def drawclt(clt,name):
-    """Create a pdf file 'name'.pdf in the subfolder 'Output' with a pictographic representation of the CLT 'clt'.
+    """Create a pdf file 'name'.pdf in the subfolder 'examples' with a pictographic representation of the CLT 'clt'.
     This function is not used anywhere in the code and kept for debugging purposes only.
     """
     scale = 100
@@ -275,7 +307,7 @@ def drawclt(clt,name):
                  [abs(i[1]-i[0]) for i in clt.arcs_bot()]+\
                  [abs(i[1]-i[0]-clt.top) for i in clt.arcs_mix()])
     
-    surface = cairo.PDFSurface("Output/"+name+'.pdf',w*scale,(h+1)*scale)
+    surface = cairo.PDFSurface("examples/"+name+'.pdf',w*scale,(h+1)*scale)
     ctx = cairo.Context(surface)
     matrix = cairo.Matrix(scale,0,0,scale,0.5*scale,0.5*scale)
     ctx.set_matrix(matrix)
@@ -287,7 +319,7 @@ def drawclt(clt,name):
     
 
 def drawcob(cob,name):
-    """Create a pdf file 'name'.pdf in the subfolder 'Output' with a pictographic representation of the cobordism 'cob'.
+    """Create a pdf file 'name'.pdf in the subfolder 'examples' with a pictographic representation of the cobordism 'cob'.
     This function is not used anywhere in the code and kept for debugging purposes only.
     """
     clt1=cob.front
@@ -301,7 +333,7 @@ def drawcob(cob,name):
                  [abs(i[1]-i[0]) for i in clt2.arcs_bot()]+\
                  [abs(i[1]-i[0]-clt2.top) for i in clt2.arcs_mix()])
     
-    surface = cairo.PDFSurface("Output/"+name+'.pdf',w*scale,(h+1)*scale*len(cob.decos))
+    surface = cairo.PDFSurface("examples/"+name+'.pdf',w*scale,(h+1)*scale*len(cob.decos))
     ctx = cairo.Context(surface)
     matrix = cairo.Matrix(scale,0,0,scale,0.5*scale,0.5*scale)
     ctx.set_matrix(matrix)

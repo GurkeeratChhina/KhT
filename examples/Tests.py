@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from CobComplexes import *
 from BNComplexes import *
+from CobComplexes import *
 from Drawing import *
 from CrossingTangle import *
 
@@ -647,6 +647,8 @@ def TestSet29(): # same as tangle_8, but simpler presentation
     #drawtangle(tangle,"tangle_8alt","slices",1)
     complex= BNbracket(tangle,0,0,1)
     #complex.print()
+    complex.save("Test29")
+    complex = importCobcx("Test29")
     BN_complex = complex.ToBNAlgebra(2) # doing mod 7 as if over Q
     #complex1 = BN_complex.ToCob() # does not work yet, since Z is not implemented over BNAlgebra and Cob is only implemented over Z.
     #print(complex == complex1)
@@ -660,6 +662,8 @@ def TestSet29(): # same as tangle_8, but simpler presentation
     Khr.clean_up()
     multicurve_KhT=Khr.to_multicurve()
     multicurve_KhT.draw("tangle_8alt_mod5Khr","hdelta",tangle)
+    BN_complex.save("Test29")
+    importedBNcx = importBNcx("Test29")
     
 def Test_TwoTwistTangle():
     b=CLT(1,3,[1,0,3,2],2,3,0)

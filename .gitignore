@@ -2,8 +2,4 @@
 *.log
 *.png
 *.pyc
-*.svg
-Output
-output.txt
-output
 __pycache__

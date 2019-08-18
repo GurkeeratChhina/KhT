@@ -54,7 +54,7 @@ class BNComplex(object):
         self.diff = np.array([[simplify(mor) for mor in row] for row in self.diff])
     
     def __repr__(self):
-        return "BNComplex[{},{},{}]".format(self.gens,self.diff,self.field)
+        return "BNComplex({},{},{})".format(self.gens,[list(row) for row in self.diff],self.field)
     
     def __str__(self):
         """string representation of a BNcomplex; 
@@ -75,6 +75,10 @@ class BNComplex(object):
             return str(entry)
         string+=str(tabulate(pd.DataFrame([[ToStr(entry) for entry in row] for row in self.diff]),range(len(self.diff)),tablefmt="fancy_grid"))
         return string
+    
+    def save(self,filename):
+        with open("examples/data/BNComplexes/"+filename, "w") as text_file:
+            print(repr(self), file=text_file)
     
     def draw(self, filename,vertex_switch="index_qhdelta"):
         "draw a graph of for the BNcomplex"
@@ -129,7 +133,7 @@ class BNComplex(object):
         #position = sfdp_layout(g, max_iter=0)
         #Position[g.vertex(i)] = [50*(2*i+1), 200]
         
-        gr.graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="Output/" + filename)
+        gr.graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="examples/" + filename)
     
     def validate(self):
         # return True
@@ -361,7 +365,6 @@ class BNComplex(object):
         diffs=[[[self.diff[j,i] for j in curve] for i in curve] for curve in curves]
         return multicurve([BNComplex(gens,diff,self.field) for gens,diff in zip(genss,diffs)])
         
-    
     def clean_up(self,max_iter=1000):
         """ Simplify complex alternatingly wrt D and S faces and stop after at most max_iter iterations. The default is 200 iterations. 
         """
@@ -433,25 +436,35 @@ class BNComplex(object):
         complex.validate()
         return complex
     
+def importBNcx(filename):
+    with open("examples/data/BNComplexes/"+filename, "r") as text_file:
+        data = text_file.read()
+        return eval(data)
+    
 class multicurve(object):
     """A multicurve is a collection of loop-type BNcomplexes which are assumed to be connected.
     """
     def __init__(self,comps):
         self.comps=comps
     
+    def __repr__(self):
+        return "multicurve({})".format(self.comps)
+    
     def draw(self, filename, vertex_switch="index_qhdelta",tangle=None):
         """create a pdf file which draws the graph of each component on a separate page; if tangle is specified, the first page is the tangle input.
         """
         for i,comp in enumerate(self.comps):
             comp.draw(filename+str(i)+".pdf",vertex_switch)
-        #sleep(4)
+        
+        subtitle="field="+str(comp.field)
+        
         if tangle==None:
             tanglestr=""
         else:
-            tanglestr="Output/"+filename+"_tangle.pdf "
-            Drawing.drawtangle(tangle,filename+"_tangle","slices",1)
-        run("pdftk "+tanglestr+"".join(["Output/"+filename+str(i)+".pdf " for i in range(len(self.comps))])+"output Output/"+filename+".pdf", shell=True)
-        run("rm "+tanglestr+"".join(["Output/"+filename+str(i)+".pdf " for i in range(len(self.comps))]), shell=True)
+            tanglestr="examples/"+filename+".pdf "
+            Drawing.drawtangle(tangle,filename,"slices",1,subtitle=subtitle)
+        run("pdftk "+tanglestr+"".join(["examples/"+filename+str(i)+".pdf " for i in range(len(self.comps))])+"output examples/"+filename+"_"+subtitle+".pdf", shell=True)
+        run("rm "+tanglestr+"".join(["examples/"+filename+str(i)+".pdf " for i in range(len(self.comps))]), shell=True)
 
 #todo: implement recognition of local systems (optional)
 #todo: implement pairing theorem (just for fun!)
