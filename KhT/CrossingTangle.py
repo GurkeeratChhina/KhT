@@ -1,10 +1,18 @@
-import math
-from KhT import *
-from Tangles import *
-from Complex import *
-from Drawing import *
-from Cobordisms import *
-from BNComplexes import *
+# -*- coding: utf-8 -*-
+# COPYRIGHT 2019 Gurkeerat Chhina, Claudius Zibrowius
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 class Tangle(object):
     __slots__ = 'slices'
@@ -33,13 +41,13 @@ class Tangle(object):
         neg = 0
         stringlist=[[word[0:3],int(word[3:])] for word in self.slices.split('.')]
         stringlist.reverse()
-        cx=ChainComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
+        cx=CobComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
         print("Computing the Bar-Natan bracket for the tangle\n\n"+self.slices+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
               " positive crossings and "+str(neg)+" negative crossings.")
         ends = start
         for i,word in enumerate(stringlist):
             # PrettyPrintComplex(cx, "old long")
-            print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.elements))+" objects)", end='\n')# monitor \n ->\r
+            print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects)", end='\n')# monitor \n ->\r
             #time.sleep(0.1)
             if word[0]=="pos":
                 cx=AddPosCrossing(cx, word[1])
@@ -229,3 +237,4 @@ def TangleWordToTangle(word):
         string += letter[0] + str(letter[1]) + "."
     string = string[:-1]
     return Tangle(string)
+

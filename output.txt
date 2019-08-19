@@ -1,0 +1,88 @@
+Computing the Bar-Natan bracket for the tangle
+
+cup1.pos2.pos0.pos0.neg1.pos2.cap3.neg1.pos0.cap1
+
+with 1 ends at the top, 0 positive crossings, 0 negative crossings and 10 slices in total.
+slice 0/10: adding cap at index 1 to tangle. (1 objects, 0.0 sec)slice 1/10: adding pos at index 0 to tangle. (1 objects, 0.0 sec)slice 2/10: adding neg at index 1 to tangle. (2 objects, 0.0 sec)slice 3/10: adding cap at index 3 to tangle. (3 objects, 0.0 sec)slice 4/10: adding pos at index 2 to tangle. (3 objects, 0.0 sec)slice 5/10: adding neg at index 1 to tangle. (6 objects, 0.0 sec)slice 6/10: adding pos at index 0 to tangle. (10 objects, 0.0 sec)slice 7/10: adding pos at index 0 to tangle. (18 objects, 0.0 sec)slice 8/10: adding pos at index 2 to tangle. (26 objects, 0.0 sec)slice 9/10: adding cup at index 1 to tangle. (43 objects, 0.0 sec)Completed the computation successfully after 0.1 second(s).                        
+iteration: 1 (0.0 sec)
+iteration: 2 (0.0 sec)
+iteration: 3 (0.0 sec)
+iteration: 4 (0.0 sec)
+iteration: 5 (0.0 sec)
+iteration: 6 (0.0 sec)
+iteration: 7 (0.0 sec)
+iteration: 8 (0.0 sec)
+iteration: 9 (0.0 sec)
+iteration: 10 (0.0 sec)
+Clean-up: Terminated as a result of reaching maximum iteration value of 10
+Computing the Bar-Natan bracket for the tangle
+
+cup2.cup1.pos0.pos0.neg2.neg2.neg2.cap3.cap1.cup1.pos0.pos0.neg2.neg2.cap3.cap1
+
+with 1 ends at the top, 0 positive crossings and 0 negative crossings.
+slice 0/16: adding cap at index 1 to tangle. (1 objects)
+Clean-Up: Finished after 0 iteration(s) in 0.0 second(s).
+slice 1/16: adding cap at index 3 to tangle. (1 objects)
+slice 2/16: adding neg at index 2 to tangle. (1 objects)
+slice 3/16: adding neg at index 2 to tangle. (2 objects)
+slice 4/16: adding pos at index 0 to tangle. (3 objects)
+slice 5/16: adding pos at index 0 to tangle. (6 objects)
+slice 6/16: adding cup at index 1 to tangle. (9 objects)
+iteration: 1 (0.0 sec)
+iteration: 2 (0.0 sec)
+iteration: 3 (0.0 sec)
+iteration: 4 (0.0 sec)
+iteration: 5 (0.0 sec)
+iteration: 6 (0.0 sec)
+iteration: 7 (0.0 sec)
+iteration: 8 (0.0 sec)
+iteration: 9 (0.0 sec)
+iteration: 10 (0.0 sec)
+iteration: 11 (0.0 sec)
+iteration: 12 (0.0 sec)
+iteration: 13 (0.0 sec)
+iteration: 14 (0.0 sec)
+iteration: 15 (0.0 sec)
+iteration: 16 (0.0 sec)
+iteration: 17 (0.0 sec)
+iteration: 18 (0.0 sec)
+iteration: 19 (0.0 sec)
+iteration: 20 (0.0 sec)
+Clean-Up: Finished after 20 iteration(s) in 0.0 second(s).
+slice 7/16: adding cap at index 1 to tangle. (6 objects)
+slice 8/16: adding cap at index 3 to tangle. (6 objects)
+slice 9/16: adding neg at index 2 to tangle. (6 objects)
+slice 10/16: adding neg at index 2 to tangle. (12 objects)
+slice 11/16: adding neg at index 2 to tangle. (18 objects)
+slice 12/16: adding pos at index 0 to tangle. (24 objects)
+slice 13/16: adding pos at index 0 to tangle. (48 objects)
+slice 14/16: adding cup at index 1 to tangle. (72 objects)
+slice 15/16: adding cup at index 2 to tangle. (54 objects)
+iteration: 1 (0.0 sec)
+iteration: 2 (0.0 sec)
+iteration: 3 (0.0 sec)
+iteration: 4 (0.0 sec)
+iteration: 5 (0.0 sec)
+iteration: 6 (0.0 sec)
+iteration: 7 (0.0 sec)
+iteration: 8 (0.0 sec)
+iteration: 9 (0.0 sec)
+iteration: 10 (0.0 sec)
+iteration: 11 (0.0 sec)
+iteration: 12 (0.0 sec)
+iteration: 13 (0.0 sec)
+iteration: 14 (0.0 sec)
+iteration: 15 (0.0 sec)
+iteration: 16 (0.0 sec)
+iteration: 17 (0.0 sec)
+iteration: 18 (0.0 sec)
+iteration: 19 (0.0 sec)
+iteration: 20 (0.0 sec)
+Clean-Up: Finished after 20 iteration(s) in 0.0 second(s).
+Completed the computation successfully.                                              
+Clean-Up: Finished after 0 iteration(s) in 0.0 second(s).
+Clean-Up: Finished after 0 iteration(s) in 0.0 second(s).
+length 3: []
+length 4: [[[['pos', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['cap', 2], ['cap', 1]], [[['neg', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['cap', 2], ['cap', 1]]]
+length 5: [[[['cap', 0], ['pos', 0], ['cap', 1]], ['cup', 1], ['pos', 2], ['pos', 1], ['cap', 0], ['cap', 1]], [[['cap', 0], ['neg', 0], ['cap', 1]], ['cup', 1], ['neg', 2], ['pos', 1], ['cap', 0], ['cap', 1]], [[['cap', 0], ['pos', 0], ['cap', 1]], ['cup', 1], ['pos', 2], ['neg', 1], ['cap', 0], ['cap', 1]], [[['cap', 0], ['neg', 0], ['cap', 1]], ['cup', 1], ['neg', 2], ['neg', 1], ['cap', 0], ['cap', 1]], [[['pos', -1], ['pos', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['pos', 2], ['cap', 0], ['cap', 1]], [[['cap', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['pos', 2], ['cap', 0], ['cap', 1]], [[['neg', -1], ['pos', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['pos', 2], ['cap', 0], ['cap', 1]], [[['cap', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['pos', 2], ['cap', 0], ['cap', 1]], [[['pos', -1], ['neg', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['neg', 2], ['cap', 0], ['cap', 1]], [[['cap', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['neg', 2], ['cap', 0], ['cap', 1]], [[['neg', -1], ['neg', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['neg', 2], ['cap', 0], ['cap', 1]], [[['cap', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['neg', 2], ['cap', 0], ['cap', 1]], [[['pos', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['pos', 0], ['cap', 2], ['cap', 1]], [[['pos', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['pos', 0], ['cap', 2], ['cap', 1]], [[['neg', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['pos', 0], ['cap', 2], ['cap', 1]], [[['pos', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['pos', 0], ['cap', 2], ['cap', 1]], [[['pos', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['neg', 0], ['cap', 2], ['cap', 1]], [[['neg', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['neg', 0], ['cap', 2], ['cap', 1]], [[['neg', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['neg', 0], ['cap', 2], ['cap', 1]], [[['neg', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['neg', 0], ['cap', 2], ['cap', 1]], [[['pos', 0], ['cap', 0], ['cap', 1]], ['cup', 1], ['pos', 0], ['pos', 1], ['cap', 2], ['cap', 1]], [[['neg', 0], ['cap', 0], ['cap', 1]], ['cup', 1], ['neg', 0], ['pos', 1], ['cap', 2], ['cap', 1]], [[['pos', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['pos', 1], ['cap', 2], ['cap', 1]], [[['pos', 0], ['cap', 0], ['cap', 1]], ['cup', 1], ['pos', 0], ['neg', 1], ['cap', 2], ['cap', 1]], [[['neg', 0], ['cap', 0], ['cap', 1]], ['cup', 1], ['neg', 0], ['neg', 1], ['cap', 2], ['cap', 1]], [[['neg', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['neg', 1], ['cap', 2], ['cap', 1]], [[['pos', -1], ['pos', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['cap', 0], ['pos', 0], ['cap', 1]], [[['cap', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['cap', 0], ['pos', 0], ['cap', 1]], [[['neg', -1], ['pos', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['cap', 0], ['pos', 0], ['cap', 1]], [[['cap', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['cap', 0], ['pos', 0], ['cap', 1]], [[['neg', 0], ['pos', 0], ['cap', 1]], ['cup', 1], ['neg', 0], ['cap', 1], ['pos', 0], ['cap', 1]], [[['pos', 0], ['neg', 0], ['cap', 1]], ['cup', 1], ['neg', 2], ['cap', 1], ['pos', 0], ['cap', 1]], [[['pos', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['cap', 2], ['pos', 0], ['cap', 1]], [[['pos', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['cap', 2], ['pos', 0], ['cap', 1]], [[['neg', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['cap', 2], ['pos', 0], ['cap', 1]], [[['pos', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['cap', 2], ['pos', 0], ['cap', 1]], [[['pos', -1], ['neg', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['cap', 0], ['neg', 0], ['cap', 1]], [[['cap', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['cap', 0], ['neg', 0], ['cap', 1]], [[['neg', -1], ['neg', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['cap', 0], ['neg', 0], ['cap', 1]], [[['cap', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['cap', 0], ['neg', 0], ['cap', 1]], [[['pos', 0], ['neg', 0], ['cap', 1]], ['cup', 1], ['pos', 0], ['cap', 1], ['neg', 0], ['cap', 1]], [[['neg', 0], ['pos', 0], ['cap', 1]], ['cup', 1], ['pos', 2], ['cap', 1], ['neg', 0], ['cap', 1]], [[['pos', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['pos', 1], ['cap', 2], ['neg', 0], ['cap', 1]], [[['neg', 0], ['pos', 1], ['cap', 1]], ['cup', 2], ['pos', 1], ['cap', 2], ['neg', 0], ['cap', 1]], [[['neg', -1], ['cap', 0], ['cap', 1]], ['cup', 0], ['neg', 1], ['cap', 2], ['neg', 0], ['cap', 1]], [[['neg', 0], ['neg', 1], ['cap', 1]], ['cup', 2], ['neg', 1], ['cap', 2], ['neg', 0], ['cap', 1]]]
+File executed successfully

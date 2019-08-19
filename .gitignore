@@ -1,10 +1,5 @@
-CLT1.pdf CLT2.pdf CLT3.pdf CLT4.pdf CLT5.pdf SSbb.pdf SScc.pdf Sbc.pdf Scb.pdf b.pdf c.pdf cob1.pdf cob2.pdf cob3.pdf cob4.pdf cob5.pdf cob6.pdf test1.pdf test2.pdf testcobordism.pdf
 *.pdf
 *.log
 *.png
 *.pyc
-*.svg
-Output
-output.txt
-output
 __pycache__

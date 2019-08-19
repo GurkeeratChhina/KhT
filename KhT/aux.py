@@ -15,14 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# load libraries
-import math
-
-#TO DO: 
-#4. Implement gaussian elimination
-#5. Implement crossings
-#6. Test all of the above features
-
 # useful general functions that have nothing to do with this project
 def find_first_index(mylist,function):
     """compute the index of the first element in the list mylist on which function is true. 
@@ -63,10 +55,3 @@ def prod(iterable):
         prod *= x
     return prod
 
-
-#
-# dictionary
-#
-# CLT= crossingless tangle
-# TEI= tangle end index
-# DS = alternate way of representing cobordisms of 4 ended tangles, using powers of D and powers of S
