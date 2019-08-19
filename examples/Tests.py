@@ -542,12 +542,7 @@ def TestSet22(N, M):
         if M > 0:
             tangle += "pos2."
     tangle += "cap3.cap1"
-<<<<<<< HEAD:Tests.py
-    pt = Tangle(tangle)
-    pt.draw("pt" + "_" + str(N) + "_" + str(M),"slices")
-    complex= pt.toReduced_BNComplex(1000)
-    DrawBNComplex(complex, "BN_complex_pt" + str(N) + "_" + str(M) + "_after_cleanup" + ".svg", "qh")
-=======
+    
     drawtangle(tangle,"pt" + "_" + str(N) + "_" + str(M),"slices",1)
     complex= BNbracket(tangle,0,0,1)
     complex.validate()
@@ -557,7 +552,6 @@ def TestSet22(N, M):
     BN_complex.validate()
     BN_complex.clean_up(1000)
     BN_complex.draw("BN_complex_pt" + str(N) + "_" + str(M) + "_after_cleanup" + ".svg", "qh")
->>>>>>> 8a08a9ca54fc5d116232ba00d2678a9e94116fd8:examples/Tests.py
     
 def TestSet23():
     tangle = "cup1.pos2.pos0.pos0.neg1.pos2.cap3.pos0.cap1"
@@ -632,14 +626,6 @@ def TestSet26():
     BN_complex.draw("BN_complex_2m2_pt_vert_sum_2p3_pt_aftercleanup.svg", "qh")
 
 def TestSet27():
-<<<<<<< HEAD:Tests.py
-    Listof4Tangles = [TangleWordToTangle(word) for word in GenerateTangleWords(4)]
-    for index, tangle in enumerate(Listof4Tangles):
-        tangle.draw("4Tangle"+str(index), "slices")
-    Listof5Tangles = [TangleWordToTangle(word) for word in GenerateTangleWords(5)]
-    for index, tangle in enumerate(Listof5Tangles):
-        tangle.draw("5Tangle"+str(index), "slices")
-=======
     print("length 3:", GenerateTangleWords(3))
     print("length 4:", GenerateTangleWords(4))
     print("length 5:", GenerateTangleWords(5))
@@ -797,7 +783,6 @@ def TestSet31():
     BN_complex.clean_up()
     multicurve=BN_complex.to_multicurve()
     multicurve.draw("current_tangle","hdelta",Tangloid.slices)
->>>>>>> 8a08a9ca54fc5d116232ba00d2678a9e94116fd8:examples/Tests.py
 
 
 # TestSet0()
@@ -840,43 +825,36 @@ def TestSet31():
 # TestSet22(3,-3)
 # TestSet22(3,3)
 # TestSet22(15,15)
-<<<<<<< HEAD:Tests.py
-#TestSet23()
-=======
 # TestSet23()
->>>>>>> 8a08a9ca54fc5d116232ba00d2678a9e94116fd8:examples/Tests.py
 # TestSet24()
 # TestSet25()
 # TestSet26()
 # TestSet27()
-<<<<<<< HEAD:Tests.py
-TestSet22(2, -2)
-TestSet22(2, -3)
-TestSet22(2, -4)
-TestSet22(2, -5)
-TestSet22(2, -6)
-TestSet22(2, -7)
-TestSet22(3, -2)
-TestSet22(3, -3)
-TestSet22(3, -4)
-TestSet22(3, -5)
-TestSet22(3, -6)
-TestSet22(3, -7)
-TestSet22(4, -2)
-TestSet22(4, -3)
-TestSet22(4, -4)
-TestSet22(4, -5)
-TestSet22(4, -7)
-TestSet22(6, -7)
+# TestSet22(2, -2)
+# TestSet22(2, -3)
+# TestSet22(2, -4)
+# TestSet22(2, -5)
+# TestSet22(2, -6)
+# TestSet22(2, -7)
+# TestSet22(3, -2)
+# TestSet22(3, -3)
+# TestSet22(3, -4)
+# TestSet22(3, -5)
+# TestSet22(3, -6)
+# TestSet22(3, -7)
+# TestSet22(4, -2)
+# TestSet22(4, -3)
+# TestSet22(4, -4)
+# TestSet22(4, -5)
+# TestSet22(4, -7)
+# TestSet22(6, -7)
 
-=======
 TestSet29()
 #TestSet31()
 # Test_2m3pt()
 # Test_2m3pt()
 # Test_TwoTwistTangle()
 # Test_SplittingCurve()
->>>>>>> 8a08a9ca54fc5d116232ba00d2678a9e94116fd8:examples/Tests.py
 
 #X=BNmor([[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1]],2)
 #A=[0,0,X,0,4,0,0,0,0,0]
