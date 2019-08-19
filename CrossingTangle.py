@@ -7,7 +7,7 @@ from Cobordisms import *
 from BNComplexes import *
 
 class Tangle(object):
-    __slots__ = 'slices', 'strlist'
+    __slots__ = 'slices'
     
     def __init__(self, string):
         self.slices = string
@@ -28,7 +28,7 @@ class Tangle(object):
     def horizontal_sum(self, other):
         return Tangle("cup1." + other.shift(2).slices + "." + self.slices)
     
-    def toReduced_BNComplex(self, max_iter = 100, start = 1, field = 2, options = "unsafe"):
+    def toReduced_BNComplex(self, max_iter = 100, start = 1, field = 2, options = "unsafe", intermediate_cleanup = False):
         pos = 0 #TODO: Compute positive and negative crossings from orientation
         neg = 0
         stringlist=[[word[0:3],int(word[3:])] for word in self.slices.split('.')]
@@ -66,7 +66,7 @@ class Tangle(object):
                 if options=="safe": cx.ValidMorphism()
                 ends += 2
             
-            if ends == 3:
+            if ends == 3 and intermediate_cleanup:
                 BNcx = CobComplex2BNComplex(cx, field)
                 BNcx.clean_up(max_iter)
                 cx = BNComplex2CobComplex(BNcx)
@@ -78,7 +78,12 @@ class Tangle(object):
         BN_complex= CobComplex2BNComplex(cx, field)
         BN_complex.clean_up(max_iter)
         return BN_complex
-
+    
+    def draw(self, filename, style="plain"):
+        drawtangle(self.slices,filename,style)
+    
+    
+    
 def ValidCap(word, i): #check if adding cap at index i is valid
     ends = len(word[0])
     if i > ends - 2:
@@ -217,4 +222,10 @@ def GenerateTangleWords(max_length):
         return True
         
     return [ word for word in ListofWords if primeword(word)]
-    
+
+def TangleWordToTangle(word):
+    string = ""
+    for letter in word[1:]:
+        string += letter[0] + str(letter[1]) + "."
+    string = string[:-1]
+    return Tangle(string)
