@@ -784,6 +784,17 @@ def TestSet31():
     multicurve=BN_complex.to_multicurve()
     multicurve.draw("current_tangle","hdelta",Tangloid.slices)
 
+def TestTangleOrientations():
+    Tangle1 = Tangle("cup1.neg2.neg2.neg2.pos0.pos0.cap3.cap1")
+    Tangle1.OrientTangle([1,1,-1,1,[]])
+    Tangle1.draw("Tangle1", "slices")
+    print(Tangle1.orientations)
+    
+    Tangle2= Tangle("cup1.neg2.neg2.pos0.pos0.cap3.cap1")
+    Tangle2.OrientTangle([1,1,-1,1,[-1]])
+    Tangle2.draw("Tangle2", "slices")
+    print(Tangle2.orientations)
+
 
 # TestSet0()
 # TestSet1()
@@ -848,13 +859,14 @@ def TestSet31():
 # TestSet22(4, -5)
 # TestSet22(4, -7)
 # TestSet22(6, -7)
-
-TestSet29()
+# TestSet29()
 #TestSet31()
 # Test_2m3pt()
 # Test_2m3pt()
 # Test_TwoTwistTangle()
 # Test_SplittingCurve()
+
+TestTangleOrientations()
 
 #X=BNmor([[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1]],2)
 #A=[0,0,X,0,4,0,0,0,0,0]

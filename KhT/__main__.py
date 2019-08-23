@@ -5,6 +5,8 @@ from CobComplexes import *
 from Drawing import *
 from CrossingTangle import *
 
+# This is used solely to execute the files in the examples sub directory
+
 def main(data):
     print("----------------")
     print("KhT, version ???")

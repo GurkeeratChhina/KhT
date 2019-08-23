@@ -15,6 +15,8 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cairo
+
+# The drawing code is not used often - now we use the complex drawing code. 
     
 def draw_tangle_ends(posx,posy,clt,h,ctx):
     ctx.set_font_size(0.40)
@@ -316,7 +318,6 @@ def drawclt(clt,name):
     # Drawing code
     draw_tangle_ends(0,0,clt,h,ctx)
     draw_arcs(0,0,clt,h,ctx,(0,0,0))
-    
 
 def drawcob(cob,name):
     """Create a pdf file 'name'.pdf in the subfolder 'examples' with a pictographic representation of the cobordism 'cob'.

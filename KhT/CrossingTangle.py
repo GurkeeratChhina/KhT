@@ -14,40 +14,217 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-class Tangle(object):
-    __slots__ = 'slices'
+from CobComplexes import *
+from BNComplexes import *
+from Drawing import *
+
+def StringToStringList(str):
+    list=[[word[0:3],int(word[3:])] for word in str.split('.')]
+    list.reverse()
+    return list
     
-    def __init__(self, string):
-        self.slices = string
+def StringListToString(strlst):
+    strlst.reverse()
+    newstring = ""
+    for word in strlst[:-1]:
+        newstring += word + "."
+    newstring += strlst[-1]
+    return newstring
+
+class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming from a knot
+    """ A tangle is either a string that goes through all the slices, seperated by '.' or a list of slices
+        'slices' is a string with the left most slice being the bottom of the tangle
+        'stringlist' is a list with the left most slice being the top of the tangle
+        both formats include an integer as the index at which the slice is being added
+        'pos'/'neg' count the number of positively/negatively oriented crossings, respectively
+        note that pos and neg are also used to specify the unoriented crossing in the slices
+        such as pos1 meaning the overstrand has positive slope, at index 1
+        'pos' and 'neg' are calculated automatically from the given input orientation
+        the input_orientations is a length n+1 list, where n is the number of tangle ends
+        the first n entries specify the orientations on the n tangle ends, read left to right, top to bottom
+        the last entry is a list of orientations on any closed components, in the order they are encountered top to bottom
+        if there are no closed components, then the last element is an empty list
+        an orientation is an element of [-1, 0, 1], where -1 means downward, +1 means upwards, and 0 means unoriented
+        on closed components, a -1 means left at the first cap encountered, and a +1 means right
+        'orientations' stores the orientation information at each of the slices, as a list of lists of orientations
+        'orientations' is of length 'height'+1, where 'height' is the number of slices. 
         
-    def vertical_sum(self, other):
+        A tangle is oriented by calling the OrientTangle method
+    """
+    __slots__ = 'slices', 'stringlist', 'pos', 'neg', 'top', 'bot', 'orientations', 'height'
+    
+    
+    def __init__(self, string = None, strlist = None, topends = 1, botends =3, orientation = None, pos = 0, neg = 0):
+        if string is not None and strlist is not None: #initializing using both string and stringlist
+            self.slices = string
+            self.stringlist = strlist
+        if string is not None: #initializing using only string
+            self.slices = string
+            self.stringlist = StringToStringList(string)
+        elif strlist is not None: #initializing using only stringlist
+            self.stringlist = strlist
+            self.slices = StringListToString(strlist)
+        else: # no data to initialize with
+            raise Exception('Constructing an empty tangle')
+        
+        self.top = topends
+        self.bot = botends
+        self.height = len(self.stringlist)
+        
+        if orientation is None: # initializing orienation data with 0's for unoriented
+            ends = topends
+            SliceOrientations = [[0]*ends]
+            for slice in self.stringlist:
+                if slice[0] == "cup":
+                    ends -= 2
+                elif slice[0] == "cap":
+                    ends += 2
+                SliceOrientations += [[0]*ends]
+            self.orientations = SliceOrientations
+            self.pos = 0
+            self.neg = 0
+        else:
+            self.orientations = orientation
+            self.pos = pos
+            self.neg = neg
+        
+    def OrientTangle(self, input_orientations):
+        if len(input_orientations) != self.top + self.bot +1:
+            raise Exception("Number of specified orientations does not agree with number of tangle ends.")
+        for index, boundary_orientation in enumerate(input_orientations[:-1]):
+            if index < self.top:  #Propogate orientations from the top
+                if self.orientations[0][index] == boundary_orientation: #strand already oriented
+                    continue
+                elif self.orientations[0][index] == 0: # unoriented strand to start
+                    self.PropogateOrientations(1, boundary_orientation, 0, index)
+                else: #opposite orientation there
+                    raise Exception("Orientations on boundary are not consistent")
+            else: #Propogate orientations from the bot
+                if self.orientations[-1][index-self.top] == boundary_orientation: #strand already oriented
+                    continue
+                elif self.orientations[-1][index-self.top] == 0: #strand unoriented to start
+                    self.PropogateOrientations(-1, boundary_orientation, self.height, index-self.top)
+                else: #opposite orientation there
+                    raise Exception("Orientations on boundary are not consistent")
+        for closed_orientation in input_orientations[-1]:
+            for index, oriented_slice in enumerate(self.orientations):
+                if contains_0(oriented_slice):
+                    self.PropogateOrientations(1, closed_orientation, index, indexQ(oriented_slice, 0))
+                    break
+        #TODO: find pos and neg crossings
+        
+    def PropogateOrientations(self, initial_direction, initial_orientation, initial_height, initial_index):
+        direction = initial_direction # either +1 or -1, meaning travelling down (resp. up) the tangle
+        curr_orientation = initial_orientation
+        max_height = self.height
+        curr_height = initial_height
+        curr_index = initial_index
+        while True:
+            self.orientations[curr_height][curr_index] = curr_orientation
+            if direction == 1: # Move down strand, changing orientation, height, index, and direction if needed
+                next_slice = self.stringlist[curr_height] #find the next slice to calculate new stuff
+                if next_slice[0] == "cap" and next_slice[1] <= curr_index: 
+                    curr_height += 1
+                    curr_index += 2
+                elif next_slice[0] == "cap" and next_slice[1] > curr_index:
+                    curr_height += 1
+                elif next_slice[0] == "pos" and next_slice[1] == curr_index:
+                    curr_height += 1
+                    curr_index += 1
+                elif next_slice[0] == "pos" and next_slice[1] == curr_index-1:
+                    curr_height += 1
+                    curr_index -= 1
+                elif next_slice[0] == "neg" and next_slice[1] == curr_index:
+                    curr_height += 1
+                    curr_index += 1
+                elif next_slice[0] == "neg" and next_slice[1] == curr_index-1:
+                    curr_height += 1
+                    curr_index -= 1
+                elif next_slice[0] == "cup" and next_slice[1] > curr_index:
+                    curr_height += 1
+                elif next_slice[0] == "cup" and next_slice[1] < curr_index -1:
+                    curr_height += 1
+                    curr_index -= 2
+                elif next_slice[0] == "cup" and next_slice[1] == curr_index:
+                    curr_index +=1
+                    direction *= -1
+                    curr_orientation *= -1
+                elif next_slice[0] == "cup" and next_slice[1] == curr_index -1:
+                    curr_index -= 1
+                    direction *= -1
+                    curr_orientation *= -1
+                else:
+                    curr_height +=1
+            elif direction == -1: # Move up strand, changing orientation, height, index, and direction if needed
+                next_slice = self.stringlist[curr_height-1]
+                if next_slice[0] == "cup" and next_slice[1] <= curr_index:
+                    curr_height -= 1
+                    curr_index += 2
+                elif next_slice[0] == "cup" and next_slice[1] > curr_index:
+                    curr_height -= 1
+                elif next_slice[0] == "pos" and next_slice[1] == curr_index:
+                    curr_height -= 1
+                    curr_index += 1
+                elif next_slice[0] == "pos" and next_slice[1] == curr_index-1:
+                    curr_height -= 1
+                    curr_index -= 1
+                elif next_slice[0] == "neg" and next_slice[1] == curr_index:
+                    curr_height -= 1
+                    curr_index += 1
+                elif next_slice[0] == "neg" and next_slice[1] == curr_index-1:
+                    curr_height -= 1
+                    curr_index -= 1
+                ###### TODO : CHECK THE FOLLOWING
+                elif next_slice[0] == "cap" and next_slice[1] > curr_index:
+                    curr_height -= 1
+                elif next_slice[0] == "cap" and next_slice[1] < curr_index-1:
+                    curr_height -= 1
+                    curr_index -=2
+                elif next_slice[0] == "cap" and next_slice[1] == curr_index:
+                    curr_index +=1
+                    direction *= -1
+                    curr_orientation *= -1
+                elif next_slice[0] == "cap" and next_slice[1] == curr_index -1:
+                    curr_index -= 1
+                    direction *= -1
+                    curr_orientation *= -1
+                else:
+                    curr_height -=1               
+            if curr_height == 0 or curr_height == max_height:
+                break
+            if self.orientations[curr_height][curr_index] != 0:
+                break 
+
+    def shift(self, n): #shifts all the strands of a tangle over by n, to be used in the vertical and horizontal sums
+        def shift_letter(letter):
+            return [letter[0], letter[1] + n]
+        shiftlist = [shift_letter(letter) for letter in self.stringlist]
+        return Tangle(None, shiftlist, self.top, self.bot, self.orientations, self.pos, self.neg)
+
+    def vertical_sum(self, other): # Assumes self and other are 1-3 tangles. Converts them to 2-2 tangles and stacks them vertically #TODO: orientations
+        #TODO: verify that self and other are 1-3
         return Tangle("cup2." + other.slices + "." + self.slices)    
-    
-    def shift(self, n):
-        def shift_word(word):
-            return word[0:3] + str(int(word[3:]) + n)
-        splitlist = [shift_word(word) for word in self.slices.split('.')]
-        newstring = ""
-        for word in splitlist[:-1]:
-            newstring += word + "."
-        newstring += splitlist[-1]
-        return Tangle(newstring)
-    
-    def horizontal_sum(self, other):
+ 
+    def horizontal_sum(self, other): # Assumes self and other are 1-3 tangles. Converts them to 2-2 tangles and stacks them horizontally #TODO: orientations
+        #TODO: verify that self and other are 1-3
         return Tangle("cup1." + other.shift(2).slices + "." + self.slices)
     
     def toReduced_BNComplex(self, max_iter = 100, start = 1, field = 2, options = "unsafe", intermediate_cleanup = False):
-        pos = 0 #TODO: Compute positive and negative crossings from orientation
-        neg = 0
-        stringlist=[[word[0:3],int(word[3:])] for word in self.slices.split('.')]
-        stringlist.reverse()
+        """ Computes the reduced BN complex from the tangle self
+            max_iter is the maximum number of iterations in the cleanup procedure
+            start specifies the number of ends at the top
+            field is as usual: 0 = Q, 1 = Z, p = F_p
+            options is either "safe" or "unsafe" - if "safe" then it checks if the complex is valid at each step
+            intermediate_cleanup will convert to a BN complex, and apply the cleanup lemma if there is an
+            intermediate point where the tangle is a 4-ended tangle
+        """
         cx=CobComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
         print("Computing the Bar-Natan bracket for the tangle\n\n"+self.slices+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
               " positive crossings and "+str(neg)+" negative crossings.")
         ends = start
-        for i,word in enumerate(stringlist):
+        for i,word in enumerate(self.stringlist):
             # PrettyPrintComplex(cx, "old long")
-            print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects)", end='\n')# monitor \n ->\r
+            print("slice "+str(i)+"/"+str(len(self.stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects)", end='\n')# monitor \n ->\r
             #time.sleep(0.1)
             if word[0]=="pos":
                 cx=AddPosCrossing(cx, word[1])
@@ -81,17 +258,26 @@ class Tangle(object):
 
                 
             
-        cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
+        cx.shift_qhd(self.pos-2*self.neg,-1*self.neg,0.5*neg)
         print("Completed the computation successfully.                                              ")
         BN_complex= CobComplex2BNComplex(cx, field)
         BN_complex.clean_up(max_iter)
         return BN_complex
     
     def draw(self, filename, style="plain"):
-        drawtangle(self.slices,filename,style)
+        drawtangle(self.slices,filename,style,self.top)
     
     
-    
+ 
+ 
+##########################################################################################################
+###                                                                                                    ###
+###    The following code is incomplete, it is used to generate all prime tangles of a given length    ###
+###    Note this does not mean the number of crossings, but the number of horizontal slices            ###
+###    The output should be as a list of tangle words or as a list of tangles                          ###
+###                                                                                                    ###
+##########################################################################################################
+
 def ValidCap(word, i): #check if adding cap at index i is valid
     ends = len(word[0])
     if i > ends - 2:
@@ -138,7 +324,6 @@ def ValidNeg(word, i): #check if adding neg at index i is valid
         return False
     else:
         return True
-
 
 def GenerateTangleWords(max_length):
     """a Word is [ [strand info], [letter, index], [letter, index], ...  ]
@@ -207,7 +392,7 @@ def GenerateTangleWords(max_length):
         remaining_slices -= 1
         currentListofWords = nextListofWords[:]
         
-    ListofWords = [] #CHECK FOR NULL
+    ListofWords = [] #TODO: CHECK FOR NULL
     for word in currentListofWords:
         ends = len(word[0])
         for i in range(ends-2):
@@ -231,10 +416,4 @@ def GenerateTangleWords(max_length):
         
     return [ word for word in ListofWords if primeword(word)]
 
-def TangleWordToTangle(word):
-    string = ""
-    for letter in word[1:]:
-        string += letter[0] + str(letter[1]) + "."
-    string = string[:-1]
-    return Tangle(string)
 
