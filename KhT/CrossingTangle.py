@@ -27,8 +27,8 @@ def StringListToString(strlst):
     strlst.reverse()
     newstring = ""
     for word in strlst[:-1]:
-        newstring += word + "."
-    newstring += strlst[-1]
+        newstring += word[0] + str(word[1]) + "."
+    newstring += strlst[-1][0] + str(strlst[-1][1])
     return newstring
 
 class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming from a knot
@@ -87,8 +87,9 @@ class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming fro
             self.orientations = orientation
             self.pos = pos
             self.neg = neg
-        
-    def OrientTangle(self, input_orientations):
+    
+    # ONLY USE THIS ON UNORIENTED TANGLES
+    def OrientTangle(self, input_orientations):    
         if len(input_orientations) != self.top + self.bot +1:
             raise Exception("Number of specified orientations does not agree with number of tangle ends.")
         for index, boundary_orientation in enumerate(input_orientations[:-1]):
@@ -111,7 +112,21 @@ class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming fro
                 if contains_0(oriented_slice):
                     self.PropogateOrientations(1, closed_orientation, index, indexQ(oriented_slice, 0))
                     break
-        #TODO: find pos and neg crossings
+        for x, slice in enumerate(self.stringlist):
+            if slice[0] == "pos":
+                left_end = self.orientations[x][slice[1]]
+                right_end = self.orientations[x][slice[1]+1]
+                if left_end*right_end == 1:
+                    self.pos += 1
+                else:
+                    self.neg += 1
+            elif slice[0] == "neg":
+                left_end = self.orientations[x][slice[1]]
+                right_end = self.orientations[x][slice[1]+1]
+                if left_end*right_end == 1:
+                    self.neg += 1
+                else:
+                    self.pos += 1
         
     def PropogateOrientations(self, initial_direction, initial_orientation, initial_height, initial_index):
         direction = initial_direction # either +1 or -1, meaning travelling down (resp. up) the tangle
@@ -264,6 +279,20 @@ class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming fro
         BN_complex.clean_up(max_iter)
         return BN_complex
     
+    def Cable(self): # TODO: orientations
+        if self.top != 1 or self.bot != 1:
+            raise Exception("Tangle is not a 1-1 tangle to cable")
+        NewStringList = [["cap", 1]]
+        for letter in self.stringlist:
+            if letter[0] in ["pos", "neg"]:
+                NewStringList.extend([ [letter[0], 2*letter[1]+1], [letter[0], 2*letter[1]], [letter[0], 2*letter[1]+2], [letter[0], 2*letter[1]+1] ])
+            elif letter[0] == "cap":
+                NewStringList.extend([ ["cap", 2*letter[1]], ["cap", 2*letter[1] + 1] ])
+            elif letter[0] == "cup":
+                NewStringList.extend([ ["cup", 2*letter[1]+1], ["cup", 2*letter[1]] ])    
+        
+        return Tangle(None, NewStringList)
+        
     def draw(self, filename, style="plain"):
         drawtangle(self.slices,filename,style,self.top)
     

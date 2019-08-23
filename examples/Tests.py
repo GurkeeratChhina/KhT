@@ -789,12 +789,18 @@ def TestTangleOrientations():
     Tangle1.OrientTangle([1,1,-1,1,[]])
     Tangle1.draw("Tangle1", "slices")
     print(Tangle1.orientations)
+    print(Tangle1.pos, Tangle1.neg)
     
     Tangle2= Tangle("cup1.neg2.neg2.pos0.pos0.cap3.cap1")
     Tangle2.OrientTangle([1,1,-1,1,[-1]])
     Tangle2.draw("Tangle2", "slices")
     print(Tangle2.orientations)
+    print(Tangle2.pos, Tangle2.neg)
 
+def TestCable():
+    Tangle1 = Tangle("cup1.neg0.pos1.neg0.cap1", None, 1, 1)
+    Tangle2 = Tangle1.Cable()
+    Tangle2.draw("Cable", "slices")
 
 # TestSet0()
 # TestSet1()
@@ -867,6 +873,7 @@ def TestTangleOrientations():
 # Test_SplittingCurve()
 
 TestTangleOrientations()
+TestCable()
 
 #X=BNmor([[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1]],2)
 #A=[0,0,X,0,4,0,0,0,0,0]
