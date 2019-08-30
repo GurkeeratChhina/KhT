@@ -1,5 +1,6 @@
 ---
 title: Examples
+layout: default
 filename: examples
 ---
 
