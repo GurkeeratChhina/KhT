@@ -31,7 +31,7 @@ def StringListToString(strlst):
     newstring += strlst[-1][0] + str(strlst[-1][1])
     return newstring
 
-class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming from a knot
+class Tangle(object): #TODO: implement orientations for all methods
     """ A tangle is either a string that goes through all the slices, seperated by '.' or a list of slices
         'slices' is a string with the left most slice being the bottom of the tangle
         'stringlist' is a list with the left most slice being the top of the tangle
@@ -87,6 +87,36 @@ class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming fro
             self.orientations = orientation
             self.pos = pos
             self.neg = neg
+    
+    @classmethod
+    def PretzelTangle(cls, left_twists, right_twists):
+        tangle = "cup1."
+        for i in range(abs(left_twists)):
+            if left_twists < 0:
+                tangle += "neg0."
+            if left_twists > 0:
+                tangle += "pos0."
+        for i in range(abs(right_twists)):
+            if right_twists < 0:
+                tangle += "neg2."
+            if right_twists > 0:
+                tangle += "pos2."
+        tangle += "cap3.cap1"
+        return Tangle(tangle)
+        
+    @classmethod
+    def LiamsTangle(cls, N, Twists):
+        tangle = "cup1.neg0.pos2."
+        for j in range(N):
+            tangle += "neg0.neg1."
+            for k in range(abs(Twists[j])):
+                if Twists[j] < 0:
+                    tangle += "neg2."
+                if Twists[j] >= 0:
+                    tangle += "pos2."
+            tangle += "neg1.neg0."
+        tangle += "pos2.cap3.neg0.neg0.cap1"
+        return Tangle(tangle)
     
     # ONLY USE THIS ON UNORIENTED TANGLES
     def OrientTangle(self, input_orientations):    
@@ -224,7 +254,7 @@ class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming fro
         #TODO: verify that self and other are 1-3
         return Tangle("cup1." + other.shift(2).slices + "." + self.slices)
     
-    def toReduced_BNComplex(self, max_iter = 100, start = 1, field = 2, options = "unsafe", intermediate_cleanup = False):
+    def toReduced_BNComplex(self, max_iter = 100, field = 2, options = "unsafe", intermediate_cleanup = False):
         """ Computes the reduced BN complex from the tangle self
             max_iter is the maximum number of iterations in the cleanup procedure
             start specifies the number of ends at the top
@@ -233,49 +263,8 @@ class Tangle(object): #TODO: Add orientations, cabling of 1-1 tangles coming fro
             intermediate_cleanup will convert to a BN complex, and apply the cleanup lemma if there is an
             intermediate point where the tangle is a 4-ended tangle
         """
-        cx=CobComplex([CLT(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[ZeroCob]])
-        print("Computing the Bar-Natan bracket for the tangle\n\n"+self.slices+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
-              " positive crossings and "+str(neg)+" negative crossings.")
-        ends = start
-        for i,word in enumerate(self.stringlist):
-            # PrettyPrintComplex(cx, "old long")
-            print("slice "+str(i)+"/"+str(len(self.stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects)", end='\n')# monitor \n ->\r
-            #time.sleep(0.1)
-            if word[0]=="pos":
-                cx=AddPosCrossing(cx, word[1])
-                if options=="safe": cx.ValidMorphism()
-                cx.eliminateAll()
-                if options=="safe": cx.ValidMorphism()
-                
-                
-            if word[0]=="neg":
-                cx=AddNegCrossing(cx, word[1])
-                if options=="safe": cx.ValidMorphism()
-                cx.eliminateAll()
-                if options=="safe": cx.ValidMorphism()
-            
-            if word[0]=="cup":
-                cx=AddCup(cx, word[1])
-                if options=="safe": cx.ValidMorphism()
-                cx.eliminateAll()
-                if options=="safe": cx.ValidMorphism()
-                ends -= 2
-            
-            if word[0]=="cap":
-                cx=AddCap(cx, word[1])
-                if options=="safe": cx.ValidMorphism()
-                ends += 2
-            
-            if ends == 3 and intermediate_cleanup:
-                BNcx = CobComplex2BNComplex(cx, field)
-                BNcx.clean_up(max_iter)
-                cx = BNComplex2CobComplex(BNcx)
-
-                
-            
-        cx.shift_qhd(self.pos-2*self.neg,-1*self.neg,0.5*neg)
-        print("Completed the computation successfully.                                              ")
-        BN_complex= CobComplex2BNComplex(cx, field)
+        cx= BNbracket(self.slices, self.pos, self.neg, self.top)
+        BN_complex= cx.ToBNAlgebra(field)
         BN_complex.clean_up(max_iter)
         return BN_complex
     

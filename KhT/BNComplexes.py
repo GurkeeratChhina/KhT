@@ -86,7 +86,7 @@ class BNComplex(object):
         size = len(self.gens)
         g.add_vertex(size)
         
-        scaling_factor=150 #this may need some adjusting
+        scaling_factor=250 #this may need some adjusting
         if "index" in vertex_switch:
             scaling_factor+=100
         if "q" in vertex_switch:
