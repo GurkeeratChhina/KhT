@@ -1,6 +1,6 @@
 ---
 title: About
-layout: template
+layout: default
 filename: index
 ---
 
