@@ -3,3 +3,6 @@
 *.png
 *.pyc
 __pycache__
+output.txt
+output
+
