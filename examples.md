@@ -10,4 +10,8 @@ The following are some tangles and their invariants as computed by this package.
 
 <div class="thumbnail1"><img src="test.png"></div>
 
-<embed src="https://drive.google.com/viewerng/viewer?embedded=true&url=test.pdf">
+<object data="test.pdf" type="application/pdf" width="750px" height="750px">
+    <embed src="test.pdf" type="application/pdf">
+        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="test.pdf">Download PDF</a>.</p>
+    </embed>
+</object>
