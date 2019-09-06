@@ -117,7 +117,29 @@ class Tangle(object): #TODO: implement orientations for all methods
             tangle += "neg1.neg0."
         tangle += "pos2.cap3.neg0.neg0.cap1"
         return Tangle(tangle)
+        
+    @classmethod
+    def quotient_of_2_m3_pretzel_tangle(cls, N):
+        tangle = "cup2.cup3.neg1.neg2.neg0.neg1.cup4.pos3.pos2.neg4.neg3.cap5.cap4.pos1.cup3.cup4.pos2.pos3.neg4.neg5.cap6."
+        for j in range(abs(N)):
+            if N > 0:
+                tangle += "pos3.pos4.pos0.pos3."
+            if N < 0:
+                tangle += "neg3.neg4.neg0.neg.3"
+        tangle += "cap1.cap0.cap1"
+        return Tangle(tangle)
     
+    @classmethod
+    def two_twist_hitch(cls, m):
+        tangle = "cup1.cup1.pos4.neg0.neg3.pos1.cap2."
+        for j in range(abs(m)):
+            if m > 0:
+                tangle += "pos1."
+            if m < 0:
+                tangle += "neg1."
+        tangle += "pos2.pos2.neg0.neg0.cap3.cap1"
+        return Tangle(tangle)
+
     # ONLY USE THIS ON UNORIENTED TANGLES
     def OrientTangle(self, input_orientations):    
         if len(input_orientations) != self.top + self.bot +1:

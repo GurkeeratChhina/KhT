@@ -49,9 +49,33 @@ multicurve8 = BNcx8.to_multicurve()
 multicurve8.draw(name8+"_BNr","hdelta",Tangle8.slices)
 
 name9 = "../Output/two_twist_hitch"
-Tangle9 = Tangle("cup1.pos2.cup1.neg0.neg4.pos1.cap2.pos2.pos2.neg0.neg0.cap3.cap1")
+Tangle9 = Tangle("cup1.cup1.pos4.neg0.neg3.pos1.cap2.pos2.pos2.neg0.neg0.cap3.cap1")
 BNcx9 = Tangle9.toReduced_BNComplex(1000, field)
 multicurve9 = BNcx9.to_multicurve()
 multicurve9.draw(name9+"_BNr","hdelta",Tangle9.slices)
+
+name10 = "../Output/quotient_of_2_m3_pretzel_tangle"
+Tangle10 = Tangle.quotient_of_2_m3_pretzel_tangle(0)
+BNcx10 = Tangle10.toReduced_BNComplex(1000, field)
+multicurve10 = BNcx10.to_multicurve()
+multicurve10.draw(name10 + "_BNr", "hdelta", Tangle10.slices)
+
+name11 = "../Output/cable-5_1"
+Tangle11 = Tangle("cup1.pos0.neg1.neg1.neg1.pos0.cap1", None,1,1).Cable()
+BNcx11 = Tangle11.toReduced_BNComplex(1000, field)
+multicurve11 = BNcx11.to_multicurve()
+multicurve11.draw(name11+"_BNr","hdelta",Tangle11.slices)
+
+name12 = "../Output/cable-5_2"
+Tangle12 = Tangle("cup1.neg0.pos1.pos1.neg0.neg0.cap1", None,1,1).Cable()
+BNcx12 = Tangle12.toReduced_BNComplex(1000, field)
+multicurve12 = BNcx12.to_multicurve()
+multicurve12.draw(name12+"_BNr","hdelta",Tangle12.slices)
+
+name13 = "../Output/cable-6_1"
+Tangle13 = Tangle("cup1.neg0.pos1.pos1.pos1.neg0.neg0.cap1", None,1,1).Cable()
+BNcx13 = Tangle13.toReduced_BNComplex(1000, field)
+multicurve13 = BNcx13.to_multicurve()
+multicurve13.draw(name13+"_BNr","hdelta",Tangle13.slices)
 
 # "cup1.pos2.cup1.neg0.neg4.pos1.cap2.[-m].pos2.pos2.neg0.neg0.cap3.cap1"
