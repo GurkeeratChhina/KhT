@@ -6,4 +6,4 @@ filename: examples
 
 The following are some tangles and their invariants as computed by this package. 
 
-[ ![](test.png =100x400) ](test.png)
+<a href="test.png"> <img border="0" alt="sampletext" src="test.png" width="100" height="400"></a>
