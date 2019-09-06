@@ -10,8 +10,9 @@ The following are some tangles and their invariants as computed by this package.
 
 <div class="thumbnail1"><img src="test.png"></div>
 
-<object data="test.pdf" type="application/pdf" width="750px" height="750px">
-    <embed src="test.pdf" type="application/pdf">
-        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="test.pdf">Download PDF</a>.</p>
-    </embed>
+<object width="100" height="250" type="application/pdf" data="test.pdf">
+    <p>PDF can't be displayed</p>
 </object>
+
+<embed src="test.pdf" width="100" height="250" 
+ type="application/pdf">
