@@ -78,4 +78,14 @@ BNcx13 = Tangle13.toReduced_BNComplex(1000, field)
 multicurve13 = BNcx13.to_multicurve()
 multicurve13.draw(name13+"_BNr","hdelta",Tangle13.slices)
 
-# "cup1.pos2.cup1.neg0.neg4.pos1.cap2.[-m].pos2.pos2.neg0.neg0.cap3.cap1"
+name40 = "../Output/quotient_of_2_m3_pretzel_tangle_minus_1"
+Tangle40 = Tangle.quotient_of_2_m3_pretzel_tangle(-1)
+BNcx40 = Tangle40.toReduced_BNComplex(1000, field)
+multicurve40 = BNcx40.to_multicurve()
+multicurve40.draw(name40 + "_BNr", "hdelta", Tangle40.slices)
+
+name41 = "../Output/quotient_of_2_m3_pretzel_tangle_minus_2"
+Tangle41 = Tangle.quotient_of_2_m3_pretzel_tangle(-2)
+BNcx41 = Tangle41.toReduced_BNComplex(1000, field)
+multicurve41 = BNcx41.to_multicurve()
+multicurve41.draw(name41 + "_BNr", "hdelta", Tangle41.slices)

@@ -80,7 +80,7 @@ class BNComplex(object):
         with open("examples/data/BNComplexes/"+filename, "w") as text_file:
             print(repr(self), file=text_file)
     
-    def draw(self, filename,vertex_switch="index_qhdelta"):
+    def draw(self, filename,vertex_switch="index_qhdelta", thumbnail = False):
         "draw a graph of for the BNcomplex"
         g = gr.Graph()
         size = len(self.gens)
@@ -95,8 +95,11 @@ class BNComplex(object):
             scaling_factor+=50
         if "delta" in vertex_switch:
             scaling_factor+=50
-            
-        canvas_size = (scaling_factor*math.sqrt(size), scaling_factor*math.sqrt(size))# square canvas
+        
+        if thumbnail == False:
+            canvas_size = (int(scaling_factor*math.sqrt(size)), int(scaling_factor*math.sqrt(size)))# square canvas
+        elif thumbnail == True:
+            canvas_size = (130, 130)
         
         Vertex_colour = g.new_vertex_property("string") # "black" is the horizontal CLT (b) and "white" is the vertical CLT (c)
         Vertex_labelling = g.new_vertex_property("string")
@@ -107,11 +110,17 @@ class BNComplex(object):
             else:
                 Vertex_colour[g.vertex(i)] = "white"
             Vertex_labelling[g.vertex(i)]=gen.obj2string(vertex_switch,i)
+        
+        if thumbnail == False:
+            fontsize = 20
+        elif thumbnail == True:
+            fontsize = 1
+        
         vprops =  {'text' : Vertex_labelling,\
                    'color' : "black",\
                    'fill_color' : Vertex_colour,\
-                   'font_size' : 20,\
-                   'size' : 20}
+                   'font_size' : fontsize,\
+                   'size' : fontsize}
         
         Edge_labeling = g.new_edge_property("string")
         for i in range(size):
@@ -121,13 +130,13 @@ class BNComplex(object):
                     g.add_edge(g.vertex(i), g.vertex(j))
                     Edge_labeling[g.edge(i,j)] = str(edge_mor)
         eprops =   {'color' : "black",\
-                    'pen_width' : 4.0,\
+                    'pen_width' : fontsize/5,\
                     'text' : Edge_labeling,\
                     'text_color' : "black",\
-                    'text_distance' : 10,\
+                    'text_distance' : fontsize/2,\
                     'font_weight' : cairo.FONT_WEIGHT_BOLD,\
-                    'marker_size' : 20,\
-                    'font_size' : 22}   
+                    'marker_size' : fontsize,\
+                    'font_size' : fontsize}   
         
         position = gr.arf_layout(g, max_iter=0)
         #position = sfdp_layout(g, max_iter=0)
@@ -465,7 +474,15 @@ class multicurve(object):
             Drawing.drawtangle(tangle,filename,"slices",1,subtitle=subtitle)
         run("pdftk "+tanglestr+"".join(["examples/"+filename+str(i)+".pdf " for i in range(len(self.comps))])+"output examples/"+filename+"_"+subtitle+".pdf", shell=True)
         run("rm "+tanglestr+"".join(["examples/"+filename+str(i)+".pdf " for i in range(len(self.comps))]), shell=True)
-
+    
+    def drawpng(self, filename, vertex_switch = "index_qhdelta", tangle = None):
+        subtitle="field="+str(self.comps[0].field)
+        for i,comp in enumerate(self.comps):
+            comp.draw(filename+str(i)+subtitle+".png",vertex_switch)
+            comp.draw(filename+str(i)+subtitle+"_small.png","h", True)
+        if tangle is not None:
+            Drawing.drawtangle(tangle,filename,"slices",1)
+            
 #todo: implement recognition of local systems (optional)
 #todo: implement pairing theorem (just for fun!)
 

@@ -125,7 +125,7 @@ class Tangle(object): #TODO: implement orientations for all methods
             if N > 0:
                 tangle += "pos3.pos4.pos0.pos3."
             if N < 0:
-                tangle += "neg3.neg4.neg0.neg.3"
+                tangle += "neg3.neg4.neg0.neg3."
         tangle += "cap1.cap0.cap1"
         return Tangle(tangle)
     

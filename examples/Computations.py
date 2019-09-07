@@ -162,4 +162,69 @@ BNcx30 = Tangle30.toReduced_BNComplex(1000, field)
 multicurve30 = BNcx30.to_multicurve()
 multicurve30.draw(name30+"_BNr","hdelta",Tangle30.slices)
 
+name31 = "../Output/two_twist_hitch_plus_1"
+Tangle31 = Tangle.two_twist_hitch(1)
+BNcx31 = Tangle31.toReduced_BNComplex(1000, field)
+multicurve31 = BNcx31.to_multicurve()
+multicurve31.draw(name31+"_BNr","hdelta",Tangle31.slices)
+
+name32 = "../Output/two_twist_hitch_plus_2"
+Tangle32 = Tangle.two_twist_hitch(2)
+BNcx32 = Tangle32.toReduced_BNComplex(1000, field)
+multicurve32 = BNcx32.to_multicurve()
+multicurve32.draw(name32+"_BNr","hdelta",Tangle32.slices)
+
+name33 = "../Output/two_twist_hitch_plus_3"
+Tangle33 = Tangle.two_twist_hitch(3)
+BNcx33 = Tangle33.toReduced_BNComplex(1000, field)
+multicurve33 = BNcx33.to_multicurve()
+multicurve33.draw(name33+"_BNr","hdelta",Tangle33.slices)
+
+name34 = "../Output/two_twist_hitch_minus_1"
+Tangle34 = Tangle.two_twist_hitch(-1)
+BNcx34 = Tangle34.toReduced_BNComplex(1000, field)
+multicurve34 = BNcx34.to_multicurve()
+multicurve34.draw(name34+"_BNr","hdelta",Tangle34.slices)
+
+name35 = "../Output/two_twist_hitch_minus_2"
+Tangle35 = Tangle.two_twist_hitch(-2)
+BNcx35 = Tangle35.toReduced_BNComplex(1000, field)
+multicurve35 = BNcx35.to_multicurve()
+multicurve35.draw(name35+"_BNr","hdelta",Tangle35.slices)
+
+name36 = "../Output/quotient_of_2_m3_pretzel_tangle_plus_1"
+Tangle36 = Tangle.quotient_of_2_m3_pretzel_tangle(1)
+BNcx36 = Tangle36.toReduced_BNComplex(1000, field)
+multicurve36 = BNcx36.to_multicurve()
+multicurve36.draw(name36 + "_BNr", "hdelta", Tangle36.slices)
+
+name37 = "../Output/quotient_of_2_m3_pretzel_tangle_plus_2"
+Tangle37 = Tangle.quotient_of_2_m3_pretzel_tangle(2)
+BNcx37 = Tangle37.toReduced_BNComplex(1000, field)
+multicurve37 = BNcx37.to_multicurve()
+multicurve37.draw(name37 + "_BNr", "hdelta", Tangle37.slices)
+
+name38 = "../Output/quotient_of_2_m3_pretzel_tangle_plus_3"
+Tangle38 = Tangle.quotient_of_2_m3_pretzel_tangle(3)
+BNcx38 = Tangle38.toReduced_BNComplex(1000, field)
+multicurve38 = BNcx38.to_multicurve()
+multicurve38.draw(name38 + "_BNr", "hdelta", Tangle38.slices)
+
+name39 = "../Output/quotient_of_2_m3_pretzel_tangle_plus_4"
+Tangle39 = Tangle.quotient_of_2_m3_pretzel_tangle(4)
+BNcx39 = Tangle39.toReduced_BNComplex(1000, field)
+multicurve39 = BNcx39.to_multicurve()
+multicurve39.draw(name39 + "_BNr", "hdelta", Tangle39.slices)
+
+name40 = "../Output/quotient_of_2_m3_pretzel_tangle_minus_1"
+Tangle40 = Tangle.quotient_of_2_m3_pretzel_tangle(-1)
+BNcx40 = Tangle40.toReduced_BNComplex(1000, field)
+multicurve40 = BNcx40.to_multicurve()
+multicurve40.draw(name40 + "_BNr", "hdelta", Tangle40.slices)
+
+name41 = "../Output/quotient_of_2_m3_pretzel_tangle_minus_2"
+Tangle41 = Tangle.quotient_of_2_m3_pretzel_tangle(-2)
+BNcx41 = Tangle41.toReduced_BNComplex(1000, field)
+multicurve41 = BNcx41.to_multicurve()
+multicurve41.draw(name41 + "_BNr", "hdelta", Tangle41.slices)
 
