@@ -1,5 +1,5 @@
 ---
-title: Examples
+title: Pretzel Tangles
 layout: default
 filename: examples
 ---
@@ -14,6 +14,10 @@ The following are some tangles and their invariants as computed by this package.
     <p>PDF can't be displayed</p>
 </object>
 
+
+| Tangle | Invariant |
+| ---: | :--- |
+| (2-3) | [ ![](PretzelTangles/(2,-3)+BNr0field=2.png) ](PretzelTangles/(2,-3)+BNr0field=2_small.png) |
 
 Smaller: 
 <embed src="test.pdf" width="100" height="100" 
