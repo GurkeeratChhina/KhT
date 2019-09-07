@@ -7,26 +7,14 @@ filename: Pretzel_Tangle.md
 <table>
     <thead>
         <tr>
-            <th>Layer 1</th>
-            <th>Layer 2</th>
-            <th>Layer 3</th>
+            <th>Tangle</th>
+            <th>Invariant</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td rowspan=4>L1 Name</td>
-            <td rowspan=2>L2 Name A</td>
-            <td>L3 Name A</td>
-        </tr>
-        <tr>
-            <td>L3 Name B</td>
-        </tr>
-        <tr>
-            <td rowspan=2>L2 Name B</td>
-            <td>L3 Name C</td>
-        </tr>
-        <tr>
-            <td>L3 Name D</td>
+            <td rowspan=2><a href="PretzelTangles/(2,-3)_BNr0field=2.png"><img src="PretzelTangles/(2,-3)_BNr0field=2_small.png"></a></td>
         </tr>
     </tbody>
 </table>
