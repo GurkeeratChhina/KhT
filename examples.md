@@ -10,4 +10,4 @@ The following are some tangles and their invariants as computed by this package.
 
 <div class="thumbnail1"><img src="test.png"></div>
 
-[ ![](smalltest.png)](PretzelTangles.md)
+[ ![](smalltest.png)](Pretzel_Tangle.md)
