@@ -1,7 +1,7 @@
 ---
 title: Pretzel Tangles
 layout: default
-filename: Pretzel_Tangle.md
+filename: Pretzel_Tangle
 ---
 
 <table>
