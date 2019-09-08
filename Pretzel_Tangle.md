@@ -22,7 +22,7 @@ filename: Pretzel_Tangle
 		<tr>
 			<td> <img src="Field3.png"> </td>
             <td><a href="PretzelTangles/(2,2)_BNr0field=3.png"><img src="PretzelTangles/(2,2)_BNr0field=3_small.png"></a></td>
-			<td><a href="PretzelTangles/(2,2)_BNr1field=3.png"><img src="PretzelTangles/(2,2)_BNr1field=3_small.png"></a></td>
+			<td>	<a href="PretzelTangles/(2,2)_BNr1field=3.png"><img src="PretzelTangles/(2,2)_BNr1field=3_small.png"></a></td>
 		</tr>
 		<tr>
 			<td> <img src="Field5.png"> </td>
@@ -303,20 +303,20 @@ filename: Pretzel_Tangle
             <td rowspan = "3" align = "right"><a href="PretzelTangles/(6,-7)_BNr.png"><img src="PretzelTangles/(6,-7)_BNr_small.png"></a> </td>
 			<td> <img src="Field2.png"> </td>
             <td><a href="PretzelTangles/(6,-7)_BNr0field=2.png"><img src="PretzelTangles/(6,-7)_BNr0field=2_small.png"></a></td>
-			<td><a href="PretzelTangles/(6,-7)_BNr0field=2.png"><img src="PretzelTangles/(6,-7)_BNr0field=2_small.png"></a></td>
-			<td><a href="PretzelTangles/(6,-7)_BNr0field=2.png"><img src="PretzelTangles/(6,-7)_BNr0field=2_small.png"></a></td>
+			<td><a href="PretzelTangles/(6,-7)_BNr1field=2.png"><img src="PretzelTangles/(6,-7)_BNr1field=2_small.png"></a></td>
+			<td><a href="PretzelTangles/(6,-7)_BNr2field=2.png"><img src="PretzelTangles/(6,-7)_BNr2field=2_small.png"></a></td>
         </tr>
 		<tr>
 			<td> <img src="Field3.png"> </td>
             <td><a href="PretzelTangles/(6,-7)_BNr0field=3.png"><img src="PretzelTangles/(6,-7)_BNr0field=3_small.png"></a></td>
-			<td><a href="PretzelTangles/(6,-7)_BNr0field=2.png"><img src="PretzelTangles/(6,-7)_BNr0field=2_small.png"></a></td>
-			<td><a href="PretzelTangles/(6,-7)_BNr0field=2.png"><img src="PretzelTangles/(6,-7)_BNr0field=2_small.png"></a></td>
+			<td><a href="PretzelTangles/(6,-7)_BNr1field=3.png"><img src="PretzelTangles/(6,-7)_BNr1field=3_small.png"></a></td>
+			<td><a href="PretzelTangles/(6,-7)_BNr2field=3.png"><img src="PretzelTangles/(6,-7)_BNr2field=3_small.png"></a></td>
 		</tr>
 		<tr>
 			<td> <img src="Field5.png"> </td>
             <td><a href="PretzelTangles/(6,-7)_BNr0field=5.png"><img src="PretzelTangles/(6,-7)_BNr0field=5_small.png"></a></td>
-			<td><a href="PretzelTangles/(6,-7)_BNr0field=2.png"><img src="PretzelTangles/(6,-7)_BNr0field=2_small.png"></a></td>
-			<td><a href="PretzelTangles/(6,-7)_BNr0field=2.png"><img src="PretzelTangles/(6,-7)_BNr0field=2_small.png"></a></td>
+			<td><a href="PretzelTangles/(6,-7)_BNr1field=5.png"><img src="PretzelTangles/(6,-7)_BNr1field=5_small.png"></a></td>
+			<td><a href="PretzelTangles/(6,-7)_BNr2field=5.png"><img src="PretzelTangles/(6,-7)_BNr2field=5_small.png"></a></td>
 		</tr>
 		
     </tbody>
