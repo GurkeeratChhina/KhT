@@ -1,4 +1,4 @@
-field = 5
+field = 2
 
 name1 = "PretzelTangles/(2,-3)"
 Tangle1 = Tangle.PretzelTangle(2, -3)

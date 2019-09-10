@@ -112,9 +112,9 @@ class BNComplex(object):
             Vertex_labelling[g.vertex(i)]=gen.obj2string(vertex_switch,i)
         
         if thumbnail == False:
-            fontsize = 20
+            fontsize = 20*int(math.ceil(2/size))
         elif thumbnail == True:
-            fontsize = 1*ceil(10/size)
+            fontsize = 2*int(math.ceil(20/size**2))
         
         vprops =  {'text' : Vertex_labelling,\
                    'color' : "black",\
