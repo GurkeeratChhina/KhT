@@ -97,17 +97,27 @@ class CobComplex(object):
                         print(cob.print("long"), " degree:", cob.deg())
                         print("!!!!!!!!!!!!!!!!!!")
                         raise Exception('Something is wrong with the quantum grading!')
-        
-        # Computing diff squared:
-        squared = np.tensordot(self.diff,self.diff, axes=(-2,-1))
-        for i,row in enumerate(squared):
-            for j,cob in enumerate(row):
-                if (cob != 0) and (cob.ReduceDecorations() != []):
-                    print("!!!!!!!!!!!!!!!!!!")
-                    print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
-                    print(cob.print("long"))
-                    print("!!!!!!!!!!!!!!!!!!")
-                    raise Exception('Differential does not square to 0')
+        # Computing diff squared
+        for source in range(length):
+            for target in range(length):
+                sum = 0
+                for i, row in enumerate(self.diff):
+                    sum += row[source] * self.diff[target][i]
+                if (sum!=0) and (sum.ReduceDecorations() != []):
+                    raise Exception("diff does not square to 0")
+        # squared = np.tensordot(self.diff,self.diff, axes=(-2,-1))
+        # print("got this far 2")
+        # for i,row in enumerate(squared):
+            # for j,cob in enumerate(row):
+                # if j == 0:
+                    # print("got this far 4")
+                # if (cob != 0) and (cob.ReduceDecorations() != []):
+                    # print("got this far 5")
+                    # print("!!!!!!!!!!!!!!!!!!")
+                    # print("ERROR: Found non-zero term in d² in row "+str(i)+" and column "+str(j)+":")
+                    # print(cob.print("long"))
+                    # print("!!!!!!!!!!!!!!!!!!")
+                    # raise Exception('Differential does not square to 0')
     
     def findIsom(self): 
         """Returns the location of the first isomorphism it finds
@@ -159,7 +169,7 @@ class CobComplex(object):
         diff=[[convert(cob) for cob in row] for row in self.diff]
         BNcx = BNComplexes.BNComplex(gens,diff,field)
         BNcx.eliminateAll()
-        BNcx.validate()
+        # BNcx.validate()
         return BNcx
 
 def AddCapToCLT(clt, i, grshift = "false"): 
@@ -563,19 +573,19 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     for i,word in enumerate(stringlist):
         
         time2=time()
-        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects, "+str(round(time2-time1,1))+" sec)", end='\r')# monitor \n ->\r
+        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects, "+str(round(time2-time1,1))+" sec)", end='\n')# monitor \n ->\r
         time1=time2
         
         if word[0]=="pos":
             cx=AddPosCrossing(cx, word[1])
-            #print("before eliminateAll")
+            # print("before eliminateAll")
             #cx.print, "old long")
             if options=="safe": cx.validate()
             cx.eliminateAll()
             # print("after eliminateAll")
             # cx.print, "old long")
         
-        if word[0]=="neg":
+        elif word[0]=="neg":
             cx=AddNegCrossing(cx, word[1])
             #print("before eliminateAll")
             #cx.print, "old long")
@@ -584,7 +594,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
             # print("after eliminateAll")
             # cx.print, "old long")
         
-        if word[0]=="cup":
+        elif word[0]=="cup":
             cx=AddCup(cx, word[1])
             #print("before eliminateAll")
             #cx.print, "old long")
@@ -593,11 +603,13 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
             #print("after eliminateAll")
             #cx.print, "old long")
         
-        if word[0]=="cap":
+        elif word[0]=="cap":
             cx=AddCap(cx, word[1])
             if options=="safe": cx.validate()
-        
-        
+            
+        else:
+            print("this should never execute")
+
 
     cx.shift_qhd(pos-2*neg,-neg,0.5*neg)
     

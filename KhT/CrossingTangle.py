@@ -285,7 +285,7 @@ class Tangle(object): #TODO: implement orientations for all methods
             intermediate_cleanup will convert to a BN complex, and apply the cleanup lemma if there is an
             intermediate point where the tangle is a 4-ended tangle
         """
-        cx= BNbracket(self.slices, self.pos, self.neg, self.top)
+        cx= BNbracket(self.slices, self.pos, self.neg, self.top, options)
         BN_complex= cx.ToBNAlgebra(field)
         BN_complex.clean_up(max_iter)
         return BN_complex

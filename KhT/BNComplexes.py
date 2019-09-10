@@ -114,7 +114,7 @@ class BNComplex(object):
         if thumbnail == False:
             fontsize = 20
         elif thumbnail == True:
-            fontsize = 1
+            fontsize = 1*ceil(10/size)
         
         vprops =  {'text' : Vertex_labelling,\
                    'color' : "black",\
@@ -208,7 +208,8 @@ class BNComplex(object):
                 break
             else:
                 self.eliminateIsom(index_to_eliminate[0], index_to_eliminate[1])
-        self.validate()
+        self.draw("error.png")
+        # self.validate()
        
     def isotopy(self,start,end,alg,switch="safe"):
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
