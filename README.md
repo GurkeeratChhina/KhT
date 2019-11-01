@@ -18,11 +18,11 @@ and edit the new file appropriately. The computation for the new tangle can be r
 
     python3 KhT new_tangle
 
-If you have comments or questions about this package, [please get in touch](https://cbz20.raspberryip.com/). 
+If you have comments or questions about this package, or if you find a bug, [please get in touch](https://cbz20.raspberryip.com/). 
 
 ## References ##
 
-[KWZ] Artem Kotelskiy, Liam Watson and Claudius Zibrowius, _Immersed curves in Khovanov homology_, in preparation
+[KWZ] Artem Kotelskiy, Liam Watson and Claudius Zibrowius, _Immersed curves in Khovanov homology_, arXiv preprint [1910.14584](https://arxiv.org/abs/1910.14584) 
 
 ## License ##
 
