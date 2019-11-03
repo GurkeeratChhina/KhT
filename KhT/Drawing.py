@@ -15,9 +15,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cairo
+from subprocess import run
 
 # The drawing code is not used often - now we use the complex drawing code. 
     
+def SanitizeTeX(string):
+    return string.replace("_", "\_")
+
 def draw_tangle_ends(posx,posy,clt,h,ctx):
     ctx.set_font_size(0.40)
     ctx.select_font_face("Courier",cairo.FONT_SLANT_NORMAL,cairo.FONT_WEIGHT_BOLD)
@@ -92,7 +96,124 @@ def draw_dot_on_arc(arc,clt,h,ctx,deco_index):
     ctx.set_source_rgb(255,0,0)
     ctx.stroke()
 
-def drawtangle(string,name,style="plain",start=1,subtitle=""):
+def drawtangle(string,filename,style="plain",start=1,subtitle=""):
+    """draw the tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
+    <type> is equal to:
+        'pos': positive crossing
+        'neg': negative crossing
+        'cup': cup
+        'cap': cap
+    <index> is the index at which the crossing, cap or cup sits. 
+    The optional parameter 'style' is either 'plain' (simple tangle) or 'slices' (shows slices with labels).
+    The optional parameter 'start' is an integer which specifies the number of tangle ends at the top.
+    The optional parameter 'subtitle' is a string which is added to the top.
+    """
+    content="""\\documentclass{article}
+\\usepackage[crop=off]{auto-pst-pdf}
+\\usepackage{pst-node,rotating}
+\\renewcommand{\\familydefault}{\\sfdefault}
+\\begin{document}
+\\centering 
+"""
+    stringwidth=0.08
+    
+
+    if subtitle == "":
+        baselevel = 1
+    else:
+        baselevel = 1.5
+    stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
+    stringlist.reverse()
+    
+    w_current = start
+    w_max = start
+    for word in stringlist:
+        if word[0]=="cap":
+            w_current+= 2
+            w_max = max(w_max,w_current)
+        if word[0]=="cup":
+            w_current-= 2
+    
+    if style=="slices":
+        w = w_max+1.5
+    else:
+        w = w_max
+    h = len(stringlist)+baselevel
+    dotlength=start
+    
+    content+="\\psset{{yunit=-1}}\\begin{{pspicture}}(-0.5,-0.5)({0},{1})\n\psset{{linewidth=2.5pt}}\n".format(w-0.5,h+0.5)
+    
+    content+="\\rput[c]("+str(w/2-0.5)+","+str(0)+"){\\textbf{"+SanitizeTeX(filename)+"}}\n"    
+    content+="\\rput[c]("+str(w/2-0.5)+","+str(0.75)+"){"+SanitizeTeX(subtitle)+"}\n"
+
+    def draw_cup(level,index,dotlength):
+        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level)   
+        for i in range(index):
+            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
+        for i in range(index+2,dotlength):
+            string += "\\psbezier({},{})({},{})({},{})({},{})".format(i,level,i,level+0.5,i-2,level+0.5,i-2,level+1)
+        return string
+    
+    def draw_cap(level,index,dotlength):
+        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index,level+1,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        for i in range(index):
+            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
+        for i in range(index,dotlength):
+            string += "\\psbezier({},{})({},{})({},{})({},{})".format(i,level,i,level+0.5,i+2,level+0.5,i+2,level+1)
+        return string
+    
+    def draw_pos(level,index,dotlength):
+        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
+        string += "\\psbezier({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
+        for i in range(index):
+            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
+        for i in range(index+2,dotlength):
+            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
+        return string
+
+    def draw_neg(level,index,dotlength):
+        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
+        string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        string += "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        for i in range(index):
+            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
+        for i in range(index+2,dotlength):
+            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
+        return string
+
+    # Drawing code
+    for level,word in enumerate(stringlist):
+        level+=baselevel
+        if word[0]=="pos":
+            content+=draw_pos(level,word[1],dotlength)
+        
+        if word[0]=="neg":
+            content+=draw_neg(level,word[1],dotlength)
+        
+        if word[0]=="cup":
+            content+=draw_cup(level,word[1],dotlength)
+            dotlength-=2
+        
+        if word[0]=="cap":
+            content+=draw_cap(level,word[1],dotlength)
+            dotlength+=2
+        
+        if (style=="slices") and (level>baselevel):
+            content+="\\psline[linecolor=lightgray]("+str(w-0.75)+","+str(level)+")(-0.25,"+str(level)+")\n"
+        
+        if (style=="slices"):
+            content+="\\rput[c]("+str(w-1.5)+","+str(level+0.5)+"){\color{gray}"+word[0]+str(word[1])+"}\n"
+  
+    content+="\\end{pspicture}\n\\end{document}"
+    with open("examples/PSTricks/"+filename+"-tangle.tex", "w") as text_file:
+        print(content, file=text_file)
+        
+    run("cd examples/PSTricks && pdflatex -shell-escape "+filename+"-tangle.tex > "+filename+"-tangle.out 2>&1", shell=True)
+    run("cd examples/PSTricks && rm "+(" ".join([filename+"-tangle."+string+" " for string in ["log","aux","pdf","out"]])), shell=True)
+
+
+def drawtangle_old(string,name,style="plain",start=1,subtitle=""):
     """draw the tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
     <type> is equal to:
         'pos': positive crossing

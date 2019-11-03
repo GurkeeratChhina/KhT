@@ -73,6 +73,27 @@ class obj(object):
         else: 
             return "○"#c (hollow dot)
     
+    def grading2TeX(self,switch="qhdelta"):
+        if "q" in switch:
+            q="q^{"+str(self.q)+"}"
+        else:
+            q=""
+        if "h" in switch:
+            h="h^{"+str(self.h)+"}"
+        else:
+            h=""
+        if "delta" in switch:
+            if 2*self.delta % 2 == 0: # delta is an integer
+                delta="\\delta^{"+str(round(self.delta))+"}"
+            else:
+                #delta="δ"+ToExponent(round(2*self.delta))+"'²"
+                delta="\\delta^{"+str(self.delta)+"}"
+            
+        else:
+            delta=""
+        
+        return q+h+delta
+    
     def obj2string(self,switch="idem",index=-1): 
         """ Returns a string version of the morphism including grading information if specified
             switch is a string containing idem, index, q, h, delta
@@ -219,6 +240,40 @@ class mor(object):
     
     def __neg__(self): #returns a new mor that is the same except with the opposite sign on the coefficient
         return mor([[pair[0],(-1)*pair[1]] for pair in self.pairs],self.field)
+    
+    def label2TeX(self,switch="DS"):
+        """The switch determines whether we only print powers of S or powers of D or both. The identity is included as D^0, not as S^0."""
+        string=""
+            
+        for pair in self.pairs:
+            if ((("D" in switch) and (pair[0]>=0)) or (("S" in switch) and (pair[0]<0))):
+                coeff = pair[1]
+                if (string != "") & (coeff > 0):# add plus sign if the next coefficient is positive, except for the first summand
+                    string += "+"
+                if coeff < 0: # add minus sign in any case
+                    string += "-"
+                    coeff = abs(coeff)
+                
+                if coeff != 0:# omit any summands with coefficient 0
+                
+                    exponent=abs(pair[0])
+                    if exponent==1: # omit exponent 1 from the notation
+                        exponent = ""
+                    else:
+                        exponent= "^{"+str(exponent)+"}"
+                    
+                    if coeff==1: # omit coefficients 1 and -1 from the notation
+                        coeff = ""
+                    else:
+                        coeff = str(coeff) + "\cdot "
+                    
+                    if pair[0] > 0:# powers of D
+                        string += coeff + "D" + exponent
+                    if pair[0] < 0:
+                        string += coeff + "S" + exponent
+                    if pair[0] == 0:
+                        string += coeff + "id"
+        return string
     
     def __str__(self): #returns a string that represents self, expresed as a linear combination of powers of D and powers of H
         string=""

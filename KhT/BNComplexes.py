@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import cairo
-import graph_tool.all as gr
 import math
 import numpy as np
 import pandas as pd
@@ -79,71 +77,7 @@ class BNComplex(object):
     def save(self,filename):
         with open("examples/data/BNComplexes/"+filename, "w") as text_file:
             print(repr(self), file=text_file)
-    
-    def draw(self, filename,vertex_switch="index_qhdelta", thumbnail = False):
-        "draw a graph of for the BNcomplex"
-        g = gr.Graph()
-        size = len(self.gens)
-        g.add_vertex(size)
-        
-        scaling_factor=250 #this may need some adjusting
-        if "index" in vertex_switch:
-            scaling_factor+=100
-        if "q" in vertex_switch:
-            scaling_factor+=50
-        if "h" in vertex_switch:
-            scaling_factor+=50
-        if "delta" in vertex_switch:
-            scaling_factor+=50
-        
-        if thumbnail == False:
-            canvas_size = (int(scaling_factor*math.sqrt(size)), int(scaling_factor*math.sqrt(size)))# square canvas
-        elif thumbnail == True:
-            canvas_size = (130, 130)
-        
-        Vertex_colour = g.new_vertex_property("string") # "black" is the horizontal CLT (b) and "white" is the vertical CLT (c)
-        Vertex_labelling = g.new_vertex_property("string")
-        Position = g.new_vertex_property("vector<float>")
-        for i, gen in enumerate(self.gens):
-            if gen.idem == 0:
-                Vertex_colour[g.vertex(i)] = "black"
-            else:
-                Vertex_colour[g.vertex(i)] = "white"
-            Vertex_labelling[g.vertex(i)]=gen.obj2string(vertex_switch,i)
-        
-        if thumbnail == False:
-            fontsize = 20*int(math.ceil(2/size))
-        elif thumbnail == True:
-            fontsize = 2*int(math.ceil(20/size**2))
-        
-        vprops =  {'text' : Vertex_labelling,\
-                   'color' : "black",\
-                   'fill_color' : Vertex_colour,\
-                   'font_size' : fontsize,\
-                   'size' : fontsize}
-        
-        Edge_labeling = g.new_edge_property("string")
-        for i in range(size):
-            for j in range(size):
-                edge_mor=self.diff[j][i]
-                if edge_mor != 0:
-                    g.add_edge(g.vertex(i), g.vertex(j))
-                    Edge_labeling[g.edge(i,j)] = str(edge_mor)
-        eprops =   {'color' : "black",\
-                    'pen_width' : fontsize/5,\
-                    'text' : Edge_labeling,\
-                    'text_color' : "black",\
-                    'text_distance' : fontsize/2,\
-                    'font_weight' : cairo.FONT_WEIGHT_BOLD,\
-                    'marker_size' : fontsize,\
-                    'font_size' : fontsize}   
-        
-        position = gr.arf_layout(g, max_iter=0)
-        #position = sfdp_layout(g, max_iter=0)
-        #Position[g.vertex(i)] = [50*(2*i+1), 200]
-        
-        gr.graph_draw(g, pos=position, vprops=vprops, eprops=eprops, output_size=canvas_size, bg_color=[1,1,1,1],  output="examples/" + filename)
-    
+
     def validate(self):
         # return True
         length = len(self.gens)
@@ -208,8 +142,7 @@ class BNComplex(object):
                 break
             else:
                 self.eliminateIsom(index_to_eliminate[0], index_to_eliminate[1])
-        self.draw("error.png")
-        # self.validate()
+        self.validate()
        
     def isotopy(self,start,end,alg,switch="safe"):
         """ Apply an isotopy along an arrow (start--->end) labelled by 'alg'.
@@ -460,21 +393,82 @@ class multicurve(object):
     def __repr__(self):
         return "multicurve({})".format(self.comps)
     
-    def draw(self, filename, vertex_switch="index_qhdelta",tangle=None):
+    def draw(self, filename, vertex_switch="qhdelta",tangle=None,thumbnails=False):
         """create a pdf file which draws the graph of each component on a separate page; if tangle is specified, the first page is the tangle input.
         """
+        
+        content="""\\documentclass{article}
+\\usepackage[crop=off]{auto-pst-pdf}
+\\usepackage{pst-node,rotating}
+\\begin{document}
+\\centering 
+"""
+        if thumbnails == True:
+            vertex_switch=""
+        
         for i,comp in enumerate(self.comps):
-            comp.draw(filename+str(i)+".pdf",vertex_switch)
+            size = len(comp.gens)
+            if thumbnails == True:
+                scaledsize=size/6
+            else:
+                scaledsize=size/3
+            canvassize=scaledsize+0.5
+            if "q" in vertex_switch:
+                canvassize+=0.75
+            if "h" in vertex_switch:
+                canvassize+=0.75
+            if "delta" in vertex_switch:
+                canvassize+=0.75
+            
+            content+="\\begin{{pspicture}}(-{0},-{0})({0},{0})\n\\psset{{nodesep=2pt,shortput=nab,linewidth=1.5pt}}\n".format(canvassize)
+        
+            for i, gen in enumerate(comp.gens):
+                if gen.idem == 0:
+                    dottype="*" #black
+                else:
+                    dottype="" #white
+                content+="\\cnode"+dottype+"("+str(scaledsize)+";"+str(360*i/size-90)+"){3.5pt}{P"+str(i)+"}\n"
+                content+="\\nput{"+str(360*i/size-90)+"}{P"+str(i)+"}{$"+gen.grading2TeX(vertex_switch)+"$}\n"
+        
+            for i, diff_row in enumerate(comp.diff):
+                for j, diff in enumerate(diff_row):
+                    if diff !=0:
+                        label=diff.label2TeX()
+                        if thumbnails==True:
+                            if ("D" in label) and ("S" in label):
+                                content+="\\ncarc[arcangle=40,linestyle=dotted,dotsep=1pt]{P"+str(j)+"}{P"+str(i)+"}\n"
+                                content+="\\ncarc[arcangle=-40]{P"+str(j)+"}{P"+str(i)+"}\n"
+                            elif "D" in label:
+                                content+="\\ncline[arrows=->]{P"+str(j)+"}{P"+str(i)+"}\n"
+                            elif "S" in label:
+                                content+="\\ncline[arrows=->,linestyle=dotted,dotsep=1pt]{P"+str(j)+"}{P"+str(i)+"}\n"
+                        else:
+                            if ("D" in label) and ("S" in label):
+                                content+="\\ncarc[arcangle=40,arrows=->,linestyle=dotted,dotsep=1pt]{P"+str(j)+"}{P"+str(i)+"}\\naput{$"+diff.label2TeX("S")+"$}\n"
+                                content+="\\ncarc[arcangle=-40,arrows=->]{P"+str(j)+"}{P"+str(i)+"}\\nbput{$"+diff.label2TeX("D")+"$}\n"
+                            elif "D" in label:
+                                content+="\\ncline[arrows=->]{P"+str(j)+"}{P"+str(i)+"}\\ncput*{$"+label+"$}\n"
+                            elif "S" in label:
+                                content+="\\ncline[arrows=->,linestyle=dotted,dotsep=1pt]{P"+str(j)+"}{P"+str(i)+"}\\ncput*{$"+label+"$}\n"
+        
+            content+="\\end{pspicture}\n"
+        
+        content+="\\end{document}"
+
+        with open("examples/PSTricks/"+filename+".tex", "w") as text_file:
+            print(content, file=text_file)
+        
+        run("cd examples/PSTricks && pdflatex -shell-escape "+filename+".tex > "+filename+".out 2>&1", shell=True)
+        run("cd examples/PSTricks && rm "+(" ".join([filename+"."+string+" " for string in ["log","aux","pdf","out"]])), shell=True)
         
         subtitle="field="+str(comp.field)
         
         if tangle==None:
             tanglestr=""
         else:
-            tanglestr="examples/"+filename+".pdf "
+            tanglestr="examples/PSTricks/"+filename+"-tangle-pics.pdf"
             Drawing.drawtangle(tangle,filename,"slices",1,subtitle=subtitle)
-        run("pdftk "+tanglestr+"".join(["examples/"+filename+str(i)+".pdf " for i in range(len(self.comps))])+"output examples/"+filename+"_"+subtitle+".pdf", shell=True)
-        run("rm "+tanglestr+"".join(["examples/"+filename+str(i)+".pdf " for i in range(len(self.comps))]), shell=True)
+        run("pdftk "+tanglestr+" examples/PSTricks/"+str(filename)+"-pics.pdf output examples/"+filename+"_"+subtitle+".pdf", shell=True)
     
     def drawpng(self, filename, vertex_switch = "index_qhdelta", tangle = None):
         subtitle="field="+str(self.comps[0].field)
