@@ -138,79 +138,114 @@ def drawtangle(string,filename,style="plain",start=1,subtitle=""):
         w = w_max+1.5
     else:
         w = w_max
-    h = len(stringlist)+baselevel
-    dotlength=start
+    toplength=start
     
-    content+="\\psset{{yunit=-1}}\\begin{{pspicture}}(-0.5,-0.5)({0},{1})\n\psset{{linewidth=2.5pt}}\n".format(w-0.5,h+0.5)
+    content_tangle=""
     
-    content+="\\rput[c]("+str(w/2-0.5)+","+str(0)+"){\\textbf{"+SanitizeTeX(filename)+"}}\n"    
-    content+="\\rput[c]("+str(w/2-0.5)+","+str(0.75)+"){"+SanitizeTeX(subtitle)+"}\n"
-
-    def draw_cup(level,index,dotlength):
-        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level)   
-        for i in range(index):
-            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
-        for i in range(index+2,dotlength):
-            string += "\\psbezier({},{})({},{})({},{})({},{})".format(i,level,i,level+0.5,i-2,level+0.5,i-2,level+1)
+    def fill_strands(level, top, bot):
+        string=""
+        if len(top)!=len(bot):
+            raise Exception('number of remaining dots at the top is not equal to the number of remaining dots at the bottom.')
+        for i,j in zip(top,bot):
+            string += "\\psbezier({},{})({},{})({},{})({},{})".format(i,level,i,level+0.5,j,level+0.5,j,level+1)
         return string
     
-    def draw_cap(level,index,dotlength):
-        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index,level+1,index,level+0.5,index+1,level+0.5,index+1,level+1)
-        for i in range(index):
-            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
-        for i in range(index,dotlength):
-            string += "\\psbezier({},{})({},{})({},{})({},{})".format(i,level,i,level+0.5,i+2,level+0.5,i+2,level+1)
-        return string
+    def draw_cup(level,index):
+        return "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level)   
     
-    def draw_pos(level,index,dotlength):
+    def draw_cap(level,index):
+        return "\\psbezier({},{})({},{})({},{})({},{})".format(index,level+1,index,level+0.5,index+1,level+0.5,index+1,level+1)
+    
+    def draw_pos(level,index):
         string = "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
         string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
         string += "\\psbezier({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
-        for i in range(index):
-            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
-        for i in range(index+2,dotlength):
-            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
         return string
 
-    def draw_neg(level,index,dotlength):
+    def draw_neg(level,index):
         string = "\\psbezier({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
         string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
         string += "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
-        for i in range(index):
-            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
-        for i in range(index+2,dotlength):
-            string += "\\psline({},{})({},{})".format(i,level,i,level+1)
         return string
 
     # Drawing code
-    for level,word in enumerate(stringlist):
-        level+=baselevel
-        if word[0]=="pos":
-            content+=draw_pos(level,word[1],dotlength)
+    level=baselevel
+    
+    if style=="slices":
+    #if 0==0:
+        def singleton(word):
+            rmtop=[word[1], word[1]+1]
+            rmbot=[word[1], word[1]+1]
+            if word[0]=="cup":
+                rmbot=[]
+            if word[0]=="cap":
+                rmtop=[]
+            return [[word],rmtop,rmbot]
+        compactified_stringlist=[singleton(word) for word in stringlist]
+    else:
+        compactified_stringlist=[]
+        wordset=[]
+        rmbot=[]
+        rmtop=[]
+        wordtypes=[]
+        for word in stringlist:
+            if (word[1] in rmbot) or (word[1]+1 in rmbot) \
+            or (((word[0]=="cap") or (word[0]=="cup")) and (("cap" in wordtypes) or ("cup" in wordtypes))):
+                compactified_stringlist+=[[wordset,rmtop,rmbot]]
+                wordset=[]
+                rmbot=[]
+                rmtop=[]
+            wordset+=[word]
+            rmbot_delta=[word[1],word[1]+1]
+            rmtop_delta=[word[1],word[1]+1]
+            if word[0] =="cup":
+                rmbot_delta=[]
+            if word[0] =="cap":
+                rmtop_delta=[]
+            rmbot+=rmbot_delta
+            rmtop+=rmtop_delta
+            wordtypes+=[word[0]]
+        compactified_stringlist+=[[wordset,rmtop,rmbot]]
         
-        if word[0]=="neg":
-            content+=draw_neg(level,word[1],dotlength)
+    for wordset in compactified_stringlist:
+        botlength=toplength
+        for word in wordset[0]:    
+            if word[0]=="pos":
+                content_tangle+=draw_pos(level,word[1])
+            if word[0]=="neg":
+                content_tangle+=draw_neg(level,word[1])
+            if word[0]=="cup":
+                content_tangle+=draw_cup(level,word[1])
+                botlength-=2
+            if word[0]=="cap":
+                content_tangle+=draw_cap(level,word[1])
+                botlength+=2
+            
+            if (style=="slices"):
+                content_tangle+="\\rput[c]("+str(w-1.5)+","+str(level+0.5)+"){\color{gray}"+word[0]+str(word[1])+"}\n"
         
-        if word[0]=="cup":
-            content+=draw_cup(level,word[1],dotlength)
-            dotlength-=2
-        
-        if word[0]=="cap":
-            content+=draw_cap(level,word[1],dotlength)
-            dotlength+=2
+        top=[x for x in range(toplength) if x not in wordset[1]]
+        bot=[x for x in range(botlength) if x not in wordset[2]]
+        content_tangle += fill_strands(level,top,bot)
         
         if (style=="slices") and (level>baselevel):
-            content+="\\psline[linecolor=lightgray]("+str(w-0.75)+","+str(level)+")(-0.25,"+str(level)+")\n"
+            content_tangle+="\\psline[linecolor=lightgray]("+str(w-0.75)+","+str(level)+")(-0.25,"+str(level)+")\n"
         
-        if (style=="slices"):
-            content+="\\rput[c]("+str(w-1.5)+","+str(level+0.5)+"){\color{gray}"+word[0]+str(word[1])+"}\n"
+        level+=1
+        toplength=botlength
   
+    content+="\\psset{{yunit=-1}}\\begin{{pspicture}}(-0.5,-0.5)({0},{1})\n\psset{{linewidth=2.5pt}}\n".format(w-0.5,level+0.5)
+    
+    content+="\\rput[c]("+str(w/2-0.5)+","+str(0)+"){\\textbf{"+SanitizeTeX(filename)+"}}\n"    
+    content+="\\rput[c]("+str(w/2-0.5)+","+str(0.75)+"){"+SanitizeTeX(subtitle)+"}\n"
+    
+    content+=content_tangle
     content+="\\end{pspicture}\n\\end{document}"
     with open("examples/PSTricks/"+filename+"-tangle.tex", "w") as text_file:
         print(content, file=text_file)
         
-    run("cd examples/PSTricks && pdflatex -shell-escape "+filename+"-tangle.tex > "+filename+"-tangle.out 2>&1", shell=True)
-    run("cd examples/PSTricks && rm "+(" ".join([filename+"-tangle."+string+" " for string in ["log","aux","pdf","out"]])), shell=True)
+    run("cd examples/PSTricks && pdflatex -shell-escape '"+filename+"-tangle.tex' > '"+filename+"-tangle.out' 2>&1", shell=True)
+    run("cd examples/PSTricks && rm "+(" ".join(["'"+filename+"-tangle."+string+"' " for string in ["log","aux","pdf","out"]])), shell=True)
 
 
 def drawtangle_old(string,name,style="plain",start=1,subtitle=""):

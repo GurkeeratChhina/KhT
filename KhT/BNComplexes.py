@@ -458,25 +458,25 @@ class multicurve(object):
         with open("examples/PSTricks/"+filename+".tex", "w") as text_file:
             print(content, file=text_file)
         
-        run("cd examples/PSTricks && pdflatex -shell-escape "+filename+".tex > "+filename+".out 2>&1", shell=True)
-        run("cd examples/PSTricks && rm "+(" ".join([filename+"."+string+" " for string in ["log","aux","pdf","out"]])), shell=True)
-        
+        run("cd examples/PSTricks && pdflatex -shell-escape '"+filename+".tex' > '"+filename+".out' 2>&1", shell=True)
+        run("cd examples/PSTricks && rm "+(" ".join(["'"+filename+"."+string+"' " for string in ["log","aux","pdf","out"]])), shell=True)
         subtitle="field="+str(comp.field)
         
         if tangle==None:
             tanglestr=""
         else:
-            tanglestr="examples/PSTricks/"+filename+"-tangle-pics.pdf"
-            Drawing.drawtangle(tangle,filename,"slices",1,subtitle=subtitle)
-        run("pdftk "+tanglestr+" examples/PSTricks/"+str(filename)+"-pics.pdf output examples/"+filename+"_"+subtitle+".pdf", shell=True)
+            tanglestr="'examples/PSTricks/"+filename+"-tangle-pics.pdf'"
+            if thumbnails:
+                Drawing.drawtangle(tangle,filename,"plain",1)
+            else:
+                Drawing.drawtangle(tangle,filename,"slices",1,subtitle=subtitle)
+        run("pdftk "+tanglestr+" 'examples/PSTricks/"+str(filename)+"-pics.pdf' output 'examples/"+filename+"_"+subtitle+".pdf'", shell=True)
     
-    def drawpng(self, filename, vertex_switch = "index_qhdelta", tangle = None):
+    def draw_all(self, filename, vertex_switch = "index_qhdelta", tangle = None):
         subtitle="field="+str(self.comps[0].field)
-        for i,comp in enumerate(self.comps):
-            comp.draw(filename+str(i)+subtitle+".png",vertex_switch)
-            comp.draw(filename+str(i)+subtitle+"_small.png","h", True)
-        if tangle is not None:
-            Drawing.drawtangle(tangle,filename,"slices",1)
+        self.draw(filename+subtitle, vertex_switch,tangle=None,thumbnails=False)
+        self.draw(filename+subtitle+"_small", vertex_switch,tangle,thumbnails=True)
+        
             
 #todo: implement recognition of local systems (optional)
 #todo: implement pairing theorem (just for fun!)

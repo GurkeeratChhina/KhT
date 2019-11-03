@@ -12,13 +12,16 @@ BNr = cx.ToBNAlgebra(7) # convert the Bar-Natan's bracket into a complex over BN
 
 BNr.eliminateAll() # cancel all identity components of the differential
 BNr.clean_up() # try to find the immersed curve invariant BNr through a sequence of random isotopies
+#BNr.draw(name)
 multicurve = BNr.to_multicurve() # if the previous step was successful, separate the components
-multicurve.draw(name+"_BNr","hdelta",tangle) # create output pdf-file
+multicurve.draw(name+"_BNr","qhdelta",tangle,thumbnails=True) # create output pdf-file
+
+drawtangle(tangle,name+"test",start=1)
 
 Khr=BNr.cone(1) # compute the complex Khr as a cone [BNr---H¹--->BNr]
 Khr.clean_up() # try to find the immersed curve invariant Khr through a sequence of random isotopies
 multicurve_KhT=Khr.to_multicurve() # if the previous step was successful, separate the components
-multicurve_KhT.draw(name+"_Khr","hdelta",tangle) # create output pdf-file
+multicurve_KhT.draw(name+"_Khr","hdelta",tangle,thumbnails=True) # create output pdf-file
 
 #BNr.save(name) # save this complex for later
 #BNr = importBNcx(name) # import saved complex

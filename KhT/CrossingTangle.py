@@ -91,16 +91,23 @@ class Tangle(object): #TODO: implement orientations for all methods
     @classmethod
     def PretzelTangle(cls, left_twists, right_twists):
         tangle = "cup1."
-        for i in range(abs(left_twists)):
-            if left_twists < 0:
-                tangle += "neg0."
-            if left_twists > 0:
-                tangle += "pos0."
-        for i in range(abs(right_twists)):
-            if right_twists < 0:
-                tangle += "neg2."
-            if right_twists > 0:
-                tangle += "pos2."
+        if left_twists < 0:
+            left= "neg0."
+        else:
+            left= "pos0."
+        if right_twists < 0:
+            right= "neg2."
+        else:
+            right= "pos2."
+        
+        left_twists=abs(left_twists)
+        right_twists=abs(right_twists)
+        
+        if left_twists < right_twists:
+            tangle += (left+right)*left_twists+right*(right_twists-left_twists)
+        else:
+            tangle += (left+right)*left_twists+left*(left_twists-right_twists)
+            
         tangle += "cap3.cap1"
         return Tangle(tangle)
         
