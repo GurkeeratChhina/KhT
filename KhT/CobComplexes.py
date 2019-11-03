@@ -442,13 +442,12 @@ def AddPosCrossing(Complex, i):
     CapCup = AddCap(AddCup(Complex, i), i, "true")
     sourcegens = Complex.gens
     targetgens = CapCup.gens
-    Newgens = sourcegens + targetgens
+    
     TopLeft = Complex.diff
     BottomRight = CapCup.diff
-    length1 = len(Complex.gens)
-    length2 = len(CapCup.gens)
-    TopRight = np.full((length1, length2), 0, Cob.mor)
+    TopRight = np.full((len(Complex.gens), len(CapCup.gens)), 0, Cob.mor)
     BottomLeft = []
+    
     for x, targetclt in enumerate(Complex.gens):
         if targetclt.arcs[targetclt.top +i] == targetclt.top+i+1: #targetclt is closed
             newRow = []
@@ -486,9 +485,8 @@ def AddPosCrossing(Complex, i):
                     newRow.append(0)
             BottomLeft.append(newRow)
     Newdiff = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
-                                   np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
-    NewComplex = CobComplex(Newgens, Newdiff)
-    return NewComplex
+                              np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
+    return CobComplex(sourcegens + targetgens, Newdiff)
 
 def grshiftclt(clt):
     return Cob.obj(clt.top, clt.bot, clt.arcs, clt.h+1, clt.q+1, clt.delta-0.5)
@@ -503,13 +501,12 @@ def AddNegCrossing(Complex, i):
     targetgens = [grshiftclt(clt) for clt in Complex.gens]
     CapCup = AddCap(AddCup(Complex, i), i)
     sourcegens = CapCup.gens
-    Newgens = sourcegens + targetgens
+    
     TopLeft = CapCup.diff
     BottomRight = [[grshiftcob(cob) for cob in row] for row in Complex.diff]
-    length1 = len(sourcegens)
-    length2 = len(targetgens)
-    TopRight = np.full((length1, length2), 0, Cob.mor)
-    BottomLeft = [] 
+    TopRight = np.full((len(sourcegens), len(targetgens)), 0, Cob.mor)
+    BottomLeft = []
+    
     for x, targetclt in enumerate(Complex.gens):
         newRow = []
         for y, sourceclt in enumerate(Complex.gens):
@@ -544,9 +541,8 @@ def AddNegCrossing(Complex, i):
                     newRow.append(0)
         BottomLeft.append(newRow)
     Newdiff = np.concatenate((np.concatenate((TopLeft, TopRight), axis = 1), \
-                                   np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
-    NewComplex = CobComplex(Newgens, Newdiff)
-    return NewComplex
+                              np.concatenate((BottomLeft, BottomRight), axis = 1)), axis = 0)
+    return CobComplex(sourcegens + targetgens, Newdiff)
 
 def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     """compute the Bar-Natan bracket for tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
