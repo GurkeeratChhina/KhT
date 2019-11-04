@@ -460,7 +460,7 @@ class multicurve(object):
         
         run("cd examples/PSTricks && pdflatex -shell-escape '"+filename+".tex' > '"+filename+".out' 2>&1", shell=True)
         run("cd examples/PSTricks && rm "+(" ".join(["'"+filename+"."+string+"' " for string in ["log","aux","pdf","out"]])), shell=True)
-        subtitle="field="+str(comp.field)
+        #subtitle="field="+str(comp.field)
         
         if tangle==None:
             tanglestr=""
@@ -469,8 +469,8 @@ class multicurve(object):
             if thumbnails:
                 Drawing.drawtangle(tangle,filename,"plain",1)
             else:
-                Drawing.drawtangle(tangle,filename,"slices",1,[title[0],subtitle])
-        run("pdftk "+tanglestr+" 'examples/PSTricks/"+str(filename)+"-pics.pdf' output 'examples/"+filename+"_"+subtitle+".pdf'", shell=True)
+                Drawing.drawtangle(tangle,filename,"slices",1,title)
+        run("pdftk "+tanglestr+" 'examples/PSTricks/"+str(filename)+"-pics.pdf' output 'examples/"+filename+title[1]+".pdf'", shell=True)
         
 #todo: implement recognition of local systems (optional)
 #todo: implement pairing theorem (just for fun!)

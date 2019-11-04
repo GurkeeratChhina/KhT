@@ -569,7 +569,7 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     for i,word in enumerate(stringlist):
         
         time2=time()
-        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects, "+str(round(time2-time1,1))+" sec)", end='\n')# monitor \n ->\r
+        print("slice "+str(i)+"/"+str(len(stringlist))+": adding "+word[0]+" at index "+str(word[1])+" to tangle. ("+str(len(cx.gens))+" objects, "+str(round(time2-time1,1))+" sec)", end='\r')# monitor \n ->\r
         time1=time2
         
         if word[0]=="pos":
