@@ -393,7 +393,7 @@ class multicurve(object):
     def __repr__(self):
         return "multicurve({})".format(self.comps)
     
-    def draw(self, filename, vertex_switch="qhdelta",tangle=None,thumbnails=False):
+    def draw(self, filename, vertex_switch="qhdelta",title=["",""],tangle=None,thumbnails=False):
         """create a pdf file which draws the graph of each component on a separate page; if tangle is specified, the first page is the tangle input.
         """
         
@@ -469,15 +469,9 @@ class multicurve(object):
             if thumbnails:
                 Drawing.drawtangle(tangle,filename,"plain",1)
             else:
-                Drawing.drawtangle(tangle,filename,"slices",1,subtitle=subtitle)
+                Drawing.drawtangle(tangle,filename,"slices",1,[title[0],subtitle])
         run("pdftk "+tanglestr+" 'examples/PSTricks/"+str(filename)+"-pics.pdf' output 'examples/"+filename+"_"+subtitle+".pdf'", shell=True)
-    
-    def draw_all(self, filename, vertex_switch = "index_qhdelta", tangle = None):
-        subtitle="field="+str(self.comps[0].field)
-        self.draw(filename+subtitle, vertex_switch,tangle=None,thumbnails=False)
-        self.draw(filename+subtitle+"_small", vertex_switch,tangle,thumbnails=True)
         
-            
 #todo: implement recognition of local systems (optional)
 #todo: implement pairing theorem (just for fun!)
 

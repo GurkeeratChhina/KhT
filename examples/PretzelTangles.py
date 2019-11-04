@@ -6,4 +6,5 @@ for i in range(1,5):
         Tangle = Tangle.PretzelTangle(2*i, -2*j-1)
         BNcx = Tangle.toReduced_BNComplex(1000, field)
         multicurve = BNcx.to_multicurve()
-        multicurve.draw(name+"_BNr","hdelta",Tangle.slices,thumbnails=True)
+        multicurve.draw(name+"_BNr_thumbs","hdelta",[name+"_BNr",""],Tangle.slices,thumbnails=True)
+        multicurve.draw(name+"_BNr","qhdelta",[name+"_BNr",""],Tangle.slices)

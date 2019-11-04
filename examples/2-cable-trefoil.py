@@ -14,9 +14,10 @@ BNr.eliminateAll() # cancel all identity components of the differential
 BNr.clean_up() # try to find the immersed curve invariant BNr through a sequence of random isotopies
 #BNr.draw(name)
 multicurve = BNr.to_multicurve() # if the previous step was successful, separate the components
-multicurve.draw(name+"_BNr","qhdelta",tangle,thumbnails=True) # create output pdf-file
+multicurve.draw(name+"_BNr_thumbs","qhdelta",[name+"_BNr",""],tangle,thumbnails=True) # create output pdf-file
+multicurve.draw(name+"_BNr","qhdelta",[name+"_BNr",""],tangle) # create output pdf-file
 
-drawtangle(tangle,name+"test",start=1)
+drawtangle(tangle,name+"test",start=1,title=[name+"test",""])
 
 Khr=BNr.cone(1) # compute the complex Khr as a cone [BNr---H¹--->BNr]
 Khr.clean_up() # try to find the immersed curve invariant Khr through a sequence of random isotopies
