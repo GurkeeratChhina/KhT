@@ -106,7 +106,7 @@ class Tangle(object): #TODO: implement orientations for all methods
         if left_twists < right_twists:
             tangle += (left+right)*left_twists+right*(right_twists-left_twists)
         else:
-            tangle += (left+right)*left_twists+left*(left_twists-right_twists)
+            tangle += (left+right)*right_twists+left*(left_twists-right_twists)
             
         tangle += "cap3.cap1"
         return Tangle(tangle)

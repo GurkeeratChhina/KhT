@@ -1,0 +1,45 @@
+InfoBegin
+InfoKey: ModDate
+InfoValue: D:20191103183938-08'00'
+InfoBegin
+InfoKey: CreationDate
+InfoValue: D:20191103183938-08'00'
+InfoBegin
+InfoKey: Creator
+InfoValue: pdftk 2.02 - www.pdftk.com
+InfoBegin
+InfoKey: Producer
+InfoValue: itext-paulo-155 (itextpdf.sf.net-lowagie.com)
+PdfID0: 72243ce7996c7533970235e6de589772
+PdfID1: 88adc94a208e5f360ffd6961b5288573
+NumberOfPages: 6
+PageMediaBegin
+PageMediaNumber: 1
+PageMediaRotation: 0
+PageMediaRect: 0 0 185.25 730.92
+PageMediaDimensions: 185.25 730.92
+PageMediaBegin
+PageMediaNumber: 2
+PageMediaRotation: 0
+PageMediaRect: 0 0 780.53 780.53
+PageMediaDimensions: 780.53 780.53
+PageMediaBegin
+PageMediaNumber: 3
+PageMediaRotation: 0
+PageMediaRect: 0 0 837.22 837.22
+PageMediaDimensions: 837.22 837.22
+PageMediaBegin
+PageMediaNumber: 4
+PageMediaRotation: 0
+PageMediaRect: 0 0 686.04 686.04
+PageMediaDimensions: 686.04 686.04
+PageMediaBegin
+PageMediaNumber: 5
+PageMediaRotation: 0
+PageMediaRect: 0 0 534.86 534.86
+PageMediaDimensions: 534.86 534.86
+PageMediaBegin
+PageMediaNumber: 6
+PageMediaRotation: 0
+PageMediaRect: 0 0 383.68 383.68
+PageMediaDimensions: 383.68 383.68
