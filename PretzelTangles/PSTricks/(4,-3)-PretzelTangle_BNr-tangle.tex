@@ -1,0 +1,113 @@
+\documentclass{article}
+\usepackage[crop=off]{auto-pst-pdf}
+\usepackage{pst-node,rotating}
+\renewcommand{\familydefault}{\sfdefault}
+\begin{document}
+\centering 
+\psset{yunit=-1}\begin{pspicture}(-0.5,-0.5)(6.0,11.25)
+\psset{linewidth=2.5pt}
+\rput[c](2.75,0){\textbf{(4,-3)-PretzelTangle\_BNr}}
+\rput[c](2.75,0.75){}
+
+%%%%%%%%%%%%%%%%%%%
+% [[['cap', 1]], [], [1, 2]]
+\psbezier(1,1.75)(1,1.25)(2,1.25)(2,1.75)
+\rput[c](5.0,1.25){\color{gray}cap1}
+\psbezier(0,0.75)(0,1.25)(0,1.25)(0,1.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['cap', 3]], [], [3, 4]]
+\psbezier(3,2.75)(3,2.25)(4,2.25)(4,2.75)
+\rput[c](5.0,2.25){\color{gray}cap3}
+\psbezier(0,1.75)(0,2.25)(0,2.25)(0,2.75)
+\psbezier(1,1.75)(1,2.25)(1,2.25)(1,2.75)
+\psbezier(2,1.75)(2,2.25)(2,2.25)(2,2.75)
+\psline[linecolor=lightgray](5.75,1.75)(-0.25,1.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['pos', 0]], [0, 1], [0, 1]]
+\psbezier(0,2.75)(0,3.25)(1,3.25)(1,3.75)
+\psbezier[linecolor=white,linewidth=10pt](1,2.75)(1,3.25)(0,3.25)(0,3.75)
+\psbezier(1,2.75)(1,3.25)(0,3.25)(0,3.75)
+\rput[c](5.0,3.25){\color{gray}pos0}
+\psbezier(2,2.75)(2,3.25)(2,3.25)(2,3.75)
+\psbezier(3,2.75)(3,3.25)(3,3.25)(3,3.75)
+\psbezier(4,2.75)(4,3.25)(4,3.25)(4,3.75)
+\psline[linecolor=lightgray](5.75,2.75)(-0.25,2.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['neg', 2]], [2, 3], [2, 3]]
+\psbezier(3,3.75)(3,4.25)(2,4.25)(2,4.75)
+\psbezier[linecolor=white,linewidth=10pt](2,3.75)(2,4.25)(3,4.25)(3,4.75)
+\psbezier(2,3.75)(2,4.25)(3,4.25)(3,4.75)
+\rput[c](5.0,4.25){\color{gray}neg2}
+\psbezier(0,3.75)(0,4.25)(0,4.25)(0,4.75)
+\psbezier(1,3.75)(1,4.25)(1,4.25)(1,4.75)
+\psbezier(4,3.75)(4,4.25)(4,4.25)(4,4.75)
+\psline[linecolor=lightgray](5.75,3.75)(-0.25,3.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['pos', 0]], [0, 1], [0, 1]]
+\psbezier(0,4.75)(0,5.25)(1,5.25)(1,5.75)
+\psbezier[linecolor=white,linewidth=10pt](1,4.75)(1,5.25)(0,5.25)(0,5.75)
+\psbezier(1,4.75)(1,5.25)(0,5.25)(0,5.75)
+\rput[c](5.0,5.25){\color{gray}pos0}
+\psbezier(2,4.75)(2,5.25)(2,5.25)(2,5.75)
+\psbezier(3,4.75)(3,5.25)(3,5.25)(3,5.75)
+\psbezier(4,4.75)(4,5.25)(4,5.25)(4,5.75)
+\psline[linecolor=lightgray](5.75,4.75)(-0.25,4.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['neg', 2]], [2, 3], [2, 3]]
+\psbezier(3,5.75)(3,6.25)(2,6.25)(2,6.75)
+\psbezier[linecolor=white,linewidth=10pt](2,5.75)(2,6.25)(3,6.25)(3,6.75)
+\psbezier(2,5.75)(2,6.25)(3,6.25)(3,6.75)
+\rput[c](5.0,6.25){\color{gray}neg2}
+\psbezier(0,5.75)(0,6.25)(0,6.25)(0,6.75)
+\psbezier(1,5.75)(1,6.25)(1,6.25)(1,6.75)
+\psbezier(4,5.75)(4,6.25)(4,6.25)(4,6.75)
+\psline[linecolor=lightgray](5.75,5.75)(-0.25,5.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['pos', 0]], [0, 1], [0, 1]]
+\psbezier(0,6.75)(0,7.25)(1,7.25)(1,7.75)
+\psbezier[linecolor=white,linewidth=10pt](1,6.75)(1,7.25)(0,7.25)(0,7.75)
+\psbezier(1,6.75)(1,7.25)(0,7.25)(0,7.75)
+\rput[c](5.0,7.25){\color{gray}pos0}
+\psbezier(2,6.75)(2,7.25)(2,7.25)(2,7.75)
+\psbezier(3,6.75)(3,7.25)(3,7.25)(3,7.75)
+\psbezier(4,6.75)(4,7.25)(4,7.25)(4,7.75)
+\psline[linecolor=lightgray](5.75,6.75)(-0.25,6.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['neg', 2]], [2, 3], [2, 3]]
+\psbezier(3,7.75)(3,8.25)(2,8.25)(2,8.75)
+\psbezier[linecolor=white,linewidth=10pt](2,7.75)(2,8.25)(3,8.25)(3,8.75)
+\psbezier(2,7.75)(2,8.25)(3,8.25)(3,8.75)
+\rput[c](5.0,8.25){\color{gray}neg2}
+\psbezier(0,7.75)(0,8.25)(0,8.25)(0,8.75)
+\psbezier(1,7.75)(1,8.25)(1,8.25)(1,8.75)
+\psbezier(4,7.75)(4,8.25)(4,8.25)(4,8.75)
+\psline[linecolor=lightgray](5.75,7.75)(-0.25,7.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['pos', 0]], [0, 1], [0, 1]]
+\psbezier(0,8.75)(0,9.25)(1,9.25)(1,9.75)
+\psbezier[linecolor=white,linewidth=10pt](1,8.75)(1,9.25)(0,9.25)(0,9.75)
+\psbezier(1,8.75)(1,9.25)(0,9.25)(0,9.75)
+\rput[c](5.0,9.25){\color{gray}pos0}
+\psbezier(2,8.75)(2,9.25)(2,9.25)(2,9.75)
+\psbezier(3,8.75)(3,9.25)(3,9.25)(3,9.75)
+\psbezier(4,8.75)(4,9.25)(4,9.25)(4,9.75)
+\psline[linecolor=lightgray](5.75,8.75)(-0.25,8.75)
+
+%%%%%%%%%%%%%%%%%%%
+% [[['cup', 1]], [1, 2], []]
+\psbezier(1,9.75)(1,10.25)(2,10.25)(2,9.75)
+\rput[c](5.0,10.25){\color{gray}cup1}
+\psbezier(0,9.75)(0,10.25)(0,10.25)(0,10.75)
+\psbezier(3,9.75)(3,10.25)(1,10.25)(1,10.75)
+\psbezier(4,9.75)(4,10.25)(2,10.25)(2,10.75)
+\psline[linecolor=lightgray](5.75,9.75)(-0.25,9.75)
+\end{pspicture}
+\end{document}
