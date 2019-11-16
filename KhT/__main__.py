@@ -35,7 +35,7 @@ if __name__ == "__main__":
             data = text_file.read()
             filename=filename[:-3]
         
-    paths=["","/PSTricks","/BNComplexes","/CobComplexes","Results"]
+    paths=["","/PSTricks","/BNComplexes","/CobComplexes"]
     for path in paths:
         if not os.path.exists('examples/'+filename+path):
             os.makedirs('examples/'+filename+path)
