@@ -388,12 +388,18 @@ class multicurve(object):
     """A multicurve is a collection of loop-type BNcomplexes which are assumed to be connected.
     """
     def __init__(self,comps):
-        self.comps=comps
+        def compsize(comp):
+            return len(comp.gens)
+        self.comps=sorted(comps, key=compsize)
     
     def __repr__(self):
         return "multicurve({})".format(self.comps)
     
-    def draw(self, filename, vertex_switch="qhdelta",title=["",""],tangle=None,thumbnails=False):
+    def save(self,name):
+        with open(filepath+"BNComplexes/"+name, "w") as text_file:
+            print(repr(self), file=text_file)
+    
+    def draw(self, name, vertex_switch="qhdelta",title=["",""],tangle=None,thumbnails=False):
         """create a pdf file which draws the graph of each component on a separate page; if tangle is specified, the first page is the tangle input.
         """
         
@@ -427,8 +433,8 @@ class multicurve(object):
                     dottype="*" #black
                 else:
                     dottype="" #white
-                content+="\\cnode"+dottype+"("+str(scaledsize)+";"+str(360*i/size-90)+"){3.5pt}{P"+str(i)+"}\n"
-                content+="\\nput{"+str(360*i/size-90)+"}{P"+str(i)+"}{$"+gen.grading2TeX(vertex_switch)+"$}\n"
+                content+="\\cnode"+dottype+"("+str(scaledsize)+";"+str(round(360*i/size-90,5))+"){3.5pt}{P"+str(i)+"}\n"
+                content+="\\nput{"+str(round(360*i/size-90,5))+"}{P"+str(i)+"}{$"+gen.grading2TeX(vertex_switch)+"$}\n"
         
             for i, diff_row in enumerate(comp.diff):
                 for j, diff in enumerate(diff_row):
@@ -454,23 +460,64 @@ class multicurve(object):
             content+="\\end{pspicture}\n"
         
         content+="\\end{document}"
-
-        with open("examples/PSTricks/"+filename+".tex", "w") as text_file:
+        
+        with open(filepath+"PSTricks/"+name+".tex", "w") as text_file:
             print(content, file=text_file)
         
-        run("cd examples/PSTricks && pdflatex -shell-escape '"+filename+".tex' > '"+filename+".out' 2>&1", shell=True)
-        run("cd examples/PSTricks && rm "+(" ".join(["'"+filename+"."+string+"' " for string in ["log","aux","pdf","out"]])), shell=True)
-        #subtitle="field="+str(comp.field)
+        run("cd '"+filepath+"PSTricks' && pdflatex -shell-escape '"+name+".tex' > '"+name+".out' 2>&1", shell=True)
+        run("cd '"+filepath+"PSTricks' && rm "+(" ".join(["'"+name+string+"' " for string in [".log",".aux",".pdf",".out","-autopp.ps","-autopp.dvi","-autopp.log"]])), shell=True)
         
         if tangle==None:
             tanglestr=""
         else:
-            tanglestr="'examples/PSTricks/"+filename+"-tangle-pics.pdf'"
+            tanglestr="'"+filepath+"PSTricks/"+name+"-tangle-pics.pdf'"
             if thumbnails:
-                Drawing.drawtangle(tangle,filename,"plain",1)
+                Drawing.drawtangle(tangle,name,"plain",1)
             else:
-                Drawing.drawtangle(tangle,filename,"slices",1,title)
-        run("pdftk "+tanglestr+" 'examples/PSTricks/"+str(filename)+"-pics.pdf' output 'examples/"+filename+title[1]+".pdf'", shell=True)
+                Drawing.drawtangle(tangle,name,"slices",1,title)
+                
+        run("pdftk "+tanglestr+" '"+filepath+"PSTricks/"+name+"-pics.pdf' output '"+filepath+name+title[1]+".pdf'", shell=True)
+    
+    def html(self, name, suffix="",vertex_switch="qhdelta",tangle=None):
+        """compute a string that defines a row of a html table and create all files that this row needs.
+        """
+        longname=name+suffix
+        self.draw(longname+"_thumbs",vertex_switch,[longname,""],tangle.slices,thumbnails=True)
+        self.draw(longname,vertex_switch,[longname,""],tangle.slices)
+        
+        # we are assuming that there are fewer than 99 components; otherwise, the filename suffices don't work
+        if len(self.comps)>98:
+            raise Exception('This is a large multicurve. There are more than 98 components!')
+        # convert thumbnails file into pngs
+        run("cd "+filepath+" && pdftoppm '"+longname+"_thumbs.pdf' '"+longname+"_thumbs' -png -rx 300 -ry 300", shell=True)
+        # split detailed pdf into single pages
+        run("cd "+filepath+" && pdftk '"+longname+".pdf' burst output '"+longname+"'_%02d.pdf", shell=True) 
+        # remove report from pdftk burst
+        run("cd "+filepath+" && rm doc_data.txt", shell=True) 
+        
+        html_row="\n<p>"
+        
+        classname = "tangle_diagram"
+        for counter in range(len(self.comps)+1):
+            counterstr=str(counter+1)
+            if len(counterstr)==1:
+                pdf_suffix="_0"+counterstr
+            else:
+                pdf_suffix="_"+counterstr
+            if counter != 0:
+                classname = "component"
+            if len(self.comps)>8:
+                png_suffix = pdf_suffix[1:]
+            else:
+                png_suffix = counterstr
+            #<div onclick=on('PretzelTangles/(2,-3)-PretzelTangle_BNr_01')>
+            #    <img class=tangle_diagram src='PretzelTangles/(2,-3)-PretzelTangle_BNr_thumbs-1.png'>
+            #</div>
+            if counter == 0:
+                pdf_suffix=""
+            html_row+="<span onclick=on('"+filename+"/"+longname+pdf_suffix+"')><img class="+classname+" src='"+filename+"/"+longname+"_thumbs-"+png_suffix+".png'></span>\n"    
+        html_row+="\n</p>"
+        return html_row
         
 #todo: implement recognition of local systems (optional)
 #todo: implement pairing theorem (just for fun!)

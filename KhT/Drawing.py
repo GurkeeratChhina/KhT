@@ -96,7 +96,7 @@ def draw_dot_on_arc(arc,clt,h,ctx,deco_index):
     ctx.set_source_rgb(255,0,0)
     ctx.stroke()
 
-def drawtangle(string,filename,style="plain",start=1,title=["",""]):
+def drawtangle(string,name,style="plain",start=1,title=["",""]):
     """draw the tangle specified by 'string', which is a concatenation of words <type>+<index>, separated by '.' read from right to left, for each elementary tangle slice, read from top to bottom, where:
     <type> is equal to:
         'pos': positive crossing
@@ -146,25 +146,25 @@ def drawtangle(string,filename,style="plain",start=1,title=["",""]):
         if len(top)!=len(bot):
             raise Exception('number of remaining dots at the top is not equal to the number of remaining dots at the bottom.')
         for i,j in zip(top,bot):
-            string += "\\psbezier({},{})({},{})({},{})({},{})".format(i,level,i,level+0.5,j,level+0.5,j,level+1)
+            string += "\\psbezier({},{})({},{})({},{})({},{})\n".format(i,level,i,level+0.5,j,level+0.5,j,level+1)
         return string
     
     def draw_cup(level,index):
-        return "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level)   
+        return "\\psbezier({},{})({},{})({},{})({},{})\n".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level)   
     
     def draw_cap(level,index):
-        return "\\psbezier({},{})({},{})({},{})({},{})".format(index,level+1,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        return "\\psbezier({},{})({},{})({},{})({},{})\n".format(index,level+1,index,level+0.5,index+1,level+0.5,index+1,level+1)
     
     def draw_pos(level,index):
-        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
-        string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
-        string += "\\psbezier({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
+        string = "\\psbezier({},{})({},{})({},{})({},{})\n".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})\n".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
+        string += "\\psbezier({},{})({},{})({},{})({},{})\n".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
         return string
 
     def draw_neg(level,index):
-        string = "\\psbezier({},{})({},{})({},{})({},{})".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
-        string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
-        string += "\\psbezier({},{})({},{})({},{})({},{})".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        string = "\\psbezier({},{})({},{})({},{})({},{})\n".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
+        string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})\n".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
+        string += "\\psbezier({},{})({},{})({},{})({},{})\n".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
         return string
     
     if style=="slices":
@@ -205,6 +205,9 @@ def drawtangle(string,filename,style="plain",start=1,title=["",""]):
         
     for wordset in compactified_stringlist:
         botlength=toplength
+        
+        content_tangle+="\n%%%%%%%%%%%%%%%%%%%\n% "+str(wordset)+"\n"
+        
         for word in wordset[0]:    
             if word[0]=="pos":
                 content_tangle+=draw_pos(level,word[1])
@@ -237,11 +240,11 @@ def drawtangle(string,filename,style="plain",start=1,title=["",""]):
     
     content+=content_tangle
     content+="\\end{pspicture}\n\\end{document}"
-    with open("examples/PSTricks/"+filename+"-tangle.tex", "w") as text_file:
+    with open(filepath+"PSTricks/"+name+"-tangle.tex", "w") as text_file:
         print(content, file=text_file)
         
-    run("cd examples/PSTricks && pdflatex -shell-escape '"+filename+"-tangle.tex' > '"+filename+"-tangle.out' 2>&1", shell=True)
-    run("cd examples/PSTricks && rm "+(" ".join(["'"+filename+"-tangle."+string+"' " for string in ["log","aux","pdf","out"]])), shell=True)
+    run("cd '"+filepath+"PSTricks' && pdflatex -shell-escape '"+name+"-tangle.tex' > '"+name+"-tangle.out' 2>&1", shell=True)
+    run("cd '"+filepath+"PSTricks' && rm "+(" ".join(["'"+name+"-tangle"+string+"' " for string in [".log",".aux",".pdf",".out","-autopp.ps","-autopp.dvi","-autopp.log"]])), shell=True)
 
 
 ################
