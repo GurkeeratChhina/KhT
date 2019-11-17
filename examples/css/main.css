@@ -3,12 +3,14 @@
     max-height:100px;
     text-align:center;
     vertical-align: middle;
+    cursor: pointer; /* Add a pointer on hover */
 }
 .component {
     max-width:100px;
     max-height:100px;
     text-align:center;
     vertical-align: middle;
+    cursor: pointer; /* Add a pointer on hover */
 }
 
 #overlay {
