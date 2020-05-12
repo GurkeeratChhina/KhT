@@ -122,7 +122,6 @@ def drawtangle(string,name,style="plain",start=1,title=["",""]):
         baselevel+= 0.75
 
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
-    stringlist.reverse()
     
     w_current = start
     w_max = start
@@ -155,13 +154,13 @@ def drawtangle(string,name,style="plain",start=1,title=["",""]):
     def draw_cap(level,index):
         return "\\psbezier({},{})({},{})({},{})({},{})\n".format(index,level+1,index,level+0.5,index+1,level+0.5,index+1,level+1)
     
-    def draw_pos(level,index):
+    def draw_neg(level,index):
         string = "\\psbezier({},{})({},{})({},{})({},{})\n".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
         string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})\n".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
         string += "\\psbezier({},{})({},{})({},{})({},{})\n".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
         return string
 
-    def draw_neg(level,index):
+    def draw_pos(level,index):
         string = "\\psbezier({},{})({},{})({},{})({},{})\n".format(index+1,level,index+1,level+0.5,index,level+0.5,index,level+1)
         string += "\\psbezier[linecolor=white,linewidth=10pt]({},{})({},{})({},{})({},{})\n".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
         string += "\\psbezier({},{})({},{})({},{})({},{})\n".format(index,level,index,level+0.5,index+1,level+0.5,index+1,level+1)
@@ -183,11 +182,10 @@ def drawtangle(string,name,style="plain",start=1,title=["",""]):
         wordset=[]
         rmbot=[]
         rmtop=[]
-        wordtypes=[]
         for word in stringlist:
-            if (word[1] in rmbot) or (word[1]+1 in rmbot) \
-            or (((word[0]=="cap") or (word[0]=="cup")) and (("cap" in wordtypes) or ("cup" in wordtypes))):
-                compactified_stringlist+=[[wordset,rmtop,rmbot]]
+            if (word[1] in rmbot) or (word[1]+1 in rmbot) or (word[0]=="cap") or (word[0]=="cup") or (wordset[0][0][0]=="c"):
+                if wordset!=[]:
+                    compactified_stringlist+=[[wordset,rmtop,rmbot]]
                 wordset=[]
                 rmbot=[]
                 rmtop=[]
@@ -200,7 +198,6 @@ def drawtangle(string,name,style="plain",start=1,title=["",""]):
                 rmtop_delta=[]
             rmbot+=rmbot_delta
             rmtop+=rmtop_delta
-            wordtypes+=[word[0]]
         compactified_stringlist+=[[wordset,rmtop,rmbot]]
         
     for wordset in compactified_stringlist:

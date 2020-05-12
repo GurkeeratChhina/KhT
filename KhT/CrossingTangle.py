@@ -20,16 +20,10 @@ from Drawing import *
 
 def StringToStringList(str):
     list=[[word[0:3],int(word[3:])] for word in str.split('.')]
-    list.reverse()
     return list
     
-def StringListToString(strlst):
-    strlst.reverse()
-    newstring = ""
-    for word in strlst[:-1]:
-        newstring += word[0] + str(word[1]) + "."
-    newstring += strlst[-1][0] + str(strlst[-1][1])
-    return newstring
+def StringListToString(str_list):
+    return ".".join([word[0]+str(word[1]) for word in str_list])
 
 class Tangle(object): #TODO: implement orientations for all methods
     """ A tangle is either a string that goes through all the slices, seperated by '.' or a list of slices
@@ -88,17 +82,59 @@ class Tangle(object): #TODO: implement orientations for all methods
             self.pos = pos
             self.neg = neg
     
+    def twist(self,sequence):
+        
+        twist=""
+        
+        for i,item in enumerate(sequence):
+            if item>0:
+                addendum=".pos"+str(i%2)
+            else:
+                addendum=".neg"+str(i%2)
+            twist+=abs(item)*addendum
+        
+        self.slices += twist
+        self.stringlist = StringToStringList(self.slices)
+        self.height += len(self.stringlist)
+    
+    @classmethod
+    def RationalTangle(p,q):
+        if p*q>0:
+            strB=".pos0"
+        else:
+            strB=".neg0"
+        strR=".pos1"
+        p=abs(p)
+        q=abs(q)
+        
+        twist=""
+        
+        while p!=q:
+            if p > q:
+                p=p-q 
+                twist += strB
+            else:
+                q=q-p
+                twist += strR
+        
+        if (p==1 and q==1):
+            twist += strB
+        else:
+            raise Exception("gcd(p,q) should be 1.")
+        
+        #not finished
+    
     @classmethod
     def PretzelTangle(cls, left_twists, right_twists):
-        tangle = "cup1."
+        tangle = "cap1.cap3"
         if left_twists < 0:
-            left= "neg0."
+            left= ".neg0"
         else:
-            left= "pos0."
+            left= ".pos0"
         if right_twists < 0:
-            right= "neg2."
+            right= ".neg2"
         else:
-            right= "pos2."
+            right= ".pos2"
         
         left_twists=abs(left_twists)
         right_twists=abs(right_twists)
@@ -108,7 +144,7 @@ class Tangle(object): #TODO: implement orientations for all methods
         else:
             tangle += (left+right)*right_twists+left*(left_twists-right_twists)
             
-        tangle += "cap3.cap1"
+        tangle += ".cup1"
         return Tangle(tangle)
         
     @classmethod
@@ -294,7 +330,7 @@ class Tangle(object): #TODO: implement orientations for all methods
         """
         cx= BNbracket(self.slices, self.pos, self.neg, self.top, options)
         BN_complex= cx.ToBNAlgebra(field)
-        BN_complex.clean_up(max_iter)
+        #BN_complex.clean_up(max_iter)
         return BN_complex
     
     def Cable(self): # TODO: orientations

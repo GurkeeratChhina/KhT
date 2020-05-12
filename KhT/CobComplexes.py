@@ -558,7 +558,6 @@ def BNbracket(string,pos=0,neg=0,start=1,options="unsafe"):
     E.g. 'BNbracket('cup0pos0',2)' is a (2,0)-tangle which is decomposed as a positive crossing followed by a cap.
     """
     stringlist=[[word[0:3],int(word[3:])] for word in string.split('.')]
-    stringlist.reverse()
     cx=CobComplex([Cob.obj(start,start,[start+i for i in range(start)]+[i for i in range(start)], 0,0,0)], [[0]])
     print("Computing the Bar-Natan bracket for the tangle\n\n"+string+"\n\n"+"with "+str(start)+" ends at the top, "+str(pos)+\
           " positive crossings, "+str(neg)+" negative crossings and "+str(len(stringlist))+" slices in total.")

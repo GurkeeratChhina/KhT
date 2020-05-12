@@ -289,11 +289,13 @@ class mor(object):
         # list of lists of indices of components in first/second cobordism that belong to the old_comp in old_comps
         comps2_x=[[j for j,comp in enumerate(comps2) if comp[0] in old_comp] for old_comp in old_comps]
          
-        def comp_genus(old_comp,old_comp_x):
-            def intersection(comp):
-                return sum([1 for i in comp if i[0] in old_comp])
-            return 1-(intersection(comps1)+intersection(comps2)-len(old_comp)//2+len(old_comp_x))//2
-        genus=[comp_genus(old_comp,old_comp_x) for old_comp,old_comp_x in zip(old_comps,old_comps_x)]# genus of the closure of old_comps
+        genus=[1-(len(comp1_x)\
+                  +len(comp2_x)\
+                  -len(old_comp)//2\
+                  +len(old_comp_x))//2\
+               for old_comp,old_comp_x,comp1_x,comp2_x \
+               in zip(old_comps,old_comps_x,comps1_x,comps2_x)\
+        ]# genus of the closure of old_comps
         
         def decos_from_old_comp(g,r,n):
             if r>0:# r>0 and v_c=1
