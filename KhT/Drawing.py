@@ -241,7 +241,7 @@ def drawtangle(string,name,style="plain",start=1,title=["",""]):
         print(content, file=text_file)
         
     run("cd '"+filepath+"PSTricks' && pdflatex -shell-escape '"+name+"-tangle.tex' > '"+name+"-tangle.out' 2>&1", shell=True)
-    run("cd '"+filepath+"PSTricks' && rm "+(" ".join(["'"+name+"-tangle"+string+"' " for string in [".log",".aux",".pdf",".out","-autopp.ps","-autopp.dvi","-autopp.log"]])), shell=True)
+    run("cd '"+filepath+"PSTricks' && rm "+(" ".join(["'"+name+"-tangle"+string+"' " for string in [".log",".aux",".pdf",".out"]])), shell=True)
 
 
 ################

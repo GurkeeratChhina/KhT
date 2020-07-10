@@ -465,7 +465,7 @@ class multicurve(object):
             print(content, file=text_file)
         
         run("cd '"+filepath+"PSTricks' && pdflatex -shell-escape '"+name+".tex' > '"+name+".out' 2>&1", shell=True)
-        run("cd '"+filepath+"PSTricks' && rm "+(" ".join(["'"+name+string+"' " for string in [".log",".aux",".pdf",".out","-autopp.ps","-autopp.dvi","-autopp.log"]])), shell=True)
+        run("cd '"+filepath+"PSTricks' && rm "+(" ".join(["'"+name+string+"' " for string in [".log",".aux",".pdf",".out"]])), shell=True)
         
         if tangle==None:
             tanglestr=""
