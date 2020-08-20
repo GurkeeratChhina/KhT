@@ -18,7 +18,7 @@ from itertools import product, groupby
 from tabulate import tabulate
 
 import BNAlgebra
-from aux import *
+from auxiliary import *
 
 class obj(object):
     """A crossingless tangle (CLT) is a matching of n+m ends (m=top,n=bot=bottom). 

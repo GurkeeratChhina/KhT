@@ -26,7 +26,7 @@ from time import time
 import Drawing
 import BNAlgebra
 import CobComplexes
-from aux import *
+from auxiliary import *
 
 class BNComplex(object):
     """ A chain complex is a directed graph, consisting of 
